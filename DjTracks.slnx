@@ -1,0 +1,6 @@
+<Solution>
+  <Project Path="src/DjTracks.Api/DjTracks.Api.csproj" />
+  <Project Path="src/DjTracks.Domain/DjTracks.Domain.csproj" />
+  <Project Path="src/DjTracks.Infrastructure/DjTracks.Infrastructure.csproj" />
+  <Project Path="src/DjTracks.UI/DjTracks.UI.csproj" />
+</Solution>
