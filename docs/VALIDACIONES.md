@@ -14,7 +14,7 @@ Consultar siempre el estado real de GitHub antes de actuar sobre un PR.
 - F1.1: **validada por el usuario el 26/10/2026** con "Funciona todo. Continua". Aceptación global de la entrega y autorización de continuación; no amplía las comprobaciones individuales del agente. PR [#4](https://github.com/dgomezc/dj-tracks/pull/4) mergeado en `develop` a las 14:57:01 UTC, commit `e70aafc` (comprobado en GitHub).
 - Fase activa: **F1.2, filtros de Tracks; pendiente de validación del usuario**. No avanzar a F1.3 ni hacer merge sin su confirmación y autorización.
 - Rama: `fase/f1-2-filtros`, desde `develop` actualizado por fast-forward, en el checkout original y sin nuevos worktrees.
-- Entrega F1.2: PR hacia `develop`; consultar su enlace al entregar y su estado real en GitHub antes de actuar.
+- Entrega F1.2: PR [#5](https://github.com/dgomezc/dj-tracks/pull/5) hacia `develop`, abierto y pendiente de validación; consultar su estado real en GitHub antes de actuar.
 - Continuidad confirmada: trabajar directamente en el checkout original, sin nuevos worktrees. Se han preservado los cambios locales preexistentes en los dos `Class1.cs`, sin incluirlos en los commits.
 - Novedad: `/tracks` conserva la navegación Año → Estilo y añade filtros plegables por año, estilo/grupo y subestilo. `/settings` conserva los cinco inputs de texto con sus ayudas, sin selector.
 - Revisión del 26/10/2026: el usuario rechazó el selector de carpetas y pidió volver al formulario anterior. Retirados los botones Examinar, el diálogo y el endpoint de navegación; se mantienen los cinco campos de texto, la validación y el guardado originales. La elección previa del selector queda revocada.
