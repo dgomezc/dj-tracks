@@ -42,6 +42,7 @@ Cada slice agrupa endpoint, request/response y lógica. `Domain` contiene entida
 ## Fases
 
 Cada fase termina en algo visible y probable en el navegador. Validación manual al final de cada una.
+El estado de entrega y las checklists se mantienen en `VALIDACIONES.md`. Una implementación no se considera validada hasta la confirmación del usuario.
 
 ### Bloque 0 — Base
 - **F0.1 Layout**: MudBlazor, tema oscuro, layout con panel izquierdo (playlists, vacío), zona central, barra inferior de reproductor (vacía), pestañas Tracks / Sessions / Remember, Inicio y Configuración. UI llama a la API vía `HttpClient`. Perfiles de lanzamiento múltiples en VS (Api + UI).

@@ -1,0 +1,17 @@
+[
+  {
+    "Name": "DJ Tracks (Api + UI)",
+    "Projects": [
+      {
+        "Path": "src\\DjTracks.Api\\DjTracks.Api.csproj",
+        "Action": "Start",
+        "DebugTarget": "http"
+      },
+      {
+        "Path": "src\\DjTracks.UI\\DjTracks.UI.csproj",
+        "Action": "Start",
+        "DebugTarget": "http"
+      }
+    ]
+  }
+]

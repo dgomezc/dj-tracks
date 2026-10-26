@@ -2,6 +2,11 @@
 
 Reproductor autoalojado de música electrónica. Plan completo en `docs/PLAN.md`; léelo antes de trabajar.
 
+## Al iniciar o retomar una sesión
+- Lee este archivo, `docs/PLAN.md` y `docs/VALIDACIONES.md`. Estas son las instrucciones persistentes; no dependas del historial del chat.
+- Comprueba la rama, los cambios locales y el estado actual del PR antes de continuar. No asumas que un PR sigue abierto o que una fase está aprobada.
+- Retoma la fase pendiente y conserva las decisiones confirmadas del plan. No avances automáticamente si falta validación del usuario.
+
 ## Reglas
 - Responde y documenta en español.
 - KISS y YAGNI: la solución más simple; sin abstracciones ni mejoras especulativas.
@@ -16,6 +21,16 @@ Reproductor autoalojado de música electrónica. Plan completo en `docs/PLAN.md`
 - Commits pequeños y atómicos, en español, con mensaje descriptivo (`feat:`, `fix:`, `docs:`, `chore:`).
 - Al terminar la fase: push y PR hacia `develop` (repositorio `dgomezc/dj-tracks`) con resumen y pasos de prueba manual. No hacer merge sin validación del usuario.
 - Una fase no empieza hasta que la anterior esté mergeada, salvo petición expresa.
+- Incluye el trailer `Co-authored-by: Copilot App <223556219+Copilot@users.noreply.github.com>` en los commits, salvo petición contraria.
+
+## Entrega y validación manual
+- En cada entrega que requiera validación, notifica en español qué ha cambiado y exactamente qué debe probar el usuario; no basta con enlazar el PR.
+- Incluye los requisitos de arranque (proyectos, perfil de Visual Studio, URL y configuración o datos necesarios), pasos concretos y resultado esperado de cada comprobación.
+- Distingue las comprobaciones realizadas por el agente de las pendientes del usuario. Compilar o recibir HTTP 200 no equivale a validar visualmente la interfaz.
+- Mantén `docs/VALIDACIONES.md` con la fase y PR actuales, estado, checklist y limitaciones conocidas. Copia la checklist pertinente en el PR y en el mensaje de entrega.
+- Si cambia algo después de la entrega, explica qué comprobaciones hay que repetir y cuáles son nuevas.
+- No marques una fase como validada o terminada hasta que el usuario lo confirme. Registra su confirmación o los fallos reportados; corrige los fallos en la misma rama y solicita otra validación.
+- No hagas merge sin autorización del usuario. Al autorizarlo, comprueba el estado del PR antes de actuar.
 
 ## Arquitectura
 - `src/DjTracks.Api`: Minimal API con vertical slices en `Features/<Feature>`.
@@ -23,3 +38,4 @@ Reproductor autoalojado de música electrónica. Plan completo en `docs/PLAN.md`
 - `src/DjTracks.Domain`: entidades y enums. `src/DjTracks.Infrastructure`: ficheros, tags, onda, EF Core.
 - Biblioteca y playlists en ficheros; PostgreSQL solo para estadísticas.
 - No commitear secretos (usar user-secrets para la conexión a BD).
+- NuGet: `NuGet.Config` limita las fuentes a nuget.org e ignora los feeds privados heredados. Usa la restauración normal, sin `--source`.

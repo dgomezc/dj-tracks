@@ -1,6 +1,42 @@
 ﻿@inherits LayoutComponentBase
 
-@Body
+<MudThemeProvider IsDarkMode="true" />
+<MudPopoverProvider />
+<MudDialogProvider />
+<MudSnackbarProvider />
+
+<MudLayout>
+    <MudAppBar Elevation="1" Dense="true">
+        <MudText Typo="Typo.h6">DJ Tracks</MudText>
+        <MudSpacer />
+        <MudNavLink Href="/" Match="NavLinkMatch.All" Style="width:auto">Inicio</MudNavLink>
+        <MudNavLink Href="/tracks" Style="width:auto">Tracks</MudNavLink>
+        <MudNavLink Href="/sessions" Style="width:auto">Sessions</MudNavLink>
+        <MudNavLink Href="/remember" Style="width:auto">Remember</MudNavLink>
+        <MudSpacer />
+        <MudIconButton Icon="@Icons.Material.Filled.Settings" Href="/settings" Color="Color.Inherit" />
+    </MudAppBar>
+
+    <MudDrawer Open="true" Variant="DrawerVariant.Persistent" Elevation="0" ClipMode="DrawerClipMode.Always" Width="260px">
+        <MudNavMenu>
+            <MudText Typo="Typo.overline" Class="px-4 mt-4">Playlists manuales</MudText>
+            <MudText Typo="Typo.body2" Class="px-4 mud-text-secondary">Sin playlists</MudText>
+            <MudDivider Class="my-3" />
+            <MudText Typo="Typo.overline" Class="px-4">Playlists automáticos</MudText>
+            <MudText Typo="Typo.body2" Class="px-4 mud-text-secondary">Sin playlists</MudText>
+        </MudNavMenu>
+    </MudDrawer>
+
+    <MudMainContent Class="main-content">
+        <MudContainer MaxWidth="MaxWidth.False" Class="pa-4">
+            @Body
+        </MudContainer>
+    </MudMainContent>
+</MudLayout>
+
+<footer class="player-bar">
+    <MudText Typo="Typo.body2" Class="mud-text-secondary">Reproductor (próximamente)</MudText>
+</footer>
 
 <div id="blazor-error-ui" data-nosnippet>
     An unhandled error has occurred.
