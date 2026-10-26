@@ -17,7 +17,7 @@ public static class LibraryEndpoints
         routes.MapGet("/filter-options", (JsonSettingsStore settingsStore, TrackLibrary library,
             ILoggerFactory loggerFactory, CancellationToken ct) =>
             ExecuteAsync(settingsStore, loggerFactory, root => library.GetFilterOptions(root, ct), ct));
-        routes.MapGet("/search", (string? year, string? group, string? substyle,
+        routes.MapGet("/search", (string[] year, string[] group, string[] substyle,
             JsonSettingsStore settingsStore, TrackLibrary library, ILoggerFactory loggerFactory,
             CancellationToken ct) => ExecuteAsync(settingsStore, loggerFactory,
                 root => library.Search(root, new TrackFilter(year, group, substyle), ct), ct));

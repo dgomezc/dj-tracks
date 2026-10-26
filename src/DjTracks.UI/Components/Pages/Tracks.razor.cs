@@ -17,9 +17,9 @@ public partial class Tracks
     private bool _busy;
     private bool _filtersOpen;
     private TrackFilterOptions? _filterOptions;
-    private string _filterYear = "";
-    private string _filterGroup = "";
-    private string _filterSubstyle = "";
+    private IReadOnlyCollection<string> _filterYears = [];
+    private IReadOnlyCollection<string> _filterGroups = [];
+    private IReadOnlyCollection<string> _filterSubstyles = [];
     private TrackFilter? _appliedFilter;
 
     protected override Task OnInitializedAsync() => LoadAsync(null, null);
@@ -41,8 +41,8 @@ public partial class Tracks
     {
         if (_busy)
             return Task.CompletedTask;
-        _appliedFilter = new(NullIfEmpty(_filterYear), NullIfEmpty(_filterGroup),
-            NullIfEmpty(_filterSubstyle));
+        _appliedFilter = new(_filterYears.ToArray(), _filterGroups.ToArray(),
+            _filterSubstyles.ToArray());
         _year = null;
         _style = null;
         return ReloadAsync();
@@ -52,7 +52,7 @@ public partial class Tracks
     {
         if (_busy)
             return Task.CompletedTask;
-        _filterYear = _filterGroup = _filterSubstyle = "";
+        _filterYears = _filterGroups = _filterSubstyles = [];
         return LoadAsync(null, null);
     }
 
@@ -74,9 +74,12 @@ public partial class Tracks
         if (_appliedFilter is not null)
         {
             url += "/search";
-            AddQuery(query, "year", _appliedFilter.Year);
-            AddQuery(query, "group", _appliedFilter.Group);
-            AddQuery(query, "substyle", _appliedFilter.Substyle);
+            foreach (var year in _appliedFilter.Years)
+                AddQuery(query, "year", year);
+            foreach (var group in _appliedFilter.Groups)
+                AddQuery(query, "group", group);
+            foreach (var substyle in _appliedFilter.Substyles)
+                AddQuery(query, "substyle", substyle);
         }
         else
         {
@@ -128,8 +131,6 @@ public partial class Tracks
         }
     }
 
-    private static string? NullIfEmpty(string value) => string.IsNullOrEmpty(value) ? null : value;
-
     private static void AddQuery(List<string> query, string name, string? value)
     {
         if (value is not null)
@@ -137,7 +138,10 @@ public partial class Tracks
     }
 
     private string FilterSummary => _appliedFilter is null ? ""
-        : $"{_appliedFilter.Year ?? "Todos los años"} / {_appliedFilter.Group ?? "Todos los estilos"} / {_appliedFilter.Substyle ?? "Todos los subestilos"}";
+        : $"{SelectionSummary(_appliedFilter.Years, "Todos los años")} / {SelectionSummary(_appliedFilter.Groups, "Todos los estilos")} / {SelectionSummary(_appliedFilter.Substyles, "Todos los subestilos")}";
+
+    private static string SelectionSummary(string[] values, string emptyText) =>
+        values.Length == 0 ? emptyText : string.Join(", ", values);
 
     private static string Display(string? value) => string.IsNullOrWhiteSpace(value) ? "Sin datos" : value;
 

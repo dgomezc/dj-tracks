@@ -46,16 +46,18 @@ public sealed class TrackLibrary
 
     public TrackListing Search(string root, TrackFilter filter, CancellationToken ct)
     {
-        if (filter.Substyle is not null && filter.Substyle is not ("Instrumental" or "Vocal"))
-            throw new ArgumentException("El subestilo debe ser Instrumental o Vocal.");
-        if (filter.Group is not null)
-            ValidateFolderName(filter.Group);
+        foreach (var substyle in filter.Substyles)
+            if (substyle is not ("Instrumental" or "Vocal"))
+                throw new ArgumentException("El subestilo debe ser Instrumental o Vocal.");
+        foreach (var group in filter.Groups)
+            ValidateFolderName(group);
 
         var directory = new DirectoryInfo(root);
-        var years = filter.Year is null
+        var years = filter.Years.Length == 0
             ? directory.EnumerateDirectories().Where(IsRegularEntry)
                 .OrderByDescending(year => year.Name, StringComparer.OrdinalIgnoreCase)
-            : new[] { FindChild(directory, filter.Year) }.AsEnumerable();
+            : filter.Years.Distinct(StringComparer.Ordinal).Select(year => FindChild(directory, year))
+                .OrderByDescending(year => year.Name, StringComparer.OrdinalIgnoreCase);
         List<TrackFile> tracks = [];
         foreach (var year in years)
         {
@@ -65,8 +67,9 @@ public sealed class TrackLibrary
             {
                 ct.ThrowIfCancellationRequested();
                 var parts = SplitStyle(style.Name);
-                if ((filter.Group is null || parts.Group.Equals(filter.Group, StringComparison.OrdinalIgnoreCase))
-                    && (filter.Substyle is null || parts.Substyle == filter.Substyle))
+                if ((filter.Groups.Length == 0 || filter.Groups.Contains(parts.Group, StringComparer.OrdinalIgnoreCase))
+                    && (filter.Substyles.Length == 0
+                        || (parts.Substyle is not null && filter.Substyles.Contains(parts.Substyle))))
                     tracks.AddRange(ReadTracks(style, ct));
             }
         }

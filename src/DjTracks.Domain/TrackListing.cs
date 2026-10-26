@@ -7,4 +7,4 @@ public sealed record TrackFile(string FileName, string? Title, string[] Artists,
 
 public sealed record TrackFilterOptions(string[] Years, string[] Groups);
 
-public sealed record TrackFilter(string? Year = null, string? Group = null, string? Substyle = null);
+public sealed record TrackFilter(string[] Years, string[] Groups, string[] Substyles);

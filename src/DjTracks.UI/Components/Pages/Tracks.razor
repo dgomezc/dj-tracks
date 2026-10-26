@@ -9,9 +9,9 @@
     <MudExpansionPanel Text="Filtros" Expanded="@_filtersOpen" ExpandedChanged="OnFiltersExpandedAsync">
         <MudGrid Spacing="2">
             <MudItem xs="12" sm="4">
-                <MudSelect T="string" Label="Año" @bind-Value="_filterYear" Dense="true" Margin="Margin.Dense"
+                <MudSelect T="string" Label="Años" @bind-SelectedValues="_filterYears" MultiSelection="true"
+                           Clearable="true" Placeholder="Todos los años" Dense="true" Margin="Margin.Dense"
                            Variant="Variant.Outlined" Disabled="@(_busy || _filterOptions is null)">
-                    <MudSelectItem T="string" Value="@string.Empty">Todos los años</MudSelectItem>
                     @foreach (var year in _filterOptions?.Years ?? [])
                     {
                         <MudSelectItem Value="@year">@year</MudSelectItem>
@@ -19,9 +19,9 @@
                 </MudSelect>
             </MudItem>
             <MudItem xs="12" sm="4">
-                <MudSelect T="string" Label="Estilo / grupo" @bind-Value="_filterGroup" Dense="true" Margin="Margin.Dense"
+                <MudSelect T="string" Label="Estilos / grupos" @bind-SelectedValues="_filterGroups" MultiSelection="true"
+                           Clearable="true" Placeholder="Todos los estilos" Dense="true" Margin="Margin.Dense"
                            Variant="Variant.Outlined" Disabled="@(_busy || _filterOptions is null)">
-                    <MudSelectItem T="string" Value="@string.Empty">Todos los estilos</MudSelectItem>
                     @foreach (var group in _filterOptions?.Groups ?? [])
                     {
                         <MudSelectItem Value="@group">@group</MudSelectItem>
@@ -29,15 +29,16 @@
                 </MudSelect>
             </MudItem>
             <MudItem xs="12" sm="4">
-                <MudSelect T="string" Label="Subestilo" @bind-Value="_filterSubstyle" Dense="true" Margin="Margin.Dense"
+                <MudSelect T="string" Label="Subestilos" @bind-SelectedValues="_filterSubstyles" MultiSelection="true"
+                           Clearable="true" Placeholder="Todos los subestilos" Dense="true" Margin="Margin.Dense"
                            Variant="Variant.Outlined" Disabled="@(_busy || _filterOptions is null)">
-                    <MudSelectItem T="string" Value="@string.Empty">Todos los subestilos</MudSelectItem>
                     <MudSelectItem T="string" Value="@("Instrumental")">Instrumental</MudSelectItem>
                     <MudSelectItem T="string" Value="@("Vocal")">Vocal</MudSelectItem>
                 </MudSelect>
             </MudItem>
         </MudGrid>
         <MudText Typo="Typo.body2" Class="mud-text-secondary my-2">
+            Selecciona uno o varios valores por filtro; sin selección se incluyen todos.
             Los filtros se combinan al pulsar Aplicar. Instrumental o Vocal sin grupo incluye Day y Night.
         </MudText>
         <MudStack Row="true" Wrap="Wrap.Wrap">
