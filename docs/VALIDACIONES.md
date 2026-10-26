@@ -13,7 +13,7 @@ Consultar siempre el estado real de GitHub antes de actuar sobre un PR.
 - F0.2: validada por el usuario el 26/10/2026, incluidas la restauración de campos de texto y las descripciones. Confirmación: "Todo Ok, mezcla el PR y continúa como dijimos en el proyecto principal". PR [#3](https://github.com/dgomezc/dj-tracks/pull/3) mergeado en `develop` el 26/10/2026 a las 11:30:56 UTC, commit `88571b9` (comprobado en GitHub).
 - Fase activa: **F1.1, explorador de Tracks; pendiente de validación del usuario**. No avanzar a F1.2 ni hacer merge sin su confirmación y autorización.
 - Rama: `fase/f1-1-explorador-tracks`, desde `develop` actualizado por fast-forward.
-- Entrega: PR de F1.1 hacia `develop`; consultar el enlace publicado al entregar y el estado real en GitHub.
+- Entrega: PR [#4](https://github.com/dgomezc/dj-tracks/pull/4) hacia `develop`, abierto y pendiente de validación; consultar su estado real en GitHub antes de actuar.
 - Continuidad confirmada: trabajar directamente en el checkout original, sin nuevos worktrees. Se han preservado los cambios locales preexistentes en los dos `Class1.cs`, sin incluirlos en los commits.
 - Novedad: `/tracks` navega Año → Estilo → canciones reales, con nombre de fichero, título, artista, álbum y duración. `/settings` conserva los cinco inputs de texto con sus ayudas, sin selector.
 - Revisión del 26/10/2026: el usuario rechazó el selector de carpetas y pidió volver al formulario anterior. Retirados los botones Examinar, el diálogo y el endpoint de navegación; se mantienen los cinco campos de texto, la validación y el guardado originales. La elección previa del selector queda revocada.
@@ -54,10 +54,11 @@ proyectos por separado con sus perfiles `http`.
 
 - Compilación completa con `dotnet build DjTracks.slnx`: 0 errores y 0 advertencias.
 - API y UI en puertos temporales y JSON aislado; los ajustes privados migrados no se usaron ni modificaron durante las pruebas.
-- MP3 sintéticos locales: lectura de título, artista, álbum y duración; MP3 sin tags y MP3 corrupto con aviso. Extensión mayúscula incluida, TXT excluido, estilo vacío y alias de carpeta navegables.
+- MP3 sintéticos locales: lectura de título, artista, álbum y duración; MP3 sin tags y MP3 corrupto con aviso. Extensión mayúscula incluida, TXT excluido, año/estilo vacíos y alias de carpeta navegables. Las altas se reflejan en la siguiente petición.
 - HTTP 400 para rutas absolutas, traversal y estilo sin año; 404 para selecciones inexistentes; 409 sin configuración; 500 con JSON corrupto; 503 con raíz inexistente. Respuestas sin rutas absolutas del servidor.
 - Enlaces/junctions internos excluidos y no navegables. OpenAPI contiene el nuevo endpoint.
 - Navegador interactivo: recorrido año → estilo → canciones, DOM con tags y aviso; captura visual con los datos sintéticos. Error de almacenamiento visible; API detenida muestra aviso de conexión. La aceptación visual y los datos reales corresponden al usuario.
+- Servicios y datos sintéticos temporales retirados al acabar; iniciar los proyectos desde Visual Studio para la validación del usuario.
 
 ### Límites
 
