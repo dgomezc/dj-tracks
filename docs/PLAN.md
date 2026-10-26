@@ -1,0 +1,94 @@
+# DJ Tracks — Plan de desarrollo
+
+Reproductor autoalojado de música electrónica (Tracks, Sessions, Remember). Se ejecuta y depura desde Visual Studio 2026. Docker se aborda al final.
+
+## Decisiones tomadas
+
+| Tema | Decisión |
+|---|---|
+| Frontend | Blazor Server interactivo (.NET 10, ya existente en `src/DjTracks.UI`) |
+| UI | MudBlazor, tema oscuro |
+| Backend | ASP.NET Minimal API + Vertical Slices (`src/DjTracks.Api/Features/<Feature>`) |
+| Proyectos | `Api`, `UI`, `Domain`, `Infrastructure` (ya creados en `DjTracks.slnx`) |
+| Biblioteca musical | Sin BD: se lee del sistema de ficheros (carpetas = año/estilo) |
+| Playlists | Ficheros JSON en disco (carpeta configurable). Simple, portable y exportable a m3u |
+| PostgreSQL | Solo estadísticas (reproducciones). EF Core + Npgsql |
+| Tags/carátula | TagLibSharp (lectura de tags y carátula incrustada) |
+| Onda | Interfaz `IWaveformGenerator` con dos implementaciones (FFMpegCore y NAudio), seleccionable por configuración. Picos cacheados en disco (JSON). Se decidirá cuál mantener tras compararlas |
+| Autenticación | Ninguna (red local/VPN) |
+| Playlists automáticos "vivos" | Se guardan los filtros; se resuelven al abrirlos contra un índice de la biblioteca. El índice se refresca con `FileSystemWatcher` + reescaneo horario (`BackgroundService`) por si el watcher falla en redes compartidas |
+| Audio | Endpoint con soporte de `Range` (seek) |
+| Tests | No se generan; validación manual por fase |
+
+## Convenciones de la biblioteca
+
+- **Tracks**: `Año/Estilo/Artista - Título.mp3`. Estilos: `Day Instrumental`, `Day Vocal`, `Night Instrumental`, `Night Vocal`, `Technohouse`, `Tribal`. Estilo compuesto: grupo `Day`/`Night` + subestilo `Instrumental`/`Vocal`. (Se aceptará la errata `Night Intrumental` como alias.)
+- **Sessions**: `Año/yyyy-MM-dd - Nombre/Nombre.mp3` + `.txt` con líneas `N. Artista - Track`.
+- **Remember**: `Cortas/…mp3` y `Largas/…mp3`.
+- Filtros y playlists automáticos se basan en nombres de carpeta, no en tags.
+
+## Estructura de la API (vertical slices)
+
+```
+Features/
+  Library/      (tracks, sessions, remember: listado y navegación)
+  Streaming/    (audio, carátula, onda)
+  Playlists/    (manuales, automáticos, export m3u)
+  Stats/
+  Settings/
+```
+Cada slice agrupa endpoint, request/response y lógica. `Domain` contiene entidades/enums (Estilo, Track, Session, Playlist); `Infrastructure` contiene acceso a ficheros, TagLib, ffmpeg/NAudio, EF Core.
+
+## Fases
+
+Cada fase termina en algo visible y probable en el navegador. Validación manual al final de cada una.
+
+### Bloque 0 — Base
+- **F0.1 Layout**: MudBlazor, tema oscuro, layout con panel izquierdo (playlists, vacío), zona central, barra inferior de reproductor (vacía), pestañas Tracks / Sessions / Remember, Inicio y Configuración. UI llama a la API vía `HttpClient`. Perfiles de lanzamiento múltiples en VS (Api + UI).
+  *Prueba*: navegar entre páginas, layout correcto.
+- **F0.2 Configuración de rutas**: página Configuración que edita rutas (tracks, sessions, remember, playlists, ruta raíz m3u) guardadas en un JSON de ajustes; validación de que existen.
+  *Prueba*: guardar rutas y ver mensaje de validación.
+
+### Bloque 1 — Tracks
+- **F1.1 Explorador de Tracks**: árbol/listado Año → Estilo → canciones (nombre de fichero, tags básicos).
+  *Prueba*: navegar y ver el listado real.
+- **F1.2 Filtros**: filtro compacto (desplegable) por año y estilo, con Day/Night y subestilos separables.
+  *Prueba*: combinaciones de filtros devuelven lo esperado.
+- **F1.3 Reproductor básico**: barra inferior con play/pausa, volumen, tiempo; reproducir al pulsar una canción (streaming con Range).
+  *Prueba*: sonido y seek con barra simple.
+- **F1.4 Onda**: generación y caché de picos; la línea de tiempo es la onda y permite clic para ir al punto exacto. Comparativa FFMpegCore vs NAudio (tiempo y fiabilidad).
+  *Prueba*: onda visible, clic salta; probar con track y con mix de 1h+.
+- **F1.5 Cola de reproducción**: añadir/quitar, anterior/siguiente, shuffle, bucle, panel de cola.
+  *Prueba*: cada control por separado.
+- **F1.6 Ficha de "ahora suena"**: carátula e información en la zona principal.
+  *Prueba*: carátula y datos correctos.
+
+### Bloque 2 — Sessions
+- **F2.1 Listado y navegación de sesiones** (por año), añadir a cola.
+- **F2.2 Reproducción + tracklist** leído del `.txt` junto a la sesión, con onda.
+- **F2.3 (último, opcional) Marcas de inicio por canción**: marcar posición actual en el tracklist, guardar en JSON junto a la sesión, clic para saltar. Reproductor grande sincronizado en la página principal.
+
+### Bloque 3 — Remember
+- **F3.1 Remember**: selector Cortas/Largas, listado, reproducción y ficha del track.
+
+### Bloque 4 — Playlists
+- **F4.1 Manuales**: crear/borrar/renombrar, añadir y quitar canciones (botón en listados de Tracks y Remember), cargar en cola. Panel izquierdo.
+- **F4.2 Export m3u** con la ruta raíz configurada.
+- **F4.3 Automáticos**: modal "Generar playlist automático" con filtros Año (multi), Estilo (multi), Incluir Remember; guardado de filtros y generación; export m3u.
+- **F4.4 Playlists vivos**: índice de biblioteca con watcher + reescaneo horario; los automáticos reflejan altas/bajas.
+  *Prueba*: añadir/borrar un mp3 en carpeta y ver el cambio en el playlist.
+
+### Bloque 5 — Estadísticas
+- **F5.1 PostgreSQL y registro de reproducciones** (migración EF Core, conexión de desarrollo en el NAS por user-secrets).
+- **F5.2 Dashboard**: más reproducidas, últimas reproducidas, resumen de biblioteca y playlists.
+
+### Bloque 6 — Cierre
+- **F6.1 Docker**: Dockerfiles (con ffmpeg si se usa), `docker-compose` (db, api, ui), despliegue en Ubuntu Server.
+- **F6.2 (fase 2 del proyecto) Subsonic**: análisis de exponer API compatible para clientes Android.
+
+## Aclaraciones confirmadas
+
+1. Biblioteca de ~1000 mp3, crecimiento de 3-4 al mes: el índice en memoria es suficiente; no hace falta paginación ni BD para la biblioteca.
+2. Los m3u usan rutas **relativas** (relativas a la ruta raíz configurada).
+3. Los playlists manuales pueden mezclar Tracks y Remember.
+4. Las sesiones no se pueden añadir a playlists manuales.
