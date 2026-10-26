@@ -3,4 +3,82 @@
 <PageTitle>Tracks - DJ Tracks</PageTitle>
 
 <MudText Typo="Typo.h4" Class="mb-2">Tracks</MudText>
-<MudText Class="mud-text-secondary">Explorador de tracks (fase F1.1).</MudText>
+<MudText Class="mud-text-secondary mb-4">Explora tu biblioteca por año y estilo.</MudText>
+
+<MudStack Row="true" Wrap="Wrap.Wrap" Class="mb-4">
+    <MudButton OnClick="() => LoadAsync(null, null)" Disabled="@_busy">Años</MudButton>
+    @if (_year is not null)
+    {
+        <MudText Class="align-self-center">/</MudText>
+        <MudButton OnClick="() => LoadAsync(_year, null)" Disabled="@_busy">@_year</MudButton>
+    }
+    @if (_style is not null)
+    {
+        <MudText Class="align-self-center">/ @_style</MudText>
+    }
+    <MudButton OnClick="() => LoadAsync(_year, _style)" Disabled="@_busy" Variant="Variant.Outlined">
+        Volver a cargar
+    </MudButton>
+</MudStack>
+
+@if (_busy)
+{
+    <MudProgressLinear Indeterminate="true" Color="Color.Primary" Class="mb-4" aria-label="Cargando biblioteca" />
+}
+@if (_error is not null)
+{
+    <MudAlert Severity="Severity.Error" Class="mb-4" role="alert">@_error</MudAlert>
+    <MudLink Href="/settings">Abrir Configuración</MudLink>
+}
+else if (_listing is not null)
+{
+    @if (_style is null)
+    {
+        <MudText Typo="Typo.h6" Class="mb-2">@(_year is null ? "Años" : $"Estilos de {_year}")</MudText>
+        @if (_listing.Folders.Length == 0)
+        {
+            <MudAlert Severity="Severity.Info">No hay @(_year is null ? "carpetas de años" : "carpetas de estilos") en este nivel.</MudAlert>
+        }
+        <MudStack Row="true" Wrap="Wrap.Wrap">
+            @foreach (var folder in _listing.Folders)
+            {
+                <MudButton Variant="Variant.Outlined" StartIcon="@Icons.Material.Filled.Folder"
+                           Disabled="@_busy" OnClick="() => OpenFolderAsync(folder)">@folder</MudButton>
+            }
+        </MudStack>
+    }
+    else
+    {
+        <MudText Typo="Typo.h6" Class="mb-2">@_year / @_style · @_listing.Tracks.Length canciones</MudText>
+        <MudTable Items="@_listing.Tracks" Dense="true" Hover="true" Breakpoint="Breakpoint.Sm">
+            <HeaderContent>
+                <MudTh>Fichero</MudTh>
+                <MudTh>Título</MudTh>
+                <MudTh>Artista</MudTh>
+                <MudTh>Álbum</MudTh>
+                <MudTh>Duración</MudTh>
+            </HeaderContent>
+            <RowTemplate>
+                <MudTd DataLabel="Fichero">
+                    <MudStack Spacing="1">
+                        <MudText Style="overflow-wrap: anywhere">@context.FileName</MudText>
+                        @if (context.Warning is not null)
+                        {
+                            <MudText Typo="Typo.caption" Color="Color.Warning" role="status">@context.Warning</MudText>
+                        }
+                    </MudStack>
+                </MudTd>
+                <MudTd DataLabel="Título">@Display(context.Title)</MudTd>
+                <MudTd DataLabel="Artista">@Display(string.Join(", ", context.Artists))</MudTd>
+                <MudTd DataLabel="Álbum">@Display(context.Album)</MudTd>
+                <MudTd DataLabel="Duración">@Duration(context.DurationSeconds)</MudTd>
+            </RowTemplate>
+            <NoRecordsContent>
+                <MudText>No hay ficheros MP3 en este estilo.</MudText>
+            </NoRecordsContent>
+        </MudTable>
+        <MudText Typo="Typo.body2" Class="mud-text-secondary mt-3">
+            Los tags ausentes se muestran como «Sin datos». La reproducción llegará en F1.3.
+        </MudText>
+    }
+}
