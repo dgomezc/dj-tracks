@@ -26,6 +26,70 @@ public sealed class TrackLibrary
             return new(year, style, folders, []);
         }
 
+        return new(year, style, [], ReadTracks(directory, ct));
+    }
+
+    public TrackFilterOptions GetFilterOptions(string root, CancellationToken ct)
+    {
+        var years = new DirectoryInfo(root).EnumerateDirectories().Where(IsRegularEntry)
+            .OrderByDescending(folder => folder.Name, StringComparer.OrdinalIgnoreCase).ToArray();
+        HashSet<string> groups = new(StringComparer.OrdinalIgnoreCase);
+        foreach (var year in years)
+        {
+            ct.ThrowIfCancellationRequested();
+            foreach (var style in year.EnumerateDirectories().Where(IsRegularEntry))
+                groups.Add(SplitStyle(style.Name).Group);
+        }
+        return new(years.Select(year => year.Name).ToArray(),
+            groups.OrderBy(group => group, StringComparer.OrdinalIgnoreCase).ToArray());
+    }
+
+    public TrackListing Search(string root, TrackFilter filter, CancellationToken ct)
+    {
+        if (filter.Substyle is not null && filter.Substyle is not ("Instrumental" or "Vocal"))
+            throw new ArgumentException("El subestilo debe ser Instrumental o Vocal.");
+        if (filter.Group is not null)
+            ValidateFolderName(filter.Group);
+
+        var directory = new DirectoryInfo(root);
+        var years = filter.Year is null
+            ? directory.EnumerateDirectories().Where(IsRegularEntry)
+                .OrderByDescending(year => year.Name, StringComparer.OrdinalIgnoreCase)
+            : new[] { FindChild(directory, filter.Year) }.AsEnumerable();
+        List<TrackFile> tracks = [];
+        foreach (var year in years)
+        {
+            ct.ThrowIfCancellationRequested();
+            foreach (var style in year.EnumerateDirectories().Where(IsRegularEntry)
+                .OrderBy(style => style.Name, StringComparer.OrdinalIgnoreCase))
+            {
+                ct.ThrowIfCancellationRequested();
+                var parts = SplitStyle(style.Name);
+                if ((filter.Group is null || parts.Group.Equals(filter.Group, StringComparison.OrdinalIgnoreCase))
+                    && (filter.Substyle is null || parts.Substyle == filter.Substyle))
+                    tracks.AddRange(ReadTracks(style, ct));
+            }
+        }
+        return new(null, null, [], tracks.ToArray());
+    }
+
+    private static (string Group, string? Substyle) SplitStyle(string name)
+    {
+        foreach (var group in new[] { "Day", "Night" })
+        {
+            foreach (var substyle in new[] { "Instrumental", "Vocal" })
+            {
+                if (name.Equals($"{group} {substyle}", StringComparison.OrdinalIgnoreCase)
+                    || (group == "Night" && substyle == "Instrumental"
+                        && name.Equals("Night Intrumental", StringComparison.OrdinalIgnoreCase)))
+                    return (group, substyle);
+            }
+        }
+        return (name, null);
+    }
+
+    private static TrackFile[] ReadTracks(DirectoryInfo directory, CancellationToken ct)
+    {
         List<TrackFile> tracks = [];
         foreach (var file in directory.EnumerateFiles()
             .Where(file => IsRegularEntry(file)
@@ -37,28 +101,35 @@ public sealed class TrackLibrary
             {
                 using var audio = TagLib.File.Create(file.FullName);
                 tracks.Add(new(file.Name, audio.Tag.Title, audio.Tag.Performers,
-                    audio.Tag.Album, audio.Properties.Duration.TotalSeconds, null));
+                    audio.Tag.Album, audio.Properties.Duration.TotalSeconds, null,
+                    directory.Parent!.Name, directory.Name));
             }
             catch (Exception ex) when (ex is TagLib.CorruptFileException or TagLib.UnsupportedFormatException
                 or IOException or UnauthorizedAccessException)
             {
                 tracks.Add(new(file.Name, null, [], null, null,
-                    "No se pudieron leer los tags o el audio. Comprueba el fichero y sus permisos."));
+                    "No se pudieron leer los tags o el audio. Comprueba el fichero y sus permisos.",
+                    directory.Parent!.Name, directory.Name));
             }
         }
-        return new(year, style, [], tracks.ToArray());
+        return tracks.ToArray();
     }
 
     private static DirectoryInfo FindChild(DirectoryInfo parent, string name)
     {
-        if (string.IsNullOrWhiteSpace(name) || name is "." or ".."
-            || name.IndexOfAny(['/', '\\', ':']) >= 0 || Path.IsPathRooted(name))
-            throw new ArgumentException("El año y el estilo deben ser nombres de carpeta, no rutas.");
+        ValidateFolderName(name);
 
         return parent.EnumerateDirectories()
             .FirstOrDefault(child => IsRegularEntry(child)
                 && child.Name.Equals(name, StringComparison.Ordinal))
             ?? throw new KeyNotFoundException("La carpeta seleccionada ya no existe. Vuelve al nivel anterior.");
+    }
+
+    private static void ValidateFolderName(string name)
+    {
+        if (string.IsNullOrWhiteSpace(name) || name is "." or ".."
+            || name.IndexOfAny(['/', '\\', ':']) >= 0 || Path.IsPathRooted(name))
+            throw new ArgumentException("El año y el estilo deben ser nombres de carpeta, no rutas.");
     }
 
     private static bool IsRegularEntry(FileSystemInfo entry) =>
