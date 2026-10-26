@@ -11,8 +11,8 @@ Consultar siempre el estado real de GitHub antes de actuar sobre un PR.
 - Fase activa: F0.1, layout base.
 - PR: [#2](https://github.com/dgomezc/dj-tracks/pull/2), dirigido a `develop`.
 - Rama: `fase/f0-1-layout`.
-- Estado: pendiente de validación manual del usuario; no iniciar F0.2 todavía.
-- Sin cambios funcionales nuevos en esta entrega: se documenta el protocolo de validación.
+- Estado: layout y restauración NuGet validados por el usuario el 26/10/2026 ("Todo correcto, continúa"). Pendiente únicamente la nueva comprobación de inicio conjunto; no iniciar F0.2 todavía.
+- Novedad de esta entrega: `DjTracks.slnLaunch` permite iniciar y depurar Api + UI conjuntamente.
 
 ## F0.1: qué validar
 
@@ -24,27 +24,35 @@ globales del equipo.
 ### Preparación
 
 Abrir `DjTracks.slnx` en Visual Studio 2026 con .NET 10.
-Seleccionar `DjTracks.UI` como proyecto de inicio y el perfil `http`.
-Ejecutar y abrir `http://localhost:5050`.
+Seleccionar el perfil compartido `DJ Tracks (Api + UI)` y pulsar F5.
+Se inician ambos proyectos con el destino `http`; la UI abre `http://localhost:5050`
+y la API escucha en `http://localhost:5247`.
+Si no aparece el perfil, recargar la solución y revisar **Configurar proyectos de inicio**.
 No hacen falta archivos de música, base de datos ni API para estas páginas provisionales.
 
 ### Checklist del usuario
 
-- [ ] Restaurar los paquetes de la solución sin indicar una fuente manualmente: no debe consultarse el feed privado ni aparecer su error 401.
-- [ ] Abrir Inicio: debe aparecer el tema oscuro, el nombre DJ Tracks y el texto provisional del dashboard.
-- [ ] Navegar a Tracks, Sessions y Remember desde la barra superior: deben cambiar el título y el contenido central sin errores.
-- [ ] Pulsar el icono de configuración: debe abrir `/settings` y mostrar el texto provisional de Configuración.
-- [ ] Durante la navegación, comprobar que siguen visibles el panel izquierdo con las dos secciones de playlists vacías y la barra inferior del reproductor.
-- [ ] Recargar directamente `/tracks`, `/sessions`, `/remember` y `/settings`: cada URL debe abrir su página correspondiente.
+- [x] Restaurar los paquetes de la solución sin indicar una fuente manualmente: no debe consultarse el feed privado ni aparecer su error 401.
+- [x] Abrir Inicio: debe aparecer el tema oscuro, el nombre DJ Tracks y el texto provisional del dashboard.
+- [x] Navegar a Tracks, Sessions y Remember desde la barra superior: deben cambiar el título y el contenido central sin errores.
+- [x] Pulsar el icono de configuración: debe abrir `/settings` y mostrar el texto provisional de Configuración.
+- [x] Durante la navegación, comprobar que siguen visibles el panel izquierdo con las dos secciones de playlists vacías y la barra inferior del reproductor.
+- [x] Recargar directamente `/tracks`, `/sessions`, `/remember` y `/settings`: cada URL debe abrir su página correspondiente.
+
+### Nueva comprobación (no repetir las anteriores)
+
+- [ ] Seleccionar `DJ Tracks (Api + UI)` y pulsar F5: deben iniciarse ambos proyectos bajo el depurador y abrirse la UI en `http://localhost:5050`.
+- [ ] Abrir `http://localhost:5247/openapi/v1.json`: debe devolver el documento JSON de la API.
+- [ ] Detener la depuración en Visual Studio: deben detenerse ambos proyectos.
 
 ### Comprobaciones del agente y límites
 
 - La UI compiló y las cinco rutas respondieron HTTP 200 en la entrega inicial.
 - La restauración de los cuatro proyectos con la configuración local de NuGet se completó sin `--source`; la única fuente efectiva listada fue nuget.org.
-- No se ha realizado una comprobación visual ni se ha recibido confirmación del usuario.
+- El usuario confirmó la checklist original el 26/10/2026; el nuevo perfil necesita comprobación desde Visual Studio.
 - Las páginas son provisionales: no reproducen audio, no muestran biblioteca ni permiten editar rutas o playlists.
 - El cliente HTTP de la API está registrado, pero estas páginas aún no lo consumen.
-- El perfil compartido de inicio múltiple Api + UI previsto en F0.1 sigue pendiente; no dar la fase completa por terminada hasta resolverlo o acordar su aplazamiento.
+- El perfil compartido de inicio múltiple está añadido. El agente no puede verificar la selección del perfil y la depuración conjunta desde la interfaz de Visual Studio; queda pendiente del usuario.
 
 ## Formato para futuras entregas
 
