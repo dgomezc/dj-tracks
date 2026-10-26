@@ -9,6 +9,7 @@ public static class SettingsEndpoints
     public static void MapSettingsEndpoints(this WebApplication app)
     {
         var group = app.MapGroup("/api/settings").WithTags("Settings");
+        group.MapGet("/folders", BrowseFolders);
         group.MapGet("/", (JsonSettingsStore store, ILoggerFactory loggerFactory, CancellationToken ct) =>
             WithStorageErrors(async () => Results.Ok(await store.LoadAsync(ct)), loggerFactory));
         group.MapPut("/", (PathSettings settings, JsonSettingsStore store,
@@ -30,6 +31,27 @@ public static class SettingsEndpoints
                 await store.SaveAsync(normalized, ct);
                 return Results.Ok(normalized);
             }, loggerFactory));
+    }
+
+    private static IResult BrowseFolders(string? path, ILoggerFactory loggerFactory, CancellationToken ct)
+    {
+        try
+        {
+            return Results.Ok(FolderBrowser.Browse(path, ct));
+        }
+        catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or ArgumentException
+            or NotSupportedException)
+        {
+            loggerFactory.CreateLogger("Settings").LogWarning(ex, "No se pudo explorar la carpeta solicitada");
+            var (status, detail) = ex switch
+            {
+                ArgumentException or NotSupportedException => (400, "Introduce una ruta absoluta válida del servidor."),
+                UnauthorizedAccessException => (403, "La API no tiene permisos para leer esta carpeta."),
+                DirectoryNotFoundException => (404, "La carpeta no existe o ya no está disponible."),
+                _ => (503, "No se pudo leer la carpeta. Comprueba su disponibilidad y los permisos en el servidor.")
+            };
+            return Results.Problem(statusCode: status, title: "No se pudo abrir la carpeta.", detail: detail);
+        }
     }
 
     private static Dictionary<string, string[]> Validate(PathSettings settings)
