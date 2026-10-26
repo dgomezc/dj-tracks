@@ -13,7 +13,8 @@ Consultar siempre el estado real de GitHub antes de actuar sobre un PR.
 - Fase activa: F0.2, configuración de rutas.
 - PR: [#3](https://github.com/dgomezc/dj-tracks/pull/3), dirigido a `develop`.
 - Rama del entorno: `dgomezc-f0-2-configuracion-de-rutas`.
-- Estado: implementada, **pendiente de validación manual del usuario**. No hacer merge ni iniciar F1.1 sin su confirmación y autorización.
+- Estado: **F0.2 validada por el usuario el 26/10/2026**, incluidas la restauración de campos de texto y las descripciones. Confirmación: "Todo Ok, mezcla el PR y continúa como dijimos en el proyecto principal". Merge autorizado; comprobar GitHub para conocer su estado definitivo.
+- Continuidad solicitada: "continúa como dijimos en el proyecto principal", y limpieza de worktrees pasados. El destino exacto no está confirmado en esta sesión; se coordina con la sesión principal antes de iniciar F1.1. Preservar cambios locales y ajustes no versionados antes de archivar; no borrar el worktree activo.
 - Novedad: `/settings` consume la API y permite guardar las cinco rutas en JSON del servidor.
 - Revisión del 26/10/2026: el usuario rechazó el selector de carpetas y pidió volver al formulario anterior. Retirados los botones Examinar, el diálogo y el endpoint de navegación; se mantienen los cinco campos de texto, la validación y el guardado originales. La elección previa del selector queda revocada.
 
@@ -90,16 +91,16 @@ Si la ubicación personalizada está dentro del repositorio pero fuera de
 Para pruebas de corrupción o permisos, hacer primero una copia del JSON y
 restaurarla al terminar; no usar datos irreemplazables.
 
-### Checklist del usuario (pendiente)
+### Checklist del usuario (confirmada el 26/10/2026)
 
-- [ ] Abrir Configuración: aparecen las cinco rutas y los paneles existentes; en la primera ejecución los campos están vacíos y no se crea JSON hasta guardar.
-- [ ] Guardar cinco carpetas válidas: aparece «Rutas validadas y guardadas en el servidor». Recargar, navegar fuera y volver, y reiniciar Api + UI: se conservan las cinco rutas.
-- [ ] Probar un campo vacío, una ruta relativa, una inexistente y una ruta a un fichero: aparece el error bajo el campo; no se modifica el JSON. «Volver a cargar» recupera lo guardado.
-- [ ] Editar tras guardar: desaparece el aviso de éxito. «Volver a cargar» descarta los cambios; durante las operaciones los controles quedan bloqueados.
-- [ ] Detener solo la API y pulsar «Volver a cargar»: aparece el aviso de conexión y se bloquea guardar. Reiniciar la API y volver a cargar: desaparece el error y regresan las rutas.
-- [ ] Hacer copia del JSON; dejar temporalmente JSON mal formado y volver a cargar: aparece el aviso de JSON inválido, guardar queda bloqueado y el fichero no se sobrescribe. Restaurar la copia y volver a cargar: se recupera el formulario.
-- [ ] Con copia del JSON, marcarlo de solo lectura e intentar guardar otra carpeta válida: aparece error de almacenamiento, sin éxito ni cambio del fichero. Quitar solo lectura y volver a cargar: se recuperan las rutas originales.
-- [ ] Si se usan rutas NAS/UNC, repetir guardado con las rutas reales: deben ser accesibles con la identidad que ejecuta la API; las carpetas inaccesibles o playlists sin escritura deben dar error por campo.
+- [x] Abrir Configuración: aparecen las cinco rutas y los paneles existentes; en la primera ejecución los campos están vacíos y no se crea JSON hasta guardar.
+- [x] Guardar cinco carpetas válidas: aparece «Rutas validadas y guardadas en el servidor». Recargar, navegar fuera y volver, y reiniciar Api + UI: se conservan las cinco rutas.
+- [x] Probar un campo vacío, una ruta relativa, una inexistente y una ruta a un fichero: aparece el error bajo el campo; no se modifica el JSON. «Volver a cargar» recupera lo guardado.
+- [x] Editar tras guardar: desaparece el aviso de éxito. «Volver a cargar» descarta los cambios; durante las operaciones los controles quedan bloqueados.
+- [x] Detener solo la API y pulsar «Volver a cargar»: aparece el aviso de conexión y se bloquea guardar. Reiniciar la API y volver a cargar: desaparece el error y regresan las rutas.
+- [x] Hacer copia del JSON; dejar temporalmente JSON mal formado y volver a cargar: aparece el aviso de JSON inválido, guardar queda bloqueado y el fichero no se sobrescribe. Restaurar la copia y volver a cargar: se recupera el formulario.
+- [x] Con copia del JSON, marcarlo de solo lectura e intentar guardar otra carpeta válida: aparece error de almacenamiento, sin éxito ni cambio del fichero. Quitar solo lectura y volver a cargar: se recuperan las rutas originales.
+- Condicional NAS/UNC: incluida en la aceptación global del usuario cuando aplique; no hay detalle de ejecución sobre una ruta de red concreta. El agente no ha comprobado NAS/UNC real.
 
 ### Comprobaciones reales del agente
 
@@ -117,7 +118,7 @@ restaurarla al terminar; no usar datos irreemplazables.
 
 ### Límites y continuidad
 
-- Falta confirmar la checklist del usuario y el arranque conjunto de esta fase en Visual Studio. F0.1 conserva su validación previa.
+- El usuario confirmó globalmente F0.2 y sus revisiones con "Todo Ok" el 26/10/2026 y autorizó el merge. No se dispone de un informe individual de cada prueba; esta aceptación no amplía las comprobaciones realizadas por el agente. F0.1 conserva su validación previa.
 - Sin pruebas unitarias nuevas ni validación real de NAS/UNC.
 - Un servidor de API: acceso al JSON serializado dentro del proceso; el último guardado correcto prevalece. No hay coordinación entre varias instancias ni detección de cambios de otros formularios.
 - JSON escrito mediante temporal en el mismo directorio, flush a disco y renombrado; los errores se registran en el servidor y se notifican en la UI. Un JSON corrupto no se sobrescribe: hay que corregirlo o restaurarlo y volver a cargar.
@@ -125,7 +126,7 @@ restaurarla al terminar; no usar datos irreemplazables.
 - No se impone todavía relación de contención entre las carpetas y la raíz M3U.
 - Sin explorador, reproducción, exportación M3U, edición de playlists, BD ni Docker en esta fase.
 - Servicios de comprobación y datos temporales retirados al acabar; el usuario debe iniciar sus proyectos desde Visual Studio.
-- Las revisiones posteriores a la entrega y sus comprobaciones están registradas abajo. La checklist inicial sigue pendiente.
+- Las revisiones posteriores a la entrega y sus comprobaciones están registradas abajo; quedaron incluidas en la confirmación global del usuario.
 
 ## Revisión: restaurar campos de texto (26/10/2026)
 
@@ -134,7 +135,7 @@ revierte los cambios y deja el input de texto plano anterior".
 Se revirtieron exclusivamente los tres commits del selector. En esa revisión, el código de `src`
 quedó igual a la entrega inicial de F0.2 (`2ff8296`); no se modificaron los ajustes
 JSON locales ni se pierde la validación o persistencia anterior.
-Las checklists del selector quedan anuladas; la checklist inicial de F0.2 sigue pendiente.
+Las checklists del selector quedan anuladas; la checklist inicial de F0.2 fue confirmada posteriormente.
 
 Preparación: Visual Studio 2026 con .NET 10, abrir `DjTracks.slnx`, perfil
 **DJ Tracks (Api + UI)**, F5; UI `http://localhost:5050/settings`,
@@ -147,11 +148,11 @@ La comprobación visual de esta reversión corresponde al usuario.
 
 ### Comprobaciones que repetir
 
-- [ ] Abrir Configuración: solo aparecen los cinco campos de texto y los botones Guardar rutas y Volver a cargar, sin Examinar ni diálogo.
-- [ ] Escribir rutas válidas, guardar y recargar: aparece el mensaje de éxito y se conservan las rutas.
-- [ ] Escribir una ruta inválida y guardar: error bajo el campo sin modificar el JSON. Volver a cargar recupera las rutas guardadas.
+- [x] Abrir Configuración: solo aparecen los cinco campos de texto y los botones Guardar rutas y Volver a cargar, sin Examinar ni diálogo.
+- [x] Escribir rutas válidas, guardar y recargar: aparece el mensaje de éxito y se conservan las rutas.
+- [x] Escribir una ruta inválida y guardar: error bajo el campo sin modificar el JSON. Volver a cargar recupera las rutas guardadas.
 
-No hay funciones nuevas. La fase permanece pendiente de validación y no se autoriza merge.
+No hay funciones nuevas. Revisión incluida en la aceptación y autorización de merge posterior.
 
 ## Revisión: descripciones de las rutas (26/10/2026)
 
@@ -165,13 +166,13 @@ Preparación: abrir `DjTracks.slnx` en Visual Studio 2026 con .NET 10,
 perfil **DJ Tracks (Api + UI)** y F5; `http://localhost:5050/settings`
 (API `http://localhost:5247`). No hacen falta música ni BD para revisar los textos.
 
-- [ ] Nueva: abrir Configuración y comprobar una descripción breve del uso bajo cada uno de los cinco campos, sin botones Examinar.
-- [ ] Repetir: escribir una ruta inválida y guardar; debe aparecer su error bajo el campo. Corregir y guardar rutas válidas: se conservan al recargar. Para esto se necesitan cinco carpetas existentes, con escritura en playlists.
+- [x] Nueva: abrir Configuración y comprobar una descripción breve del uso bajo cada uno de los cinco campos, sin botones Examinar.
+- [x] Repetir: escribir una ruta inválida y guardar; debe aparecer su error bajo el campo. Corregir y guardar rutas válidas: se conservan al recargar. Para esto se necesitan cinco carpetas existentes, con escritura en playlists.
 
 Comprobación del agente: compilación completa sin errores ni advertencias;
 reutilización del mismo `HelperText` que ya utilizaba raíz M3U.
-Context7 no expone herramientas en esta sesión. Revisión visual pendiente del usuario.
-No cambia la API ni el JSON. F0.2 sigue pendiente de validación; sin merge.
+Context7 no expone herramientas en esta sesión. Revisión incluida en la aceptación del usuario.
+No cambia la API ni el JSON. Merge autorizado el 26/10/2026.
 
 ## Formato para futuras entregas
 
