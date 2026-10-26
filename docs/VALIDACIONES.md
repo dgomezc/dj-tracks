@@ -10,13 +10,85 @@ Consultar siempre el estado real de GitHub antes de actuar sobre un PR.
 - Planificación: PR #1 mergeado.
 - F0.1: validada por el usuario el 26/10/2026, incluido el inicio conjunto; PR [#2](https://github.com/dgomezc/dj-tracks/pull/2) mergeado en `develop` (estado comprobado en GitHub).
 - Continuación autorizada el 26/10/2026: "Validado. Continua". La pausa anterior queda levantada.
-- Fase activa: F0.2, configuración de rutas.
-- PR: [#3](https://github.com/dgomezc/dj-tracks/pull/3), dirigido a `develop`.
-- Rama del entorno: `dgomezc-f0-2-configuracion-de-rutas`.
-- Estado: **F0.2 validada por el usuario el 26/10/2026**, incluidas la restauración de campos de texto y las descripciones. Confirmación: "Todo Ok, mezcla el PR y continúa como dijimos en el proyecto principal". Merge autorizado; comprobar GitHub para conocer su estado definitivo.
-- Continuidad solicitada: "continúa como dijimos en el proyecto principal", y limpieza de worktrees pasados. El destino exacto no está confirmado en esta sesión; se coordina con la sesión principal antes de iniciar F1.1. Preservar cambios locales y ajustes no versionados antes de archivar; no borrar el worktree activo.
-- Novedad: `/settings` consume la API y permite guardar las cinco rutas en JSON del servidor.
+- F0.2: validada por el usuario el 26/10/2026, incluidas la restauración de campos de texto y las descripciones. Confirmación: "Todo Ok, mezcla el PR y continúa como dijimos en el proyecto principal". PR [#3](https://github.com/dgomezc/dj-tracks/pull/3) mergeado en `develop` el 26/10/2026 a las 11:30:56 UTC, commit `88571b9` (comprobado en GitHub).
+- F1.1: **validada por el usuario el 26/10/2026** con "Funciona todo. Continua". Aceptación global de la entrega y autorización de continuación; no amplía las comprobaciones individuales del agente. Merge de su PR autorizado en el flujo de continuación.
+- Rama: `fase/f1-1-explorador-tracks`, desde `develop` actualizado por fast-forward.
+- Entrega F1.1: PR [#4](https://github.com/dgomezc/dj-tracks/pull/4) hacia `develop`; comprobar su estado real en GitHub antes de actuar.
+- Continuidad confirmada: trabajar directamente en el checkout original, sin nuevos worktrees. Se han preservado los cambios locales preexistentes en los dos `Class1.cs`, sin incluirlos en los commits.
+- Novedad: `/tracks` navega Año → Estilo → canciones reales, con nombre de fichero, título, artista, álbum y duración. `/settings` conserva los cinco inputs de texto con sus ayudas, sin selector.
 - Revisión del 26/10/2026: el usuario rechazó el selector de carpetas y pidió volver al formulario anterior. Retirados los botones Examinar, el diálogo y el endpoint de navegación; se mantienen los cinco campos de texto, la validación y el guardado originales. La elección previa del selector queda revocada.
+
+## F1.1: explorador de Tracks (validada por el usuario)
+
+Aceptación global el 26/10/2026: "Funciona todo. Continua".
+La checklist siguiente conserva los pasos entregados; no consta un informe individual
+por comprobación. F1.2 será la siguiente fase y requerirá su propia validación.
+
+Cambios: GET `/api/library/tracks`, con parámetros opcionales `year` y `style`
+para recorrer los tres niveles. Acceso a ficheros en Infrastructure y lectura
+con TagLibSharp 2.3.0, sin escribir tags. Se listan MP3 (también `.MP3`) del estilo
+seleccionado; las carpetas se muestran con sus nombres reales, incluido
+`Night Intrumental`. Años en orden descendente; estilos y canciones por nombre.
+La UI incluye navegación a niveles anteriores, recarga, estados vacíos y errores.
+No hay filtros F1.2 ni reproducción F1.3.
+
+### Preparación
+
+Abrir `DjTracks.slnx` del checkout original en Visual Studio 2026 (.NET 10).
+Seleccionar **DJ Tracks (Api + UI)** y F5: API `http://localhost:5247`,
+UI `http://localhost:5050/tracks`. No hace falta BD.
+En `/settings`, comprobar que Tracks apunta a una carpeta accesible por el
+proceso de la API, organizada como `Año/Estilo/Artista - Título.mp3`.
+Los ajustes locales de F0.2 se han trasladado al checkout original y están
+ignorados por Git; no es necesario volver a introducirlos si siguen vigentes.
+Para las pruebas opcionales de tags ausentes o corrupción, usar copias desechables,
+nunca modificar la biblioteca original. Para detener solo API, iniciar ambos
+proyectos por separado con sus perfiles `http`.
+
+### Checklist del usuario
+
+- [ ] Abrir `/settings`: siguen las cinco rutas guardadas, sus ayudas y los inputs de texto, sin Examinar. No guardar si las rutas ya son correctas.
+- [ ] Abrir `/tracks`: aparecen los años de la carpeta Tracks. Abrir un año y un estilo: solo se muestran sus MP3, con nombre, título, artista, álbum y duración coincidentes con los ficheros. No se reproducen al pulsarlos.
+- [ ] Volver mediante el año y «Años», elegir otro estilo y pulsar «Volver a cargar»: cada nivel muestra su contenido actual. Recargar la página completa vuelve al listado de años.
+- [ ] Comprobar un año sin estilos y un estilo sin MP3: aparece el estado vacío correspondiente. Si existe `Night Intrumental`, debe poder abrirse igual que cualquier estilo.
+- [ ] Con copias de prueba: un MP3 válido sin tags muestra «Sin datos» donde falten; un MP3 dañado sigue listado con aviso sin impedir ver las demás canciones. Los ficheros no MP3 no aparecen.
+- [ ] Detener solo la API y pulsar «Volver a cargar»: aparece el aviso de conexión sin listado anterior engañoso. Reiniciar API y volver a cargar: se recupera el nivel seleccionado. Comprobar que los paneles laterales y el reproductor provisional siguen visibles.
+
+### Comprobaciones del agente
+
+- Compilación completa con `dotnet build DjTracks.slnx`: 0 errores y 0 advertencias.
+- API y UI en puertos temporales y JSON aislado; los ajustes privados migrados no se usaron ni modificaron durante las pruebas.
+- MP3 sintéticos locales: lectura de título, artista, álbum y duración; MP3 sin tags y MP3 corrupto con aviso. Extensión mayúscula incluida, TXT excluido, año/estilo vacíos y alias de carpeta navegables. Las altas se reflejan en la siguiente petición.
+- HTTP 400 para rutas absolutas, traversal y estilo sin año; 404 para selecciones inexistentes; 409 sin configuración; 500 con JSON corrupto; 503 con raíz inexistente. Respuestas sin rutas absolutas del servidor.
+- Enlaces/junctions internos excluidos y no navegables. OpenAPI contiene el nuevo endpoint.
+- Navegador interactivo: recorrido año → estilo → canciones, DOM con tags y aviso; captura visual con los datos sintéticos. Error de almacenamiento visible; API detenida muestra aviso de conexión. La aceptación visual y los datos reales corresponden al usuario.
+- Servicios y datos sintéticos temporales retirados al acabar; iniciar los proyectos desde Visual Studio para la validación del usuario.
+
+### Límites
+
+- Lectura bajo demanda, sin índice, caché, watcher, paginación, filtros ni reproducción. «Volver a cargar» vuelve a leer disco; no hay actualización automática.
+- Solo la estructura de dos carpetas y los MP3 directamente dentro del estilo; no se recorren subcarpetas ni enlaces internos. No se restringen los nombres de año/estilo para no ocultar carpetas existentes.
+- Si un fichero no puede leerse, se conserva su nombre con aviso y se registra una advertencia en API. Un error al enumerar carpetas impide dar por válido un listado parcial y se muestra como error.
+- No se ha comprobado NAS/UNC real ni se han creado pruebas unitarias nuevas.
+- La documentación de TagLibSharp no estaba disponible en context7 (solo ofrecía otro proyecto, TagLibSharp2); se consultó el README oficial de `mono/taglib-sharp`. MudBlazor 9.11.0 y ASP.NET Core se consultaron en context7.
+
+## Migración y limpieza del 26/10/2026
+
+- Trabajo de F1.1 en el checkout original, sin crear worktree.
+- Se comprobó el JSON privado preservado de F0.2 y se copió a
+  `src/DjTracks.Api/App_Data/settings.json` del checkout original: el destino
+  no existía, no se sobrescribieron datos distintos y Git confirma que está ignorado.
+  Los valores y las ubicaciones privadas no se versionan.
+- La sesión principal archivó F0.2 mediante la app tras confirmar la copia.
+  `git worktree list` confirma retirado su worktree; F1.1 continuó activa.
+- La sesión F0.1 sigue activa en su worktree. No puede autoarchivarse ni esta
+  sesión es su creadora: queda pendiente que el usuario la archive desde la app
+  tras el traspaso. No se ha borrado por shell.
+- El worktree detached `dgomezc-ubiquitous-bassoon` no aparece entre las
+  sesiones descubiertas. Su propiedad y sus datos no están verificados;
+  no se ha inspeccionado ni eliminado, conforme al límite de la coordinación.
+- No se han borrado otros elementos por suposición. La limpieza anterior
+  no se considera completada mientras persistan estos pendientes.
 
 ## F0.1: validación completada (histórico)
 
