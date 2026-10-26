@@ -28,15 +28,19 @@
         <MudStack Spacing="3">
             <MudTextField T="string" Label="Tracks" @bind-Value="_settings.Tracks"
                           Disabled="@Disabled" Variant="Variant.Outlined"
+                          HelperText="Carpeta de canciones organizadas por año y estilo."
                           Error="@HasError(nameof(_settings.Tracks))" ErrorText="@FieldError(nameof(_settings.Tracks))" />
             <MudTextField T="string" Label="Sessions" @bind-Value="_settings.Sessions"
                           Disabled="@Disabled" Variant="Variant.Outlined"
+                          HelperText="Carpeta de sesiones organizadas por año, con su audio y tracklist."
                           Error="@HasError(nameof(_settings.Sessions))" ErrorText="@FieldError(nameof(_settings.Sessions))" />
             <MudTextField T="string" Label="Remember" @bind-Value="_settings.Remember"
                           Disabled="@Disabled" Variant="Variant.Outlined"
+                          HelperText="Carpeta de música Remember, dividida en Cortas y Largas."
                           Error="@HasError(nameof(_settings.Remember))" ErrorText="@FieldError(nameof(_settings.Remember))" />
             <MudTextField T="string" Label="Playlists" @bind-Value="_settings.Playlists"
                           Disabled="@Disabled" Variant="Variant.Outlined"
+                          HelperText="Carpeta donde se guardarán los archivos JSON de las playlists; requiere escritura."
                           Error="@HasError(nameof(_settings.Playlists))" ErrorText="@FieldError(nameof(_settings.Playlists))" />
             <MudTextField T="string" Label="Raíz M3U" @bind-Value="_settings.M3uRoot"
                           Disabled="@Disabled" Variant="Variant.Outlined"

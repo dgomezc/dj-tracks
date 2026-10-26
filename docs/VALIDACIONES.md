@@ -125,14 +125,14 @@ restaurarla al terminar; no usar datos irreemplazables.
 - No se impone todavía relación de contención entre las carpetas y la raíz M3U.
 - Sin explorador, reproducción, exportación M3U, edición de playlists, BD ni Docker en esta fase.
 - Servicios de comprobación y datos temporales retirados al acabar; el usuario debe iniciar sus proyectos desde Visual Studio.
-- No hay una revisión posterior a la entrega: todas las comprobaciones de F0.2 son nuevas. Si se corrige algo tras la validación, registrar aquí cuáles deben repetirse.
+- Las revisiones posteriores a la entrega y sus comprobaciones están registradas abajo. La checklist inicial sigue pendiente.
 
 ## Revisión: restaurar campos de texto (26/10/2026)
 
 Petición del usuario: "No me gusta lo que has hecho con el botón examinar,
 revierte los cambios y deja el input de texto plano anterior".
-Se revirtieron exclusivamente los tres commits del selector. El código de `src`
-coincide con la entrega inicial de F0.2 (`2ff8296`); no se modifican los ajustes
+Se revirtieron exclusivamente los tres commits del selector. En esa revisión, el código de `src`
+quedó igual a la entrega inicial de F0.2 (`2ff8296`); no se modificaron los ajustes
 JSON locales ni se pierde la validación o persistencia anterior.
 Las checklists del selector quedan anuladas; la checklist inicial de F0.2 sigue pendiente.
 
@@ -152,6 +152,26 @@ La comprobación visual de esta reversión corresponde al usuario.
 - [ ] Escribir una ruta inválida y guardar: error bajo el campo sin modificar el JSON. Volver a cargar recupera las rutas guardadas.
 
 No hay funciones nuevas. La fase permanece pendiente de validación y no se autoriza merge.
+
+## Revisión: descripciones de las rutas (26/10/2026)
+
+A petición del usuario se añaden textos de ayuda bajo Tracks (canciones por año
+y estilo), Sessions (audio y tracklist por año), Remember (Cortas y Largas)
+y Playlists (archivos JSON, requiere escritura), igual que el texto existente
+de raíz M3U (rutas relativas para futuras exportaciones). Se conservan los
+campos de texto sin selector, sus valores y el comportamiento de guardado.
+
+Preparación: abrir `DjTracks.slnx` en Visual Studio 2026 con .NET 10,
+perfil **DJ Tracks (Api + UI)** y F5; `http://localhost:5050/settings`
+(API `http://localhost:5247`). No hacen falta música ni BD para revisar los textos.
+
+- [ ] Nueva: abrir Configuración y comprobar una descripción breve del uso bajo cada uno de los cinco campos, sin botones Examinar.
+- [ ] Repetir: escribir una ruta inválida y guardar; debe aparecer su error bajo el campo. Corregir y guardar rutas válidas: se conservan al recargar. Para esto se necesitan cinco carpetas existentes, con escritura en playlists.
+
+Comprobación del agente: compilación completa sin errores ni advertencias;
+reutilización del mismo `HelperText` que ya utilizaba raíz M3U.
+Context7 no expone herramientas en esta sesión. Revisión visual pendiente del usuario.
+No cambia la API ni el JSON. F0.2 sigue pendiente de validación; sin merge.
 
 ## Formato para futuras entregas
 
