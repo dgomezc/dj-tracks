@@ -9,17 +9,18 @@ Consultar siempre el estado real de GitHub antes de actuar sobre un PR.
 
 - Planificación: PR #1 mergeado.
 - F0.1: validada por el usuario el 26/10/2026, incluido el inicio conjunto; PR [#2](https://github.com/dgomezc/dj-tracks/pull/2) mergeado en `develop` (estado comprobado en GitHub).
-- Continuación autorizada el 26/10/2026: "Validado. Continua". La pausa anterior queda levantada.
+- Continuación anterior autorizada el 26/10/2026: "Validado. Continua". Sustituida por la pausa explícita de F1.2 indicada abajo.
 - F0.2: validada por el usuario el 26/10/2026, incluidas la restauración de campos de texto y las descripciones. Confirmación: "Todo Ok, mezcla el PR y continúa como dijimos en el proyecto principal". PR [#3](https://github.com/dgomezc/dj-tracks/pull/3) mergeado en `develop` el 26/10/2026 a las 11:30:56 UTC, commit `88571b9` (comprobado en GitHub).
 - F1.1: **validada por el usuario el 26/10/2026** con "Funciona todo. Continua". Aceptación global de la entrega y autorización de continuación; no amplía las comprobaciones individuales del agente. PR [#4](https://github.com/dgomezc/dj-tracks/pull/4) mergeado en `develop` a las 14:57:01 UTC, commit `e70aafc` (comprobado en GitHub).
-- Fase activa: **F1.2, filtros de Tracks; pendiente de validación del usuario**. No avanzar a F1.3 ni hacer merge sin su confirmación y autorización.
+- F1.2: **validada globalmente por el usuario el 26/10/2026**, incluida la multiselección, con "Perfecto, haz el PR pero de momento no sigas." No consta informe individual de cada comprobación; esta aceptación no amplía las pruebas del agente.
+- **Trabajo pausado por petición del usuario. No iniciar F1.3 ni hacer merge**: solo se ha solicitado dejar el PR preparado.
 - Rama: `fase/f1-2-filtros`, desde `develop` actualizado por fast-forward, en el checkout original y sin nuevos worktrees.
-- Entrega F1.2: PR [#5](https://github.com/dgomezc/dj-tracks/pull/5) hacia `develop`, abierto y pendiente de validación; consultar su estado real en GitHub antes de actuar.
+- Entrega F1.2: PR [#5](https://github.com/dgomezc/dj-tracks/pull/5) hacia `develop`, ya abierto y actualizado con la multiselección; pendiente de autorización de merge. Consultar su estado real en GitHub antes de actuar.
 - Continuidad confirmada: trabajar directamente en el checkout original, sin nuevos worktrees. Se han preservado los cambios locales preexistentes en los dos `Class1.cs`, sin incluirlos en los commits.
 - Novedad: `/tracks` conserva la navegación Año → Estilo y añade filtros plegables por año, estilo/grupo y subestilo. `/settings` conserva los cinco inputs de texto con sus ayudas, sin selector.
 - Revisión del 26/10/2026: el usuario rechazó el selector de carpetas y pidió volver al formulario anterior. Retirados los botones Examinar, el diálogo y el endpoint de navegación; se mantienen los cinco campos de texto, la validación y el guardado originales. La elección previa del selector queda revocada.
 
-## F1.2: filtros de Tracks (pendiente del usuario)
+## F1.2: filtros de Tracks (validada; PR abierto y trabajo pausado)
 
 Cambios: panel «Filtros» plegado inicialmente, con tres desplegables de
 multiselección (años, estilos/grupos y subestilos). Sin selección se incluyen todos.
@@ -104,7 +105,11 @@ Para detener solo API, iniciar ambos proyectos por separado con perfil `http`.
 - Las limitaciones de estructura, permisos y enlaces de F1.1 se mantienen.
   Un error de enumeración se comunica como error, no como listado parcial correcto.
 
-### Revisión: multiselección (26/10/2026, pendiente del usuario)
+### Revisión: multiselección (26/10/2026, validada globalmente)
+
+Confirmación posterior: "Perfecto, haz el PR pero de momento no sigas."
+El PR existente se mantiene abierto, sin merge ni comienzo de otra fase.
+Las checklists conservan los pasos entregados, sin atribuir ejecución individual.
 
 Petición: "Los filtros tienen que ser multiselección, es decir poder seleccionar
 por ejemplo el año 2025 y 2026 a la vez". Sustituye la selección única de la
