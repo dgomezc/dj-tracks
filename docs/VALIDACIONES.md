@@ -8,13 +8,15 @@ Consultar siempre el estado real de GitHub antes de actuar sobre un PR.
 ## Estado actual
 
 - Planificación: PR #1 mergeado.
-- Fase activa: F0.1, layout base.
-- PR: [#2](https://github.com/dgomezc/dj-tracks/pull/2), dirigido a `develop`.
-- Rama: `fase/f0-1-layout`.
-- Estado: F0.1 validada por el usuario el 26/10/2026, incluido el inicio conjunto ("Perfecto, mezcla el PR y detente que quiero hacer una pregunta"). Merge autorizado; detener el desarrollo y no iniciar F0.2 hasta nueva indicación.
-- Novedad de esta entrega: `DjTracks.slnLaunch` permite iniciar y depurar Api + UI conjuntamente.
+- F0.1: validada por el usuario el 26/10/2026, incluido el inicio conjunto; PR [#2](https://github.com/dgomezc/dj-tracks/pull/2) mergeado en `develop` (estado comprobado en GitHub).
+- Continuación autorizada el 26/10/2026: "Validado. Continua". La pausa anterior queda levantada.
+- Fase activa: F0.2, configuración de rutas.
+- PR: [#3](https://github.com/dgomezc/dj-tracks/pull/3), dirigido a `develop`.
+- Rama del entorno: `dgomezc-f0-2-configuracion-de-rutas`.
+- Estado: implementada, **pendiente de validación manual del usuario**. No hacer merge ni iniciar F1.1 sin su confirmación y autorización.
+- Novedad: `/settings` consume la API y permite guardar las cinco rutas en JSON del servidor.
 
-## F0.1: qué validar
+## F0.1: validación completada (histórico)
 
 Cambios: MudBlazor con tema oscuro, navegación principal, páginas provisionales,
 panel izquierdo de playlists y espacio fijo inferior para el futuro reproductor.
@@ -50,9 +52,79 @@ No hacen falta archivos de música, base de datos ni API para estas páginas pro
 - La UI compiló y las cinco rutas respondieron HTTP 200 en la entrega inicial.
 - La restauración de los cuatro proyectos con la configuración local de NuGet se completó sin `--source`; la única fuente efectiva listada fue nuget.org.
 - El usuario confirmó la checklist original y el nuevo perfil el 26/10/2026.
-- Las páginas son provisionales: no reproducen audio, no muestran biblioteca ni permiten editar rutas o playlists.
-- El cliente HTTP de la API está registrado, pero estas páginas aún no lo consumen.
+- En F0.1 las páginas eran provisionales: sin reproducción, biblioteca, edición de rutas ni playlists.
+- En F0.1 el cliente HTTP de la API estaba registrado, pero las páginas aún no lo consumían.
 - El perfil compartido de inicio múltiple está añadido y validado por el usuario desde Visual Studio.
+
+## F0.2: qué validar
+
+Cambios: formulario MudBlazor para Tracks, Sessions, Remember, Playlists y raíz M3U;
+GET/PUT `/api/settings`; errores por campo y avisos visibles de conexión,
+JSON inválido y permisos. Se comprueban rutas absolutas de carpetas existentes,
+lectura en todas y escritura en playlists. Se recortan espacios exteriores.
+No se crean carpetas de biblioteca; sí el directorio del JSON al guardar por primera vez.
+Las futuras exportaciones M3U usarán rutas relativas a la raíz configurada.
+
+### Preparación
+
+Visual Studio 2026 y .NET 10: abrir `DjTracks.slnx`, seleccionar
+**DJ Tracks (Api + UI)** y F5.
+UI: `http://localhost:5050/settings`; API: `http://localhost:5247/api/settings`.
+Preparar cinco carpetas existentes (pueden estar vacías), accesibles por el
+usuario de la API; playlists requiere escritura. No hacen falta música ni BD.
+Las rutas son del servidor de la API, no del equipo del navegador.
+Para la prueba de caída, iniciar UI y API por separado con sus perfiles `http`,
+para poder detener solo la API.
+
+El JSON local se guarda por defecto en `src/DjTracks.Api/App_Data/settings.json`;
+`App_Data` está ignorado por Git. No existe hasta el primer guardado correcto.
+Sus propiedades son `tracks`, `sessions`, `remember`, `playlists` y `m3uRoot`.
+No editar `appsettings.json` para guardar rutas privadas.
+Para cambiar la ubicación, usar `Settings:FilePath` mediante user-secrets o
+`Settings__FilePath` en el entorno de la API (las ubicaciones relativas se
+resuelven respecto a su content root). La identidad de la API necesita
+lectura y permisos de creación/renombrado/borrado en el directorio del JSON.
+Si la ubicación personalizada está dentro del repositorio pero fuera de
+`App_Data`, hay que excluirla localmente de Git antes de usarla.
+Para pruebas de corrupción o permisos, hacer primero una copia del JSON y
+restaurarla al terminar; no usar datos irreemplazables.
+
+### Checklist del usuario (pendiente)
+
+- [ ] Abrir Configuración: aparecen las cinco rutas y los paneles existentes; en la primera ejecución los campos están vacíos y no se crea JSON hasta guardar.
+- [ ] Guardar cinco carpetas válidas: aparece «Rutas validadas y guardadas en el servidor». Recargar, navegar fuera y volver, y reiniciar Api + UI: se conservan las cinco rutas.
+- [ ] Probar un campo vacío, una ruta relativa, una inexistente y una ruta a un fichero: aparece el error bajo el campo; no se modifica el JSON. «Volver a cargar» recupera lo guardado.
+- [ ] Editar tras guardar: desaparece el aviso de éxito. «Volver a cargar» descarta los cambios; durante las operaciones los controles quedan bloqueados.
+- [ ] Detener solo la API y pulsar «Volver a cargar»: aparece el aviso de conexión y se bloquea guardar. Reiniciar la API y volver a cargar: desaparece el error y regresan las rutas.
+- [ ] Hacer copia del JSON; dejar temporalmente JSON mal formado y volver a cargar: aparece el aviso de JSON inválido, guardar queda bloqueado y el fichero no se sobrescribe. Restaurar la copia y volver a cargar: se recupera el formulario.
+- [ ] Con copia del JSON, marcarlo de solo lectura e intentar guardar otra carpeta válida: aparece error de almacenamiento, sin éxito ni cambio del fichero. Quitar solo lectura y volver a cargar: se recuperan las rutas originales.
+- [ ] Si se usan rutas NAS/UNC, repetir guardado con las rutas reales: deben ser accesibles con la identidad que ejecuta la API; las carpetas inaccesibles o playlists sin escritura deben dar error por campo.
+
+### Comprobaciones reales del agente
+
+- `dotnet build DjTracks.slnx`: 0 errores y 0 advertencias.
+- API y UI iniciadas con puertos y almacenamiento temporales aislados de los datos del usuario.
+- GET inicial sin fichero: rutas vacías; no crea JSON.
+- PUT con rutas vacías, relativas, inexistentes y ficheros: 400 con errores por campo, sin guardar.
+- Guardado y recorte de espacios exteriores; GET conserva valores después de reiniciar la API.
+- Veinte PUT concurrentes correctos: JSON íntegro y sin temporales restantes. Se corrigió un fallo reproducido de `File.Replace` en Windows usando renombrado con sobrescritura en el mismo directorio.
+- ACL temporal denegando lectura en tracks y creación de ficheros en playlists: errores por campo. Permisos restaurados y guardado correcto.
+- JSON de solo lectura: 500 y fichero anterior intacto.
+- JSON mal formado, incompleto, `null` y con esquema inválido: GET/PUT devuelven 500 sin sobrescribir. Petición JSON mal formada: 400 sin cambios.
+- Navegador interactivo: guardado con éxito, validación de ruta relativa, error JSON con campos/guardar bloqueados, API detenida y recuperación con los cinco valores al reiniciarla.
+- La captura visual del navegador agotó el tiempo de espera. Las interacciones y el DOM sí se comprobaron; no se equiparan a la validación visual del usuario.
+
+### Límites y continuidad
+
+- Falta confirmar la checklist del usuario y el arranque conjunto de esta fase en Visual Studio. F0.1 conserva su validación previa.
+- Sin pruebas unitarias nuevas ni validación real de NAS/UNC.
+- Un servidor de API: acceso al JSON serializado dentro del proceso; el último guardado correcto prevalece. No hay coordinación entre varias instancias ni detección de cambios de otros formularios.
+- JSON escrito mediante temporal en el mismo directorio, flush a disco y renombrado; los errores se registran en el servidor y se notifican en la UI. Un JSON corrupto no se sobrescribe: hay que corregirlo o restaurarlo y volver a cargar.
+- Las rutas guardadas se pueden cargar aunque sus carpetas hayan desaparecido, para poder corregirlas; se revalidan al guardar.
+- No se impone todavía relación de contención entre las carpetas y la raíz M3U.
+- Sin explorador, reproducción, exportación M3U, edición de playlists, BD ni Docker en esta fase.
+- Servicios de comprobación y datos temporales retirados al acabar; el usuario debe iniciar sus proyectos desde Visual Studio.
+- No hay una revisión posterior a la entrega: todas las comprobaciones de F0.2 son nuevas. Si se corrige algo tras la validación, registrar aquí cuáles deben repetirse.
 
 ## Formato para futuras entregas
 
