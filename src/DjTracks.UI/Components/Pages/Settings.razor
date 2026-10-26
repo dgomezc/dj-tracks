@@ -3,4 +3,55 @@
 <PageTitle>Configuración - DJ Tracks</PageTitle>
 
 <MudText Typo="Typo.h4" Class="mb-2">Configuración</MudText>
-<MudText Class="mud-text-secondary">Rutas de la biblioteca (fase F0.2).</MudText>
+<MudText Class="mud-text-secondary mb-4">
+    Introduce rutas absolutas de carpetas existentes en el servidor de la API, no en el navegador.
+    Las carpetas de música necesitan lectura; playlists necesita también escritura.
+</MudText>
+
+@if (_busy)
+{
+    <MudProgressLinear Indeterminate="true" Color="Color.Primary" Class="mb-4" aria-label="Procesando ajustes" />
+}
+@if (_error is not null)
+{
+    <MudAlert Severity="Severity.Error" Class="mb-4" role="alert">@_error</MudAlert>
+}
+@if (_saved)
+{
+    <MudAlert Severity="Severity.Success" Class="mb-4" role="status">
+        Rutas validadas y guardadas en el servidor.
+    </MudAlert>
+}
+
+<MudPaper Class="pa-4" Outlined="true">
+    <form @onsubmit="SaveAsync" @onsubmit:preventDefault @oninput="() => _saved = false">
+        <MudStack Spacing="3">
+            <MudTextField T="string" Label="Tracks" @bind-Value="_settings.Tracks"
+                          Disabled="@Disabled" Variant="Variant.Outlined"
+                          Error="@HasError(nameof(_settings.Tracks))" ErrorText="@FieldError(nameof(_settings.Tracks))" />
+            <MudTextField T="string" Label="Sessions" @bind-Value="_settings.Sessions"
+                          Disabled="@Disabled" Variant="Variant.Outlined"
+                          Error="@HasError(nameof(_settings.Sessions))" ErrorText="@FieldError(nameof(_settings.Sessions))" />
+            <MudTextField T="string" Label="Remember" @bind-Value="_settings.Remember"
+                          Disabled="@Disabled" Variant="Variant.Outlined"
+                          Error="@HasError(nameof(_settings.Remember))" ErrorText="@FieldError(nameof(_settings.Remember))" />
+            <MudTextField T="string" Label="Playlists" @bind-Value="_settings.Playlists"
+                          Disabled="@Disabled" Variant="Variant.Outlined"
+                          Error="@HasError(nameof(_settings.Playlists))" ErrorText="@FieldError(nameof(_settings.Playlists))" />
+            <MudTextField T="string" Label="Raíz M3U" @bind-Value="_settings.M3uRoot"
+                          Disabled="@Disabled" Variant="Variant.Outlined"
+                          HelperText="Las futuras exportaciones M3U usarán rutas relativas a esta carpeta."
+                          Error="@HasError(nameof(_settings.M3uRoot))" ErrorText="@FieldError(nameof(_settings.M3uRoot))" />
+            <MudStack Row="true" Wrap="Wrap.Wrap">
+                <MudButton ButtonType="ButtonType.Submit" Variant="Variant.Filled"
+                           Color="Color.Primary" Disabled="@Disabled">Guardar rutas</MudButton>
+                <MudButton OnClick="LoadAsync" Variant="Variant.Outlined" Disabled="@_busy">
+                    Volver a cargar
+                </MudButton>
+            </MudStack>
+            <MudText Typo="Typo.body2" Class="mud-text-secondary">
+                Volver a cargar descarta los cambios sin guardar. No se crean carpetas de biblioteca.
+            </MudText>
+        </MudStack>
+    </form>
+</MudPaper>
