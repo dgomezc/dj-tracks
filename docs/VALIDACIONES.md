@@ -21,9 +21,9 @@ Consultar siempre el estado real de GitHub antes de actuar sobre un PR.
 
 ## F1.2: filtros de Tracks (pendiente del usuario)
 
-Cambios: panel «Filtros» plegado inicialmente, con tres desplegables de selección
-única (año, estilo/grupo y subestilo), cada uno con opción de todos.
-«Aplicar filtros» combina las selecciones mediante AND y muestra todas las
+Cambios: panel «Filtros» plegado inicialmente, con tres desplegables de
+multiselección (años, estilos/grupos y subestilos). Sin selección se incluyen todos.
+«Aplicar filtros» combina valores mediante OR en cada campo y AND entre campos y muestra todas las
 canciones coincidentes, aunque pertenezcan a distintos años o carpetas.
 Los resultados añaden año y estilo reales para distinguir ficheros homónimos.
 «Limpiar filtros y volver a años» reinicia el formulario y recupera el explorador.
@@ -45,7 +45,9 @@ Los resultados añaden año y estilo reales para distinguir ficheros homónimos.
   el borrador. Recargar la página completa reinicia el estado.
 - GET `/api/library/tracks/filter-options` devuelve años y grupos.
   GET `/api/library/tracks/search` admite `year`, `group`, `substyle`;
-  omitir un parámetro significa todos. El endpoint original de exploración se conserva.
+  cada parámetro puede repetirse (`year=2025&year=2026`); omitirlo significa todos.
+  Cada valor se valida y las selecciones repetidas no duplican canciones.
+  El endpoint original de exploración se conserva.
   Se comparte la lectura de MP3 y el tratamiento de errores, sin índice ni caché.
 
 ### Preparación
@@ -94,13 +96,40 @@ Para detener solo API, iniciar ambos proyectos por separado con perfil `http`.
 
 ### Límites
 
-- Selección única por campo en esta fase; sin persistencia de filtros ni selección
-  múltiple de playlists F4.3. Los filtros usan nombres de carpetas, nunca tags.
+- Multiselección por campo, sin persistencia de filtros entre recargas completas.
+  Los filtros usan nombres de carpetas, nunca tags.
 - Sin reproductor F1.3, BD, watcher ni actualización automática. Consultar todos
   los años lee los tags de todos los MP3 coincidentes bajo demanda.
 - Sin nuevas pruebas unitarias ni comprobación real de NAS/UNC.
 - Las limitaciones de estructura, permisos y enlaces de F1.1 se mantienen.
   Un error de enumeración se comunica como error, no como listado parcial correcto.
+
+### Revisión: multiselección (26/10/2026, pendiente del usuario)
+
+Petición: "Los filtros tienen que ser multiselección, es decir poder seleccionar
+por ejemplo el año 2025 y 2026 a la vez". Sustituye la selección única de la
+primera entrega en los tres campos; no amplía la fase a F1.3.
+Los desplegables mantienen las opciones marcadas y permiten desmarcar valores
+o vaciar el campo con su botón de limpieza. Un campo vacío significa todos.
+Se mantienen Aplicar explícito, borrador separado y recarga de la combinación efectiva.
+
+Comprobado por el agente: compilación con 0 errores/advertencias; 80 combinaciones
+de selecciones múltiples comparadas con el conjunto exacto esperado, incluidos
+años repetidos sin duplicados, grupos múltiples, ambos subestilos y vacíos.
+Validación individual de valores inválidos, año inexistente y regresión del explorador.
+Navegador interactivo: 2025 y 2026 + Day y Night + Instrumental y Vocal simultáneos,
+desmarcar 2025, recargar sin aplicar el borrador, aplicar solo 2026, limpiar y aplicar
+campos vacíos (todos). Datos sintéticos aislados; no se modificaron ajustes privados.
+
+Requisitos de arranque: los mismos de F1.2 (Api + UI desde Visual Studio,
+`http://localhost:5050/tracks`, API `http://localhost:5247`, biblioteca con dos años
+y carpetas de estilos). No hace falta repetir toda F1.1. Repetir la checklist
+F1.2 anterior usando la multiselección, y añadir:
+
+- [ ] Marcar 2025 y 2026 a la vez, aplicar: aparecen canciones de ambos años y de ningún otro; el resumen muestra ambos.
+- [ ] Marcar Day y Night junto con Instrumental: aparecen ambos grupos de los años elegidos, incluido el alias. Marcar también Vocal: aparecen ambos subestilos sin duplicados.
+- [ ] Desmarcar un año sin aplicar y recargar: se conserva la combinación previa. Aplicar: desaparecen las canciones del año desmarcado.
+- [ ] Vaciar un campo con su botón de limpieza y aplicar: ese campo deja de restringir. «Limpiar filtros y volver a años» vacía los tres; aplicar vacíos incluye toda la biblioteca.
 
 ## F1.1: explorador de Tracks (validada por el usuario)
 
