@@ -11,6 +11,9 @@
 *.sln.docstates
 *.env
 
+# Ajustes locales del servidor (rutas privadas)
+**/App_Data/
+
 # User-specific files (MonoDevelop/Xamarin Studio)
 *.userprefs
 
