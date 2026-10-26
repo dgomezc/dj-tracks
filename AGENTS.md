@@ -23,3 +23,4 @@ Reproductor autoalojado de música electrónica. Plan completo en `docs/PLAN.md`
 - `src/DjTracks.Domain`: entidades y enums. `src/DjTracks.Infrastructure`: ficheros, tags, onda, EF Core.
 - Biblioteca y playlists en ficheros; PostgreSQL solo para estadísticas.
 - No commitear secretos (usar user-secrets para la conexión a BD).
+- NuGet: `NuGet.Config` limita las fuentes a nuget.org e ignora los feeds privados heredados. Usa la restauración normal, sin `--source`.
