@@ -11,12 +11,96 @@ Consultar siempre el estado real de GitHub antes de actuar sobre un PR.
 - F0.1: validada por el usuario el 26/10/2026, incluido el inicio conjunto; PR [#2](https://github.com/dgomezc/dj-tracks/pull/2) mergeado en `develop` (estado comprobado en GitHub).
 - Continuación autorizada el 26/10/2026: "Validado. Continua". La pausa anterior queda levantada.
 - F0.2: validada por el usuario el 26/10/2026, incluidas la restauración de campos de texto y las descripciones. Confirmación: "Todo Ok, mezcla el PR y continúa como dijimos en el proyecto principal". PR [#3](https://github.com/dgomezc/dj-tracks/pull/3) mergeado en `develop` el 26/10/2026 a las 11:30:56 UTC, commit `88571b9` (comprobado en GitHub).
-- F1.1: **validada por el usuario el 26/10/2026** con "Funciona todo. Continua". Aceptación global de la entrega y autorización de continuación; no amplía las comprobaciones individuales del agente. Merge de su PR autorizado en el flujo de continuación.
-- Rama: `fase/f1-1-explorador-tracks`, desde `develop` actualizado por fast-forward.
-- Entrega F1.1: PR [#4](https://github.com/dgomezc/dj-tracks/pull/4) hacia `develop`; comprobar su estado real en GitHub antes de actuar.
+- F1.1: **validada por el usuario el 26/10/2026** con "Funciona todo. Continua". Aceptación global de la entrega y autorización de continuación; no amplía las comprobaciones individuales del agente. PR [#4](https://github.com/dgomezc/dj-tracks/pull/4) mergeado en `develop` a las 14:57:01 UTC, commit `e70aafc` (comprobado en GitHub).
+- Fase activa: **F1.2, filtros de Tracks; pendiente de validación del usuario**. No avanzar a F1.3 ni hacer merge sin su confirmación y autorización.
+- Rama: `fase/f1-2-filtros`, desde `develop` actualizado por fast-forward, en el checkout original y sin nuevos worktrees.
+- Entrega F1.2: PR hacia `develop`; consultar su enlace al entregar y su estado real en GitHub antes de actuar.
 - Continuidad confirmada: trabajar directamente en el checkout original, sin nuevos worktrees. Se han preservado los cambios locales preexistentes en los dos `Class1.cs`, sin incluirlos en los commits.
-- Novedad: `/tracks` navega Año → Estilo → canciones reales, con nombre de fichero, título, artista, álbum y duración. `/settings` conserva los cinco inputs de texto con sus ayudas, sin selector.
+- Novedad: `/tracks` conserva la navegación Año → Estilo y añade filtros plegables por año, estilo/grupo y subestilo. `/settings` conserva los cinco inputs de texto con sus ayudas, sin selector.
 - Revisión del 26/10/2026: el usuario rechazó el selector de carpetas y pidió volver al formulario anterior. Retirados los botones Examinar, el diálogo y el endpoint de navegación; se mantienen los cinco campos de texto, la validación y el guardado originales. La elección previa del selector queda revocada.
+
+## F1.2: filtros de Tracks (pendiente del usuario)
+
+Cambios: panel «Filtros» plegado inicialmente, con tres desplegables de selección
+única (año, estilo/grupo y subestilo), cada uno con opción de todos.
+«Aplicar filtros» combina las selecciones mediante AND y muestra todas las
+canciones coincidentes, aunque pertenezcan a distintos años o carpetas.
+Los resultados añaden año y estilo reales para distinguir ficheros homónimos.
+«Limpiar filtros y volver a años» reinicia el formulario y recupera el explorador.
+
+- Day/Night se separan de Instrumental/Vocal. Solo Instrumental o Vocal incluye
+  ambos grupos; solo Day o Night incluye sus dos subestilos.
+- `Night Intrumental` se considera Night + Instrumental sin renombrar carpetas.
+  Las carpetas y grupos se comparan sin distinguir mayúsculas en la clasificación.
+- Technohouse, Tribal y otras carpetas se conservan como grupos propios, sin
+  subestilo. Combinarlos con Instrumental/Vocal devuelve cero resultados;
+  no se ignora ni cambia silenciosamente ninguna selección.
+- Los años y grupos disponibles proceden de las carpetas de la biblioteca
+  completa, no se reducen al cambiar otro selector. Se refrescan al abrir el
+  panel y al recargar/aplicar con él abierto.
+- Cambiar un selector no cambia el listado hasta pulsar Aplicar.
+  «Volver a cargar» mantiene los filtros ya aplicados, no aplica el borrador.
+  El resumen indica los filtros efectivos incluso con el panel cerrado.
+  «Años» sale de los resultados y recupera la navegación; «Limpiar» borra también
+  el borrador. Recargar la página completa reinicia el estado.
+- GET `/api/library/tracks/filter-options` devuelve años y grupos.
+  GET `/api/library/tracks/search` admite `year`, `group`, `substyle`;
+  omitir un parámetro significa todos. El endpoint original de exploración se conserva.
+  Se comparte la lectura de MP3 y el tratamiento de errores, sin índice ni caché.
+
+### Preparación
+
+Visual Studio 2026 con .NET 10: abrir `DjTracks.slnx` en el checkout original,
+perfil **DJ Tracks (Api + UI)**, F5. UI `http://localhost:5050/tracks`;
+API `http://localhost:5247`. Se usan las rutas ya guardadas en Configuración,
+sin alterar el JSON privado. Tracks debe ser accesible por el proceso API y
+tener la estructura `Año/Estilo/*.mp3`; no hace falta BD.
+Para comparar combinaciones, disponer de al menos dos años y estilos Day/Night
+con Instrumental/Vocal, más Technohouse o Tribal si existen en la biblioteca.
+No crear ni modificar ficheros originales para probar: usar copias si hace falta.
+Para detener solo API, iniciar ambos proyectos por separado con perfil `http`.
+
+### Checklist del usuario (nueva de F1.2)
+
+- [ ] Abrir `/tracks`: «Filtros» está plegado y sigue funcionando Año → Estilo → canciones. Abrir el panel: aparecen años y estilos reales, con Day/Night separados del subestilo.
+- [ ] Aplicar un año + Day + todos los subestilos: solo canciones Day de ese año. Cambiar a Vocal y aplicar: solo Day Vocal. Repetir con Night e Instrumental: incluir `Night Intrumental` si existe.
+- [ ] Elegir todos los años + todos los estilos + Instrumental (y después Vocal): incluir Day y Night del subestilo, de todos los años. Comprobar año/estilo en las filas, también si se repite el nombre del fichero.
+- [ ] Seleccionar Technohouse o Tribal con todos los subestilos: solo ese estilo. Combinarlo con Vocal o usar un año/estilo sin coincidencias: aparece «No hay canciones que coincidan con los filtros», sin resultados anteriores.
+- [ ] Modificar selectores sin aplicar: no cambia el listado ni el resumen efectivo. «Volver a cargar» conserva la combinación aplicada; Aplicar usa la nueva. Plegar el panel conserva resultados y resumen. «Limpiar filtros y volver a años» borra las selecciones y recupera el explorador.
+- [ ] Con filtros aplicados, detener solo API y recargar: error visible, sin listado anterior engañoso. Reiniciar y recargar: se recupera la misma combinación. Recargar la página completa vuelve a los años con filtros plegados. Configuración, paneles y barra provisional no cambian.
+
+### Comprobaciones del agente
+
+- `dotnet build DjTracks.slnx`: 0 errores y 0 advertencias.
+- API/UI aisladas, sin usar ni modificar el JSON privado ni la biblioteca del usuario.
+  MP3 sintéticos en dos años, año vacío, seis estilos convencionales, alias,
+  carpeta no convencional con caracteres especiales, ficheros homónimos y un MP3 corrupto.
+- 84 combinaciones de año, grupo y subestilo comparadas con el conjunto exacto
+  esperado de año/estilo/fichero, incluidas combinaciones vacías, grupo en minúsculas,
+  Instrumental independiente y alias. Orden de años descendente, TXT excluido,
+  corrupto visible con aviso y respuestas sin rutas absolutas.
+- Regresión del endpoint de exploración, opciones reales de carpetas, exclusión
+  de junctions. Nuevos endpoints: 400 para rutas/traversal y subestilo inválido,
+  404 para año inexistente, 409 sin ajustes, 500 con JSON corrupto y 503 con raíz inaccesible.
+- Navegador interactivo con datos sintéticos: apertura y selección de desplegables,
+  combinación año/Night/Instrumental con alias, Instrumental independiente de ambos
+  años, cambio explícito al aplicar, recarga sin aplicar el borrador, resultados
+  vacíos y limpieza al explorador. Captura visual del panel y resultados.
+  Fallos de almacenamiento y API detenida visibles sin resultados anteriores;
+  recarga completa vuelve a los años y pliega el panel.
+  La aceptación con la biblioteca real corresponde al usuario.
+- Servicios y datos sintéticos temporales retirados al acabar; iniciar los
+  proyectos desde Visual Studio para validar. Sin cambios en el JSON privado.
+
+### Límites
+
+- Selección única por campo en esta fase; sin persistencia de filtros ni selección
+  múltiple de playlists F4.3. Los filtros usan nombres de carpetas, nunca tags.
+- Sin reproductor F1.3, BD, watcher ni actualización automática. Consultar todos
+  los años lee los tags de todos los MP3 coincidentes bajo demanda.
+- Sin nuevas pruebas unitarias ni comprobación real de NAS/UNC.
+- Las limitaciones de estructura, permisos y enlaces de F1.1 se mantienen.
+  Un error de enumeración se comunica como error, no como listado parcial correcto.
 
 ## F1.1: explorador de Tracks (validada por el usuario)
 
