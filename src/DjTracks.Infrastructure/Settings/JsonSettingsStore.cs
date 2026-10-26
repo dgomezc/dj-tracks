@@ -44,10 +44,7 @@ public sealed class JsonSettingsStore(string filePath)
             }
 
             cancellationToken.ThrowIfCancellationRequested();
-            if (File.Exists(filePath))
-                File.Replace(temporaryPath, filePath, null);
-            else
-                File.Move(temporaryPath, filePath);
+            File.Move(temporaryPath, filePath, overwrite: true);
         }
         finally
         {
@@ -68,7 +65,7 @@ public sealed class JsonSettingsStore(string filePath)
         FileStream stream;
         try
         {
-            stream = new FileStream(filePath, FileMode.Open, FileAccess.Read, FileShare.Read);
+            stream = new FileStream(filePath, FileMode.Open, FileAccess.Read, FileShare.Read | FileShare.Delete);
         }
         catch (FileNotFoundException)
         {

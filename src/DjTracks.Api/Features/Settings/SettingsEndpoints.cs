@@ -25,7 +25,7 @@ public static class SettingsEndpoints
                 };
                 var errors = Validate(normalized);
                 if (errors.Count > 0)
-                    return Results.ValidationProblem(errors);
+                    return Results.ValidationProblem(errors, title: "Revisa las rutas indicadas.");
 
                 await store.SaveAsync(normalized, ct);
                 return Results.Ok(normalized);
