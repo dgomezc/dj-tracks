@@ -3,6 +3,7 @@ using System.Text.Json;
 using DjTracks.Domain;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Mvc;
+using MudBlazor;
 
 namespace DjTracks.UI.Components.Pages;
 
@@ -10,6 +11,7 @@ public partial class Settings
 {
     [Inject] private IHttpClientFactory HttpClientFactory { get; set; } = default!;
     [Inject] private ILogger<Settings> Logger { get; set; } = default!;
+    [Inject] private IDialogService DialogService { get; set; } = default!;
 
     private PathSettings _settings = new();
     private Dictionary<string, string[]> _errors = new(StringComparer.OrdinalIgnoreCase);
@@ -24,6 +26,23 @@ public partial class Settings
     private Task LoadAsync() => SendAsync(save: false);
 
     private Task SaveAsync() => Disabled ? Task.CompletedTask : SendAsync(save: true);
+
+    private async Task BrowseAsync(string field, string initialPath, Action<string> setPath)
+    {
+        if (Disabled)
+            return;
+
+        var parameters = new DialogParameters<FolderPicker> { { picker => picker.InitialPath, initialPath } };
+        var dialog = await DialogService.ShowAsync<FolderPicker>("Seleccionar carpeta del servidor",
+            parameters, new DialogOptions { FullWidth = true, MaxWidth = MaxWidth.Medium });
+        var result = await dialog.Result;
+        if (result is { Canceled: false, Data: string path })
+        {
+            setPath(path);
+            _errors.Remove(field);
+            _saved = false;
+        }
+    }
 
     private async Task SendAsync(bool save)
     {
