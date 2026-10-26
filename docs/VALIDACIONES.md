@@ -11,14 +11,18 @@ Consultar siempre el estado real de GitHub antes de actuar sobre un PR.
 - F0.1: validada por el usuario el 26/10/2026, incluido el inicio conjunto; PR [#2](https://github.com/dgomezc/dj-tracks/pull/2) mergeado en `develop` (estado comprobado en GitHub).
 - Continuación autorizada el 26/10/2026: "Validado. Continua". La pausa anterior queda levantada.
 - F0.2: validada por el usuario el 26/10/2026, incluidas la restauración de campos de texto y las descripciones. Confirmación: "Todo Ok, mezcla el PR y continúa como dijimos en el proyecto principal". PR [#3](https://github.com/dgomezc/dj-tracks/pull/3) mergeado en `develop` el 26/10/2026 a las 11:30:56 UTC, commit `88571b9` (comprobado en GitHub).
-- Fase activa: **F1.1, explorador de Tracks; pendiente de validación del usuario**. No avanzar a F1.2 ni hacer merge sin su confirmación y autorización.
+- F1.1: **validada por el usuario el 26/10/2026** con "Funciona todo. Continua". Aceptación global de la entrega y autorización de continuación; no amplía las comprobaciones individuales del agente. Merge de su PR autorizado en el flujo de continuación.
 - Rama: `fase/f1-1-explorador-tracks`, desde `develop` actualizado por fast-forward.
-- Entrega: PR [#4](https://github.com/dgomezc/dj-tracks/pull/4) hacia `develop`, abierto y pendiente de validación; consultar su estado real en GitHub antes de actuar.
+- Entrega F1.1: PR [#4](https://github.com/dgomezc/dj-tracks/pull/4) hacia `develop`; comprobar su estado real en GitHub antes de actuar.
 - Continuidad confirmada: trabajar directamente en el checkout original, sin nuevos worktrees. Se han preservado los cambios locales preexistentes en los dos `Class1.cs`, sin incluirlos en los commits.
 - Novedad: `/tracks` navega Año → Estilo → canciones reales, con nombre de fichero, título, artista, álbum y duración. `/settings` conserva los cinco inputs de texto con sus ayudas, sin selector.
 - Revisión del 26/10/2026: el usuario rechazó el selector de carpetas y pidió volver al formulario anterior. Retirados los botones Examinar, el diálogo y el endpoint de navegación; se mantienen los cinco campos de texto, la validación y el guardado originales. La elección previa del selector queda revocada.
 
-## F1.1: explorador de Tracks (pendiente del usuario)
+## F1.1: explorador de Tracks (validada por el usuario)
+
+Aceptación global el 26/10/2026: "Funciona todo. Continua".
+La checklist siguiente conserva los pasos entregados; no consta un informe individual
+por comprobación. F1.2 será la siguiente fase y requerirá su propia validación.
 
 Cambios: GET `/api/library/tracks`, con parámetros opcionales `year` y `style`
 para recorrer los tres niveles. Acceso a ficheros en Infrastructure y lectura
