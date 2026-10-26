@@ -11,7 +11,7 @@ Consultar siempre el estado real de GitHub antes de actuar sobre un PR.
 - Fase activa: F0.1, layout base.
 - PR: [#2](https://github.com/dgomezc/dj-tracks/pull/2), dirigido a `develop`.
 - Rama: `fase/f0-1-layout`.
-- Estado: layout y restauración NuGet validados por el usuario el 26/10/2026 ("Todo correcto, continúa"). Pendiente únicamente la nueva comprobación de inicio conjunto; no iniciar F0.2 todavía.
+- Estado: F0.1 validada por el usuario el 26/10/2026, incluido el inicio conjunto ("Perfecto, mezcla el PR y detente que quiero hacer una pregunta"). Merge autorizado; detener el desarrollo y no iniciar F0.2 hasta nueva indicación.
 - Novedad de esta entrega: `DjTracks.slnLaunch` permite iniciar y depurar Api + UI conjuntamente.
 
 ## F0.1: qué validar
@@ -41,18 +41,18 @@ No hacen falta archivos de música, base de datos ni API para estas páginas pro
 
 ### Nueva comprobación (no repetir las anteriores)
 
-- [ ] Seleccionar `DJ Tracks (Api + UI)` y pulsar F5: deben iniciarse ambos proyectos bajo el depurador y abrirse la UI en `http://localhost:5050`.
-- [ ] Abrir `http://localhost:5247/openapi/v1.json`: debe devolver el documento JSON de la API.
-- [ ] Detener la depuración en Visual Studio: deben detenerse ambos proyectos.
+- [x] Seleccionar `DJ Tracks (Api + UI)` y pulsar F5: deben iniciarse ambos proyectos bajo el depurador y abrirse la UI en `http://localhost:5050`.
+- [x] Abrir `http://localhost:5247/openapi/v1.json`: debe devolver el documento JSON de la API.
+- [x] Detener la depuración en Visual Studio: deben detenerse ambos proyectos.
 
 ### Comprobaciones del agente y límites
 
 - La UI compiló y las cinco rutas respondieron HTTP 200 en la entrega inicial.
 - La restauración de los cuatro proyectos con la configuración local de NuGet se completó sin `--source`; la única fuente efectiva listada fue nuget.org.
-- El usuario confirmó la checklist original el 26/10/2026; el nuevo perfil necesita comprobación desde Visual Studio.
+- El usuario confirmó la checklist original y el nuevo perfil el 26/10/2026.
 - Las páginas son provisionales: no reproducen audio, no muestran biblioteca ni permiten editar rutas o playlists.
 - El cliente HTTP de la API está registrado, pero estas páginas aún no lo consumen.
-- El perfil compartido de inicio múltiple está añadido. El agente no puede verificar la selección del perfil y la depuración conjunta desde la interfaz de Visual Studio; queda pendiente del usuario.
+- El perfil compartido de inicio múltiple está añadido y validado por el usuario desde Visual Studio.
 
 ## Formato para futuras entregas
 
