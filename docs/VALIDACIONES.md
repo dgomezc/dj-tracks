@@ -14,7 +14,8 @@ Consultar siempre el estado real de GitHub antes de actuar sobre un PR.
 - PR: [#3](https://github.com/dgomezc/dj-tracks/pull/3), dirigido a `develop`.
 - Rama del entorno: `dgomezc-f0-2-configuracion-de-rutas`.
 - Estado: implementada, **pendiente de validación manual del usuario**. No hacer merge ni iniciar F1.1 sin su confirmación y autorización.
-- Novedad: `/settings` consume la API y permite guardar las cinco rutas en JSON del servidor.
+- Novedad inicial: `/settings` consume la API y permite guardar las cinco rutas en JSON del servidor.
+- Revisión solicitada el 26/10/2026: añadir botones para elegir carpetas. El usuario eligió explícitamente un selector de carpetas del servidor dentro de la página, en lugar de un diálogo nativo de Windows. Implementado en el mismo PR, pendiente de validación.
 
 ## F0.1: validación completada (histórico)
 
@@ -114,6 +115,66 @@ restaurarla al terminar; no usar datos irreemplazables.
 - Navegador interactivo: guardado con éxito, validación de ruta relativa, error JSON con campos/guardar bloqueados, API detenida y recuperación con los cinco valores al reiniciarla.
 - La captura visual del navegador agotó el tiempo de espera. Las interacciones y el DOM sí se comprobaron; no se equiparan a la validación visual del usuario.
 
+### Revisión: selector de carpetas del servidor (26/10/2026)
+
+Cada campo incluye un botón **Examinar**. Abre un diálogo MudBlazor que consulta
+`GET /api/settings/folders?path=...`: unidades en Windows o raíz en otros sistemas,
+subcarpetas ordenadas, navegación al padre y entrada directa de ruta absoluta.
+Solo lista carpetas, no archivos ni su contenido; no carga música al navegador.
+La ruta actual del campo se usa como punto de partida. Si está vacía muestra
+unidades/raíz; si no es válida muestra el error y permite volver a unidades/raíz.
+Una carpeta vacía se puede seleccionar. Una ruta con problemas o la pantalla
+de unidades/raíz no se puede seleccionar. Elegir una carpeta solo cambia el
+campo correspondiente; cancelar conserva todos los cambios anteriores del formulario.
+El guardado sigue siendo explícito y mantiene las validaciones de existencia y permisos.
+
+La preparación es la misma: Visual Studio 2026, perfil **DJ Tracks (Api + UI)**,
+F5 y `http://localhost:5050/settings`; API `http://localhost:5247`.
+Para comprobar la navegación, preparar una carpeta con dos subcarpetas,
+una de ellas vacía, y un archivo cualquiera. Para probar una carpeta de red
+en Windows, pegar la ruta UNC completa de un recurso compartido y pulsar **Ir**.
+No se descubren equipos ni recursos compartidos automáticamente.
+
+**Nuevas comprobaciones del usuario:**
+
+- [ ] Pulsar Examinar en cada uno de los cinco campos: se abre el selector en la ruta del campo, o en unidades/raíz si está vacío; se identifican claramente las carpetas del servidor.
+- [ ] Abrir una subcarpeta, pulsar Subir y Unidades / raíz; pegar una ruta absoluta y pulsar Ir: navega correctamente, solo muestra carpetas y permite elegir una carpeta vacía.
+- [ ] Pulsar Seleccionar esta carpeta: solo se rellena el campo que abrió el selector; no guarda el JSON hasta pulsar Guardar rutas. Cancelar, después de navegar, no modifica ningún campo.
+- [ ] Introducir en el selector una ruta relativa, inexistente o sin lectura y pulsar Ir: aparece un error visible, no permite seleccionar una carpeta anterior por error y permite recuperarse con Ir o Unidades / raíz. Al editar la ruta, Seleccionar queda bloqueado hasta abrirla con Ir.
+- [ ] Con el selector abierto, detener solo la API y pulsar Ir: aparece un error y no permite seleccionar. Reiniciar la API y pulsar Ir o Unidades / raíz: se recupera sin cerrar la página.
+- [ ] Si se usa NAS/UNC, pegar en el selector la ruta real del recurso compartido y pulsar Ir: debe listar las subcarpetas accesibles con la identidad de la API. La ruta sigue admitiendo edición manual.
+
+**Comprobaciones que repetir tras esta revisión:**
+
+- [ ] Elegir las cinco carpetas con Examinar, guardar y recargar/reiniciar Api + UI: mensaje de éxito y rutas conservadas.
+- [ ] Tras guardar, elegir otra carpeta: desaparece el aviso de éxito; Volver a cargar descarta la selección no guardada. Una ruta inválida escrita manualmente sigue produciendo error por campo sin modificar el JSON.
+- [ ] Con API caída o JSON de ajustes corrupto al cargar el formulario, tanto Guardar como Examinar quedan bloqueados hasta recuperar y volver a cargar. Hacer copia antes de modificar el JSON.
+
+La checklist inicial sigue pendiente; esta revisión no implica validación de los
+puntos anteriores ni autorización de merge.
+
+**Comprobaciones adicionales del agente:**
+
+- Compilación completa sin errores ni advertencias, sin generar pruebas unitarias.
+- API: unidades y raíz, padre y subcarpetas, directorio vacío, carpeta oculta,
+  rutas con espacios, Unicode, `#` y `&`; no aparecen archivos.
+- Rutas relativas/inexistentes/fichero y ACL real denegando lectura: errores HTTP explícitos;
+  permisos originales restaurados después de comprobarlos.
+- Navegador interactivo: apertura y selección en los cinco campos, cancelación sin
+  cambios, navegación a subcarpetas/padre/unidades, error de ruta relativa,
+  selección deshabilitada en unidades o error, guardado explícito de los cinco valores,
+  error con API detenida y recuperación al reiniciarla.
+- Edición de la ruta del selector: no permite seleccionar el directorio anterior
+  mientras no se abra la ruta escrita con Ir; navegación y elección de ruta con
+  espacios, Unicode, `#` y `&` verificadas en el navegador.
+- JSON corrupto al cargar el formulario: aviso visible y los cinco botones
+  Examinar y Guardar bloqueados. Copia del JSON restaurada después.
+- Seleccionar sin guardar no cambia el JSON; el guardado posterior conserva las
+  cinco carpetas elegidas. Comprobación DOM sin desbordamiento horizontal en el
+  tamaño de ventana utilizado; no sustituye la revisión visual del usuario.
+- Context7 no expuso herramientas en esta revisión; se consultó la documentación XML
+  incluida en el paquete MudBlazor 9.11.0 instalado para las firmas de diálogos.
+
 ### Límites y continuidad
 
 - Falta confirmar la checklist del usuario y el arranque conjunto de esta fase en Visual Studio. F0.1 conserva su validación previa.
@@ -122,9 +183,11 @@ restaurarla al terminar; no usar datos irreemplazables.
 - JSON escrito mediante temporal en el mismo directorio, flush a disco y renombrado; los errores se registran en el servidor y se notifican en la UI. Un JSON corrupto no se sobrescribe: hay que corregirlo o restaurarlo y volver a cargar.
 - Las rutas guardadas se pueden cargar aunque sus carpetas hayan desaparecido, para poder corregirlas; se revalidan al guardar.
 - No se impone todavía relación de contención entre las carpetas y la raíz M3U.
-- Sin explorador, reproducción, exportación M3U, edición de playlists, BD ni Docker en esta fase.
+- El selector enumera carpetas accesibles por la identidad de la API, sin restringirlas a una biblioteca ya configurada. Como el resto de ajustes sin autenticación, usar solo en la red local/VPN de confianza.
+- Comprobado en Windows; ejecución en Linux y NAS/UNC real pendientes. Las carpetas de red no se descubren: hay que introducir su ruta de acceso.
+- Sin explorador musical, reproducción, exportación M3U, edición de playlists, BD ni Docker en esta fase.
 - Servicios de comprobación y datos temporales retirados al acabar; el usuario debe iniciar sus proyectos desde Visual Studio.
-- No hay una revisión posterior a la entrega: todas las comprobaciones de F0.2 son nuevas. Si se corrige algo tras la validación, registrar aquí cuáles deben repetirse.
+- La revisión del selector y sus comprobaciones nuevas/repetidas están descritas arriba. F0.2 continúa pendiente de confirmación del usuario.
 
 ## Formato para futuras entregas
 

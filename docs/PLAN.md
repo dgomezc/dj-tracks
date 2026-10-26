@@ -47,7 +47,7 @@ El estado de entrega y las checklists se mantienen en `VALIDACIONES.md`. Una imp
 ### Bloque 0 — Base
 - **F0.1 Layout**: MudBlazor, tema oscuro, layout con panel izquierdo (playlists, vacío), zona central, barra inferior de reproductor (vacía), pestañas Tracks / Sessions / Remember, Inicio y Configuración. UI llama a la API vía `HttpClient`. Perfiles de lanzamiento múltiples en VS (Api + UI).
   *Prueba*: navegar entre páginas, layout correcto.
-- **F0.2 Configuración de rutas**: página Configuración que edita rutas (tracks, sessions, remember, playlists, ruta raíz m3u) guardadas en un JSON de ajustes; validación de que existen.
+- **F0.2 Configuración de rutas**: página Configuración que edita rutas (tracks, sessions, remember, playlists, ruta raíz m3u) guardadas en un JSON de ajustes; validación de que existen. Botón Examinar en cada campo con selector de carpetas del servidor dentro de la página.
   *Prueba*: guardar rutas y ver mensaje de validación.
 
 ### Bloque 1 — Tracks
@@ -93,3 +93,4 @@ El estado de entrega y las checklists se mantienen en `VALIDACIONES.md`. Una imp
 2. Los m3u usan rutas **relativas** (relativas a la ruta raíz configurada).
 3. Los playlists manuales pueden mezclar Tracks y Remember.
 4. Las sesiones no se pueden añadir a playlists manuales.
+5. Para elegir rutas se usa un selector de carpetas del **servidor** dentro de la página (decisión del usuario del 26/10/2026), no un diálogo nativo de Windows ni una carga de carpetas del equipo del navegador. Debe permitir navegar, elegir y cancelar, manteniendo la edición manual y el guardado explícito.
