@@ -1,8 +1,14 @@
+using DjTracks.Api.Features.Settings;
+using DjTracks.Infrastructure.Settings;
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 builder.Services.AddOpenApi();
+builder.Services.AddSingleton(new JsonSettingsStore(Path.GetFullPath(
+    builder.Configuration["Settings:FilePath"] ?? Path.Combine("App_Data", "settings.json"),
+    builder.Environment.ContentRootPath)));
 
 var app = builder.Build();
 
@@ -13,6 +19,7 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+app.MapSettingsEndpoints();
 
 var summaries = new[]
 {

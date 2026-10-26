@@ -93,3 +93,4 @@ El estado de entrega y las checklists se mantienen en `VALIDACIONES.md`. Una imp
 2. Los m3u usan rutas **relativas** (relativas a la ruta raíz configurada).
 3. Los playlists manuales pueden mezclar Tracks y Remember.
 4. Las sesiones no se pueden añadir a playlists manuales.
+5. Las rutas se introducen mediante campos de texto, sin botón Examinar ni selector de carpetas (decisión del usuario del 26/10/2026, que revoca la propuesta del selector).
