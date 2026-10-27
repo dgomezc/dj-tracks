@@ -38,9 +38,8 @@
             @Body
         </MudContainer>
     </MudMainContent>
+    <PlaybackQueue @bind-Open="_queueOpen" />
 </MudLayout>
-
-<PlaybackQueue @bind-Open="_queueOpen" />
 
 <footer class="player-bar">
     <div class="queue-controls">

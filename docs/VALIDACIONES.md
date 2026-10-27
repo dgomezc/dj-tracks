@@ -133,6 +133,10 @@ mediante `PATH` o `Waveform__BinaryFolder`. No se necesita base de datos.
   entrada sin cerrar ni reabrir el panel. Probar también shuffle y bucle de cola.
 - [ ] En ventana estrecha, comprobar panel, cierre, controles y onda sin que el
   reproductor tape las últimas filas. Una recarga completa vacía la cola.
+- [ ] Nueva revisión de scroll: con una lista larga y la cola abierta, desplazar
+  la página verticalmente. El panel permanece fijo a la derecha; si la cola
+  supera la altura disponible, se desplaza su contenido para acceder al final.
+  Cerrar y volver a abrir debe seguir funcionando, también en ventana estrecha.
 
 ### Comprobaciones del agente
 
@@ -142,6 +146,18 @@ La comprobación anterior de duplicados queda sustituida por la checklist nueva.
 Repetir anterior/siguiente, avance automático, shuffle, bucle y quitar/vaciar;
 son nuevas las comprobaciones de rechazo de duplicados y del indicador en vivo.
 
+Segunda revisión del 27/10/2026: el usuario informa de que el panel sube con la
+página. `PlaybackQueue` pasa al interior de `MudLayout` para que MudBlazor aplique
+su posicionamiento fijo y desplazamiento interno. Pendiente validación del usuario.
+
+- Segunda revisión comprobada: compilación en salida aislada, 0 errores y
+  advertencias (la salida normal estaba bloqueada por la depuración activa,
+  que no se detuvo). Navegador de 642 × 1020: con altura de página ampliada
+  temporalmente desde las herramientas del navegador y scroll vertical de
+  800 px, el panel conserva `position: fixed`, borde superior 0 y borde derecho
+  alineado con el viewport. Simulando contenido largo, el panel admite scroll
+  interno de 500 px sin moverse; cerrar y reabrir funciona sin error de circuito.
+  No se modificaron datos ni ajustes; pendiente comprobar con una cola real larga.
 - Revisión comprobada: compilación completa, 0 errores y advertencias. Navegador
   con dos MP3 sintéticos distintos y el mismo título: se mantienen dos entradas,
   añadir otra vez el mismo archivo no aumenta el contador ni recrea el audio ni
