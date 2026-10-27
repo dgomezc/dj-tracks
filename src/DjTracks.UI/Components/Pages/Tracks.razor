@@ -39,7 +39,8 @@
         </MudGrid>
         <MudText Typo="Typo.body2" Class="mud-text-secondary my-2">
             Selecciona uno o varios valores por filtro; sin selección se incluyen todos.
-            Los filtros se combinan al pulsar Aplicar. Instrumental o Vocal sin grupo incluye Day y Night.
+            «Aplicar filtros» combina alternativas del mismo campo y cruza los campos.
+            Instrumental o Vocal sin grupo incluye Day y Night.
         </MudText>
         <MudStack Row="true" Wrap="Wrap.Wrap">
             <MudButton OnClick="ApplyFiltersAsync" Disabled="@(_busy || _filterOptions is null)"

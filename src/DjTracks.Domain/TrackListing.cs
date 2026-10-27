@@ -5,6 +5,4 @@ public sealed record TrackListing(string? Year, string? Style, string[] Folders,
 public sealed record TrackFile(string FileName, string? Title, string[] Artists,
     string? Album, double? DurationSeconds, string? Warning, string? Year = null, string? Style = null);
 
-public sealed record TrackFilterOptions(string[] Years, string[] Groups);
-
 public sealed record TrackFilter(string[] Years, string[] Groups, string[] Substyles);

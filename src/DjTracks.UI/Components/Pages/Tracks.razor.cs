@@ -1,13 +1,12 @@
-using System.Text.Json;
 using DjTracks.Domain;
+using DjTracks.UI.Shared;
 using Microsoft.AspNetCore.Components;
-using Microsoft.AspNetCore.Mvc;
 
 namespace DjTracks.UI.Components.Pages;
 
 public partial class Tracks
 {
-    [Inject] private IHttpClientFactory HttpClientFactory { get; set; } = default!;
+    [Inject] private HttpClient Http { get; set; } = default!;
     [Inject] private ILogger<Tracks> Logger { get; set; } = default!;
 
     private TrackListing? _listing;
@@ -34,7 +33,7 @@ public partial class Tracks
         _appliedFilter = null;
         _year = year;
         _style = style;
-        return ReloadAsync();
+        return RequestAsync();
     }
 
     private Task ApplyFiltersAsync()
@@ -45,7 +44,7 @@ public partial class Tracks
             _filterSubstyles.ToArray());
         _year = null;
         _style = null;
-        return ReloadAsync();
+        return RequestAsync();
     }
 
     private Task ClearFiltersAsync()
@@ -60,75 +59,79 @@ public partial class Tracks
     {
         _filtersOpen = expanded;
         if (expanded && !_busy)
-            await RequestAsync(async () =>
-                _filterOptions = await ReadApiAsync<TrackFilterOptions>("api/library/tracks/filter-options"));
+        {
+            _busy = true;
+            _error = null;
+            try
+            {
+                await LoadFilterOptionsAsync();
+            }
+            finally
+            {
+                _busy = false;
+            }
+        }
     }
 
-    private Task ReloadAsync() => RequestAsync(async () =>
-    {
-        _listing = null;
-        if (_filtersOpen)
-            _filterOptions = await ReadApiAsync<TrackFilterOptions>("api/library/tracks/filter-options");
-        var url = "api/library/tracks";
-        List<string> query = [];
-        if (_appliedFilter is not null)
-        {
-            url += "/search";
-            foreach (var year in _appliedFilter.Years)
-                AddQuery(query, "year", year);
-            foreach (var group in _appliedFilter.Groups)
-                AddQuery(query, "group", group);
-            foreach (var substyle in _appliedFilter.Substyles)
-                AddQuery(query, "substyle", substyle);
-        }
-        else
-        {
-            AddQuery(query, "year", _year);
-            AddQuery(query, "style", _style);
-        }
-        if (query.Count > 0)
-            url += "?" + string.Join("&", query);
-        _listing = await ReadApiAsync<TrackListing>(url);
-    });
+    private Task ReloadAsync() => RequestAsync();
 
-    private async Task<T> ReadApiAsync<T>(string url)
-    {
-        using var client = HttpClientFactory.CreateClient("Api");
-        using var response = await client.GetAsync(url);
-        if (!response.IsSuccessStatusCode)
-        {
-            var problem = await response.Content.ReadFromJsonAsync<ProblemDetails>();
-            throw new HttpRequestException(problem?.Detail ?? problem?.Title
-                ?? $"La API devolvió un error ({(int)response.StatusCode}).", null, response.StatusCode);
-        }
-        return await response.Content.ReadFromJsonAsync<T>()
-            ?? throw new JsonException("Respuesta de biblioteca vacía.");
-    }
-
-    private async Task RequestAsync(Func<Task> action)
+    private async Task RequestAsync()
     {
         if (_busy)
             return;
         _busy = true;
         _error = null;
+        _listing = null;
         try
         {
-            await action();
-        }
-        catch (Exception ex) when (ex is HttpRequestException or TaskCanceledException
-            or JsonException or NotSupportedException)
-        {
-            Logger.LogError(ex, "No se pudo cargar la biblioteca de Tracks");
-            _error = ex is HttpRequestException { StatusCode: not null }
-                ? ex.Message
-                : ex is JsonException or NotSupportedException
-                ? "La API devolvió una respuesta no válida. Revisa el servidor y vuelve a cargar."
-                : "No se pudo contactar con la API o se agotó el tiempo de espera. Comprueba que está iniciada y vuelve a cargar.";
+            if (_filtersOpen && !await LoadFilterOptionsAsync())
+                return;
+
+            var url = _appliedFilter is null ? "api/library/tracks" : "api/library/tracks/search";
+            List<string> query = [];
+            if (_appliedFilter is null)
+            {
+                AddQuery(query, "year", _year);
+                AddQuery(query, "style", _style);
+            }
+            else
+            {
+                foreach (var year in _appliedFilter.Years)
+                    AddQuery(query, "year", year);
+                foreach (var group in _appliedFilter.Groups)
+                    AddQuery(query, "group", group);
+                foreach (var substyle in _appliedFilter.Substyles)
+                    AddQuery(query, "substyle", substyle);
+            }
+            if (query.Count > 0)
+                url += "?" + string.Join("&", query);
+
+            var result = await Http.GetForResultAsync<TrackListing>(url, Logger);
+            if (result.IsFailed)
+            {
+                _error = result.Errors[0].Message;
+                return;
+            }
+            _listing = result.Value;
         }
         finally
         {
             _busy = false;
         }
+    }
+
+    private async Task<bool> LoadFilterOptionsAsync()
+    {
+        var result = await Http.GetForResultAsync<TrackFilterOptions>(
+            "api/library/tracks/filter-options", Logger);
+        if (result.IsFailed)
+        {
+            _error = result.Errors[0].Message;
+            _filterOptions = null;
+            return false;
+        }
+        _filterOptions = result.Value;
+        return true;
     }
 
     private static void AddQuery(List<string> query, string name, string? value)

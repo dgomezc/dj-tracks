@@ -39,6 +39,13 @@ Features/
 ```
 Cada slice agrupa endpoint, request/response y lógica. `Domain` contiene entidades/enums (Estilo, Track, Session, Playlist); `Infrastructure` contiene acceso a ficheros, TagLib, ffmpeg/NAudio, EF Core.
 
+Flujo de cada llamada (guía completa y obligatoria en `ARQUITECTURA.md`; diseño detallado en `arquitectura/flujo-get-tracks.html`):
+
+- **UI**: el code-behind de la página inyecta `HttpClient` y llama con `GetForResultAsync`/`PutForResultAsync` (`UI/Shared/HttpClientResultExtensions.cs`), que devuelven `Result<T>` con `AppError`. Sin clientes intermedios.
+- **API**: `Program.cs` registra cada feature con `Add<Feature>Feature()` y la mapea con `Map<Feature>Feature()` dentro del grupo `/api`, que aplica `ValidationFilter` (FluentValidation) a todo parámetro `*Request`; si falta su validador, la API no arranca ese endpoint.
+- **Slice**: `Features/<Feature>/<Caso>/<Caso>.Endpoint.cs` (request + mapeo; solo delega) y `<Caso>.Handler.cs` (lógica; devuelve `Result<T>` de FluentResults). Validadores en `<Feature>Validators.cs`.
+- **Errores**: `AppError` + `ErrorKind` (Domain) creados donde ocurren; `ToHttpResult()` los traduce a HTTP. Los imprevistos los atiende el `UseExceptionHandler()` integrado (500 ProblemDetails).
+
 ## Fases
 
 Cada fase termina en algo visible y probable en el navegador. Validación manual al final de cada una.

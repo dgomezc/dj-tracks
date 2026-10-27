@@ -1,6 +1,21 @@
 @DjTracks.Api_HostAddress = http://localhost:5247
 
-GET {{DjTracks.Api_HostAddress}}/weatherforecast/
+GET {{DjTracks.Api_HostAddress}}/api/library/tracks
+Accept: application/json
+
+###
+
+GET {{DjTracks.Api_HostAddress}}/api/library/tracks/filter-options
+Accept: application/json
+
+###
+
+GET {{DjTracks.Api_HostAddress}}/api/library/tracks/search?year=2025&year=2026&group=Day&group=Night&substyle=Instrumental
+Accept: application/json
+
+###
+
+GET {{DjTracks.Api_HostAddress}}/api/settings
 Accept: application/json
 
 ###
