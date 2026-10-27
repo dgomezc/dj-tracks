@@ -77,7 +77,7 @@ public partial class Tracks
 
     private Task ReloadAsync() => RequestAsync();
 
-    private void PlayTrack(TrackFile track)
+    private void PlayTrack(TrackFile track, bool enqueue = false)
     {
         var year = track.Year ?? _year;
         var style = track.Style ?? _style;
@@ -99,8 +99,12 @@ public partial class Tracks
             QueryHelpers.AddQueryString("api/streaming/tracks", query)).AbsoluteUri;
         var waveformUrl = new Uri(Http.BaseAddress!,
             QueryHelpers.AddQueryString("api/streaming/tracks/waveform", query)).AbsoluteUri;
-        AudioPlayer.Play(audioUrl, waveformUrl, track.Title ?? track.FileName,
-            string.Join(", ", track.Artists));
+        if (enqueue)
+            AudioPlayer.Enqueue(audioUrl, waveformUrl, track.Title ?? track.FileName,
+                string.Join(", ", track.Artists));
+        else
+            AudioPlayer.Play(audioUrl, waveformUrl, track.Title ?? track.FileName,
+                string.Join(", ", track.Artists));
     }
 
     private async Task RequestAsync()
