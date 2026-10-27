@@ -1,4 +1,6 @@
 ﻿@inherits LayoutComponentBase
+@implements IDisposable
+@inject DjTracks.UI.Shared.AudioPlayerState AudioPlayer
 
 <MudThemeProvider IsDarkMode="true" />
 <MudPopoverProvider />
@@ -35,7 +37,22 @@
 </MudLayout>
 
 <footer class="player-bar">
-    <MudText Typo="Typo.body2" Class="mud-text-secondary">Reproductor (próximamente)</MudText>
+    @if (AudioPlayer.AudioUrl is null)
+    {
+        <MudText Typo="Typo.body2" Class="mud-text-secondary">Selecciona una canción para reproducir</MudText>
+    }
+    else
+    {
+        <MudStack Spacing="0" Class="player-track">
+            <MudText Typo="Typo.body2" Class="player-track-title">@AudioPlayer.Title</MudText>
+            @if (!string.IsNullOrWhiteSpace(AudioPlayer.Artist))
+            {
+                <MudText Typo="Typo.caption" Class="mud-text-secondary player-track-artist">@AudioPlayer.Artist</MudText>
+            }
+        </MudStack>
+        <audio @key="AudioPlayer.AudioUrl" controls autoplay preload="metadata"
+               src="@AudioPlayer.AudioUrl" aria-label="Controles de reproducción"></audio>
+    }
 </footer>
 
 <div id="blazor-error-ui" data-nosnippet>
@@ -43,3 +60,11 @@
     <a href="." class="reload">Reload</a>
     <span class="dismiss">🗙</span>
 </div>
+
+@code {
+    protected override void OnInitialized() => AudioPlayer.Changed += OnPlayerChanged;
+
+    private void OnPlayerChanged() => _ = InvokeAsync(StateHasChanged);
+
+    public void Dispose() => AudioPlayer.Changed -= OnPlayerChanged;
+}

@@ -13,8 +13,9 @@ Consultar siempre el estado real de GitHub antes de actuar sobre un PR.
 - F0.2: validada por el usuario el 26/10/2026, incluidas la restauración de campos de texto y las descripciones. Confirmación: "Todo Ok, mezcla el PR y continúa como dijimos en el proyecto principal". PR [#3](https://github.com/dgomezc/dj-tracks/pull/3) mergeado en `develop` el 26/10/2026 a las 11:30:56 UTC, commit `88571b9` (comprobado en GitHub).
 - F1.1: **validada por el usuario el 26/10/2026** con "Funciona todo. Continua". Aceptación global de la entrega y autorización de continuación; no amplía las comprobaciones individuales del agente. PR [#4](https://github.com/dgomezc/dj-tracks/pull/4) mergeado en `develop` a las 14:57:01 UTC, commit `e70aafc` (comprobado en GitHub).
 - F1.2: **validada globalmente por el usuario el 26/10/2026**, incluida la multiselección, con "Perfecto, haz el PR pero de momento no sigas." No consta informe individual de cada comprobación; esta aceptación no amplía las pruebas del agente.
-- El 27/10/2026 el usuario autoriza integrar el port en el checkout original y mezclar los PRs: "trae los cambios y deja los pr mezclados y las ramas estables". Esta autorización sustituye la pausa de publicación anterior; **F1.3 sigue pausada**.
-- Checkout original en `develop`, actualizado por fast-forward tras integrar F1.2. La rama de fase y la del port se conservan como historial; no se han borrado ni reescrito.
+- El 27/10/2026 el usuario autorizó integrar el port en el checkout original y mezclar los PRs: "trae los cambios y deja los pr mezclados y las ramas estables". F1.3 quedó pausada en esa entrega y se reanudó tras la instrucción posterior "continúa".
+- F1.3: **validada por el usuario el 27/10/2026** con «Todo ok, continúa»; autorización expresa para mezclar el PR #7 y seguir con F1.4. PR [#7](https://github.com/dgomezc/dj-tracks/pull/7) en proceso de merge.
+- Checkout original actualizado por fast-forward a `develop` después de integrar F1.2; el trabajo de F1.3 se desarrolla en su rama dedicada. La rama del port se conserva como historial; no se han borrado ni reescrito ramas.
 - Entrega F1.2: PR [#5](https://github.com/dgomezc/dj-tracks/pull/5) **mergeado** en `develop` el 27/10/2026 a las 07:13:41 UTC, commit `8fc21f1` (comprobado en GitHub). Incluye el port y ambos historiales sin force-push. PR #6 también mergeado; no queda PR de F1.2 pendiente.
 - Continuidad confirmada: trabajar directamente en el checkout original, sin nuevos worktrees. Se han preservado los cambios locales preexistentes en los dos `Class1.cs`, sin incluirlos en los commits.
 - Novedad: `/tracks` conserva la navegación Año → Estilo y añade filtros plegables por año, estilo/grupo y subestilo. `/settings` conserva los cinco inputs de texto con sus ayudas, sin selector.
@@ -22,6 +23,60 @@ Consultar siempre el estado real de GitHub antes de actuar sobre un PR.
 - **Refactor transversal Vertical Slices: validado por el usuario el 27/10/2026** con "Perfecto, documenta toda la arquitectura actual… Después mezcla el PR y sigue con el siguiente paso". Arquitectura documentada en `ARQUITECTURA.md`. PR [#6](https://github.com/dgomezc/dj-tracks/pull/6) mergeado en `develop` (`c7c1508`). Diseño validado en `arquitectura/flujo-get-tracks.html` ("Cambia todas las llamadas").
 - Port F1.2 recibido de `dgomezc-fase-f1-2-filtros` (`1354305` código, `c38cddb` documentación). Se integra mediante merge en la rama original: se conservan ambos historiales y se resuelven los conflictos de código con la versión adaptada a Result/FluentValidation. Sin PR duplicado ni reescritura de ramas. Cambios preexistentes y JSON privado conservados; no se borran worktrees.
 - Comprobación de integración en checkout original (27/10/2026): `src` coincide con el port recibido; compilación completa con 0 errores y advertencias. API/UI aisladas con MP3 sintéticos: multiaño/multigrupo/multisubestilo, alias, ausencia de duplicados, resultados vacíos, explorador, errores 400/404, opciones, carga de ajustes y página Tracks correctos. No equivale a validación visual de biblioteca real. Servicios y fixtures temporales retirados después de comprobar.
+
+## F1.3: reproductor básico
+
+La tabla de Tracks permite iniciar una canción desde su fila. La barra inferior
+muestra el título y artista y usa los controles nativos de audio del navegador para
+play/pausa, volumen y posición. La API ofrece `GET /api/streaming/tracks` por
+año, estilo y nombre de fichero (no acepta rutas locales del cliente), valida los
+identificadores y transmite `audio/mpeg` con soporte HTTP Range para el seek.
+La reproducción permanece fuera del alcance de la cola, la forma de onda y las
+estadísticas.
+
+### Comprobaciones del agente
+
+- `dotnet build DjTracks.slnx`: correcto, 0 errores y 0 advertencias.
+- Biblioteca aislada y temporal: una petición `Range: bytes=4-9` devolvió 206,
+  `Content-Range: bytes 4-9/256` y seis bytes; ruta inválida devolvió 400 y fichero
+  inexistente 404.
+- Navegador con la API y UI aisladas: navegación año → estilo → canción, botón
+  Reproducir actualiza título y URL del audio, y los controles nativos aparecen en
+  la barra inferior. La fixture era deliberadamente bytes sintéticos no decodificables:
+  no se ha verificado sonido ni seek real con un MP3 válido.
+- No se accedió a la biblioteca real ni a `App_Data/settings.json`; los datos de
+  comprobación fueron temporales y deben retirarse al cerrar la validación.
+
+### Preparación y checklist del usuario
+
+En Visual Studio 2026, abre `DjTracks.slnx`, selecciona el perfil **DJ Tracks
+(Api + UI)** y pulsa F5. Abre `http://localhost:5050/tracks`. La ruta de Tracks
+configurada debe estar disponible para el proceso de la API y contener archivos
+MP3 bajo `Año/Estilo/`; no es necesaria una base de datos. No cambies ajustes ni
+la biblioteca para esta comprobación.
+
+- [x] Navega a un año y un estilo (o aplica filtros) y pulsa el icono Reproducir
+  de una canción. Debe comenzar el audio y la barra inferior debe mostrar su
+  título y artista.
+- [x] En la barra inferior, pausa y reanuda: el sonido debe detenerse y continuar.
+- [x] Cambia el volumen y usa la barra de tiempo para adelantar/retroceder; el
+  sonido debe reflejar el volumen y la posición elegidos.
+- [x] Reproduce otra canción desde otra carpeta o desde resultados filtrados: el
+  reproductor debe cambiar al nuevo archivo y mantener sus controles operativos.
+- [x] Comprueba que la barra no tapa el contenido en una ventana estrecha.
+- [ ] Opcional: en las herramientas de red del navegador, una petición de audio
+  con `Range` debe recibir 206 Partial Content durante el seek.
+
+Validación manual del usuario: «Todo ok, continúa» (27/10/2026). El usuario
+confirma la entrega F1.3 y autoriza mezclar el PR #7 antes de continuar con F1.4.
+
+### Limitaciones conocidas
+
+- La comprobación de audio decodificable y audible y el seek sobre MP3 real quedan
+  pendientes de validación del usuario con su biblioteca.
+- Los controles y los mensajes de formato de audio dependen del navegador. La
+  fase no añade una cola, onda, reproducción automática del siguiente track,
+  estadísticas, ni soporte para Sessions/Remember.
 
 ## Refactor Vertical Slices + Result + FluentValidation (validado por el usuario)
 
@@ -65,7 +120,9 @@ Preparación: abrir `DjTracks.slnx` de esta rama en Visual Studio 2026, perfil
 La implementación funcional y su checklist fueron validadas globalmente por el
 usuario en la rama `fase/f1-2-filtros`. El port sobre PR #6 se incorpora al mismo
 PR #5, siguiendo `ARQUITECTURA.md`, por autorización del 27/10/2026.
-La revisión con biblioteca real del port no se presenta como realizada; no se inicia F1.3.
+La revisión con biblioteca real del port no se presenta como realizada. En esta
+entrega, F1.3 se implementa en una rama separada, sin alterar la validación pendiente
+del usuario sobre la biblioteca real.
 
 El panel «Filtros» empieza plegado y ofrece multiselección de años, estilos/grupos
 y subestilos. Los valores se mantienen como borrador hasta «Aplicar filtros»;
