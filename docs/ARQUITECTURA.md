@@ -68,9 +68,10 @@ src/DjTracks.UI/
 ```
 
 La forma de onda de Tracks se genera en Infrastructure mediante `IWaveformGenerator`
-y FFMpegCore, se cachea como JSON en `Api/App_Data/Waveforms` y se entrega a la UI
-por el slice `Streaming/GetTrackWaveform`. La UI dibuja y controla el seek en el
-componente `WaveformPlayer`; no accede al sistema de ficheros ni invoca FFmpeg.
+y FFMpegCore. El slice `Streaming/GetTrackWaveform` envía los picos en bloques
+NDJSON durante la primera generación y la UI los dibuja al recibirlos; después
+entrega la caché JSON de `Api/App_Data/Waveforms` en un solo bloque. La UI controla
+el seek en `WaveformPlayer`; no accede al sistema de ficheros ni invoca FFmpeg.
 
 | Elemento | Nombre | Namespace |
 |---|---|---|

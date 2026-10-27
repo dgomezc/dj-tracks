@@ -81,7 +81,9 @@ confirma la entrega F1.3 y autoriza mezclar el PR #7 antes de continuar con F1.4
 ## F1.4: onda interactiva de Tracks (validación manual pendiente; PR #8 abierto)
 
 La API genera 1024 picos por canción decodificando PCM estéreo a 44,1 kHz con
-FFmpegCore por pipe, sin escribir WAV intermedio. Guarda la respuesta JSON en
+FFmpegCore por pipe, sin escribir WAV intermedio. Durante la primera generación,
+envía bloques NDJSON de 16 picos y la UI los pinta inmediatamente; al terminar
+persiste el resultado completo en caché JSON en
 `src/DjTracks.Api/App_Data/Waveforms`, que no se versiona. La caché se reutiliza
 mientras coincidan longitud y fecha de modificación del MP3; una modificación
 del archivo obliga a regenerarla. El endpoint de onda comparte la resolución
@@ -116,8 +118,10 @@ equipo donde corre la API y añadir su carpeta a `PATH`; alternativamente, defin
 la configuración de la API. No hace falta base de datos. No modificar el JSON de
 ajustes ni la biblioteca para esta comprobación.
 
-- [ ] Reproducir una canción en `/tracks`: aparece un indicador mientras se genera
-  la onda y esta se dibuja al terminar; los controles nativos siguen operativos.
+- [ ] Reproducir una canción sin caché (idealmente un mix largo): aparecen bloques
+  de la onda progresivamente mientras se genera, el indicador de avance progresa
+  y los controles nativos siguen operativos. La reproducción del audio no espera
+  a que termine el cálculo.
 - [ ] Hacer clic en varios puntos de la onda: el audio salta a esas posiciones y la parte resaltada sigue el progreso. Con la onda enfocada, probar flechas, Inicio y Fin.
 - [ ] Cambiar a otra canción: título, audio y onda corresponden a la nueva pista.
 - [ ] Recargar la pista o reiniciar la API y volver a reproducirla: la onda aparece desde la caché; no se pierde el audio ni sus controles.
@@ -127,6 +131,15 @@ ajustes ni la biblioteca para esta comprobación.
 
 ### Comprobaciones del agente y límites
 
+- API con MP3 sintético de una hora, sin caché previa: llegaron 65 bloques
+  NDJSON (64 bloques de 16 picos y el cierre); el primer bloque se recibió a los
+  0,363 s, la generación acabó en 10,395 s y se cubrieron los 1024 picos. La
+  siguiente petición usó la caché y llegó en un solo bloque (9 ms).
+- UI en navegador con la fixture sintética de una hora: el canvas mostró primero
+  una parte de la onda y los píxeles dibujados aumentaron en lecturas sucesivas
+  hasta completar la forma; el indicador de avance desapareció al terminar.
+- Los códigos HTTP de petición inválida y pista inexistente siguieron siendo 400
+  y 404 antes de iniciar la respuesta en streaming.
 - Incidencia de validación reportada por el usuario: se muestra el reproductor
   nativo y el mensaje de que no se pudo generar la onda. Se comprobó que FFmpeg
   no estaba disponible en el `PATH` del entorno de desarrollo; se instaló
