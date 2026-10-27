@@ -127,6 +127,13 @@ ajustes ni la biblioteca para esta comprobación.
 
 ### Comprobaciones del agente y límites
 
+- Incidencia de validación reportada por el usuario: se muestra el reproductor
+  nativo y el mensaje de que no se pudo generar la onda. Se comprobó que FFmpeg
+  no estaba disponible en el `PATH` del entorno de desarrollo; se instaló
+  FFmpeg 9.0.2 y se configuró `Waveform__BinaryFolder` como variable de entorno
+  local del usuario. La decodificación de un MP3 sintético a PCM se verificó
+  correctamente. Falta reiniciar Visual Studio/API y repetir la comprobación
+  visual con la biblioteca real.
 - `dotnet build DjTracks.slnx`: correcto, 0 errores y 0 advertencias.
 - Benchmark sintético a 44,1 kHz y 1024 picos: en 3 minutos NAudio tardó 2264 ms
   y FFMpegCore por pipe 591 ms; en 1 hora, 28070 ms y 10422 ms. Para una hora,
