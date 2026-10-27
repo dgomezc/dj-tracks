@@ -60,7 +60,7 @@ El estado de entrega y las checklists se mantienen en `VALIDACIONES.md`. Una imp
 ### Bloque 1 — Tracks
 - **F1.1 Explorador de Tracks**: árbol/listado Año → Estilo → canciones (nombre de fichero, tags básicos).
   *Prueba*: navegar y ver el listado real.
-- **F1.2 Filtros**: filtro compacto (desplegable) por año y estilo, con Day/Night y subestilos separables.
+- **F1.2 Filtros**: filtro compacto (desplegable) con multiselección de años, estilos/grupos y subestilos, con Day/Night y subestilos separables.
   *Prueba*: combinaciones de filtros devuelven lo esperado.
 - **F1.3 Reproductor básico**: barra inferior con play/pausa, volumen, tiempo; reproducir al pulsar una canción (streaming con Range).
   *Prueba*: sonido y seek con barra simple.
@@ -101,3 +101,4 @@ El estado de entrega y las checklists se mantienen en `VALIDACIONES.md`. Una imp
 3. Los playlists manuales pueden mezclar Tracks y Remember.
 4. Las sesiones no se pueden añadir a playlists manuales.
 5. Las rutas se introducen mediante campos de texto, sin botón Examinar ni selector de carpetas (decisión del usuario del 26/10/2026, que revoca la propuesta del selector).
+6. Los filtros de Tracks son multiselección en los tres campos: por ejemplo, 2025 y 2026 simultáneamente. Se aplica OR dentro de cada campo y AND entre campos; sin selección en un campo se incluyen todos (aclaración del usuario del 26/10/2026).

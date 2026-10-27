@@ -5,6 +5,51 @@
 <MudText Typo="Typo.h4" Class="mb-2">Tracks</MudText>
 <MudText Class="mud-text-secondary mb-4">Explora tu biblioteca por año y estilo.</MudText>
 
+<MudExpansionPanels Class="mb-4">
+    <MudExpansionPanel Text="Filtros" Expanded="@_filtersOpen" ExpandedChanged="OnFiltersExpandedAsync">
+        <MudGrid Spacing="2">
+            <MudItem xs="12" sm="4">
+                <MudSelect T="string" Label="Años" @bind-SelectedValues="_filterYears" MultiSelection="true"
+                           Clearable="true" Placeholder="Todos los años" Dense="true" Margin="Margin.Dense"
+                           Variant="Variant.Outlined" Disabled="@(_busy || _filterOptions is null)">
+                    @foreach (var year in _filterOptions?.Years ?? [])
+                    {
+                        <MudSelectItem Value="@year">@year</MudSelectItem>
+                    }
+                </MudSelect>
+            </MudItem>
+            <MudItem xs="12" sm="4">
+                <MudSelect T="string" Label="Estilos / grupos" @bind-SelectedValues="_filterGroups" MultiSelection="true"
+                           Clearable="true" Placeholder="Todos los estilos" Dense="true" Margin="Margin.Dense"
+                           Variant="Variant.Outlined" Disabled="@(_busy || _filterOptions is null)">
+                    @foreach (var group in _filterOptions?.Groups ?? [])
+                    {
+                        <MudSelectItem Value="@group">@group</MudSelectItem>
+                    }
+                </MudSelect>
+            </MudItem>
+            <MudItem xs="12" sm="4">
+                <MudSelect T="string" Label="Subestilos" @bind-SelectedValues="_filterSubstyles" MultiSelection="true"
+                           Clearable="true" Placeholder="Todos los subestilos" Dense="true" Margin="Margin.Dense"
+                           Variant="Variant.Outlined" Disabled="@(_busy || _filterOptions is null)">
+                    <MudSelectItem T="string" Value="@("Instrumental")">Instrumental</MudSelectItem>
+                    <MudSelectItem T="string" Value="@("Vocal")">Vocal</MudSelectItem>
+                </MudSelect>
+            </MudItem>
+        </MudGrid>
+        <MudText Typo="Typo.body2" Class="mud-text-secondary my-2">
+            Selecciona uno o varios valores por filtro; sin selección se incluyen todos.
+            «Aplicar filtros» combina alternativas del mismo campo y cruza los campos.
+            Instrumental o Vocal sin grupo incluye Day y Night.
+        </MudText>
+        <MudStack Row="true" Wrap="Wrap.Wrap">
+            <MudButton OnClick="ApplyFiltersAsync" Disabled="@(_busy || _filterOptions is null)"
+                       Variant="Variant.Filled" Color="Color.Primary">Aplicar filtros</MudButton>
+            <MudButton OnClick="ClearFiltersAsync" Disabled="@_busy">Limpiar filtros y volver a años</MudButton>
+        </MudStack>
+    </MudExpansionPanel>
+</MudExpansionPanels>
+
 <MudStack Row="true" Wrap="Wrap.Wrap" Class="mb-4">
     <MudButton OnClick="() => LoadAsync(null, null)" Disabled="@_busy">Años</MudButton>
     @if (_year is not null)
@@ -16,10 +61,15 @@
     {
         <MudText Class="align-self-center">/ @_style</MudText>
     }
-    <MudButton OnClick="() => LoadAsync(_year, _style)" Disabled="@_busy" Variant="Variant.Outlined">
+    <MudButton OnClick="ReloadAsync" Disabled="@_busy" Variant="Variant.Outlined">
         Volver a cargar
     </MudButton>
 </MudStack>
+
+@if (_appliedFilter is not null)
+{
+    <MudText Class="mb-3" role="status">Filtros aplicados: @FilterSummary</MudText>
+}
 
 @if (_busy)
 {
@@ -32,7 +82,7 @@
 }
 else if (_listing is not null)
 {
-    @if (_style is null)
+    @if (_style is null && _appliedFilter is null)
     {
         <MudText Typo="Typo.h6" Class="mb-2">@(_year is null ? "Años" : $"Estilos de {_year}")</MudText>
         @if (_listing.Folders.Length == 0)
@@ -49,9 +99,16 @@ else if (_listing is not null)
     }
     else
     {
-        <MudText Typo="Typo.h6" Class="mb-2">@_year / @_style · @_listing.Tracks.Length canciones</MudText>
+        <MudText Typo="Typo.h6" Class="mb-2">
+            @(_appliedFilter is null ? $"{_year} / {_style}" : "Resultados filtrados") · @_listing.Tracks.Length canciones
+        </MudText>
         <MudTable Items="@_listing.Tracks" Dense="true" Hover="true" Breakpoint="Breakpoint.Sm">
             <HeaderContent>
+                @if (_appliedFilter is not null)
+                {
+                    <MudTh>Año</MudTh>
+                    <MudTh>Estilo</MudTh>
+                }
                 <MudTh>Fichero</MudTh>
                 <MudTh>Título</MudTh>
                 <MudTh>Artista</MudTh>
@@ -59,6 +116,11 @@ else if (_listing is not null)
                 <MudTh>Duración</MudTh>
             </HeaderContent>
             <RowTemplate>
+                @if (_appliedFilter is not null)
+                {
+                    <MudTd DataLabel="Año">@context.Year</MudTd>
+                    <MudTd DataLabel="Estilo">@context.Style</MudTd>
+                }
                 <MudTd DataLabel="Fichero">
                     <MudStack Spacing="1">
                         <MudText Style="overflow-wrap: anywhere">@context.FileName</MudText>
@@ -74,7 +136,7 @@ else if (_listing is not null)
                 <MudTd DataLabel="Duración">@Duration(context.DurationSeconds)</MudTd>
             </RowTemplate>
             <NoRecordsContent>
-                <MudText>No hay ficheros MP3 en este estilo.</MudText>
+                <MudText>@(_appliedFilter is null ? "No hay ficheros MP3 en este estilo." : "No hay canciones que coincidan con los filtros.")</MudText>
             </NoRecordsContent>
         </MudTable>
         <MudText Typo="Typo.body2" Class="mud-text-secondary mt-3">
