@@ -3,7 +3,7 @@ h1:focus {
 }
 
 .main-content {
-    padding-bottom: 90px;
+    padding-bottom: 130px;
 }
 
 .player-bar {
@@ -11,7 +11,7 @@ h1:focus {
     bottom: 0;
     left: 0;
     right: 0;
-    height: 80px;
+    height: 120px;
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -24,7 +24,7 @@ h1:focus {
 
 .player-track {
     min-width: 0;
-    flex: 1;
+    flex: 0 1 240px;
 }
 
 .player-track-title,
@@ -34,19 +34,58 @@ h1:focus {
     white-space: nowrap;
 }
 
+.player-controls {
+    display: flex;
+    flex: 1 1 600px;
+    flex-direction: column;
+    gap: 2px;
+    min-width: 0;
+    max-width: 900px;
+}
+
+.player-waveform {
+    position: relative;
+    width: 100%;
+    height: 44px;
+    cursor: crosshair;
+}
+
+.player-waveform canvas {
+    display: block;
+    width: 100%;
+    height: 100%;
+    outline-offset: 2px;
+}
+
+.waveform-loading {
+    position: absolute;
+    right: 0;
+    bottom: 0;
+    left: 0;
+}
+
 .player-bar audio {
-    width: min(65vw, 760px);
+    width: 100%;
     height: 48px;
 }
 
 @media (max-width: 600px) {
     .player-bar {
         height: auto;
-        min-height: 80px;
+        min-height: 132px;
         align-items: stretch;
         flex-direction: column;
         gap: 4px;
         padding: 8px 16px;
+    }
+
+    .player-controls {
+        flex: 1 1 auto;
+        max-width: none;
+    }
+
+    .player-waveform {
+        height: 32px;
     }
 
     .player-bar audio {

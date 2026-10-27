@@ -1,0 +1,109 @@
+@using DjTracks.Domain
+@using DjTracks.UI.Shared
+@implements IAsyncDisposable
+@inject HttpClient Http
+@inject ILogger<WaveformPlayer> Logger
+@inject IJSRuntime JS
+
+<div class="player-waveform">
+    <canvas @ref="_canvas" role="slider" aria-label="Forma de onda. Usa las flechas para buscar"
+            aria-valuemin="0" aria-valuemax="100" tabindex="0"></canvas>
+    @if (_loading)
+    {
+        <MudProgressLinear Indeterminate="true" Color="Color.Primary" Class="waveform-loading"
+                           aria-label="Generando forma de onda" />
+    }
+</div>
+@if (_error is not null)
+{
+    <MudText Typo="Typo.caption" Color="Color.Warning" role="status">@_error</MudText>
+}
+
+@code {
+    [Parameter] public string? WaveformUrl { get; set; }
+
+    private ElementReference _canvas;
+    private IJSObjectReference? _module;
+    private TrackWaveform? _waveform;
+    private CancellationTokenSource? _loadCts;
+    private string? _requestedUrl;
+    private string? _renderedUrl;
+    private string? _error;
+    private bool _loading;
+
+    protected override async Task OnParametersSetAsync()
+    {
+        if (WaveformUrl == _requestedUrl)
+            return;
+
+        _requestedUrl = WaveformUrl;
+        _renderedUrl = null;
+        _loadCts?.Cancel();
+        _loadCts?.Dispose();
+        _waveform = null;
+        _error = null;
+        _loading = false;
+        if (string.IsNullOrWhiteSpace(WaveformUrl))
+            return;
+
+        var url = WaveformUrl;
+        _loadCts = new CancellationTokenSource();
+        _loading = true;
+        try
+        {
+            var result = await Http.GetForResultAsync<TrackWaveform>(url, Logger, _loadCts.Token);
+            if (_requestedUrl != url)
+                return;
+            if (result.IsFailed)
+                _error = result.Errors[0].Message;
+            else
+                _waveform = result.Value;
+        }
+        finally
+        {
+            if (_requestedUrl == url)
+                _loading = false;
+        }
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (_waveform is null)
+        {
+            if (_renderedUrl is not null && _renderedUrl != _requestedUrl)
+            {
+                _module ??= await JS.InvokeAsync<IJSObjectReference>("import",
+                    "./Components/Layout/WaveformPlayer.razor.js");
+                await _module.InvokeVoidAsync("clearWaveform", _canvas);
+                _renderedUrl = null;
+            }
+            return;
+        }
+        if (_renderedUrl == _requestedUrl)
+            return;
+
+        _module ??= await JS.InvokeAsync<IJSObjectReference>("import",
+            "./Components/Layout/WaveformPlayer.razor.js");
+        await _module.InvokeVoidAsync("setWaveform", _canvas,
+            _waveform.Peaks, _waveform.DurationSeconds);
+        _renderedUrl = _requestedUrl;
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        _loadCts?.Cancel();
+        _loadCts?.Dispose();
+        if (_module is null)
+            return;
+
+        try
+        {
+            await _module.InvokeVoidAsync("disposeWaveform", _canvas);
+            await _module.DisposeAsync();
+        }
+        catch (JSDisconnectedException)
+        {
+            Logger.LogDebug("El circuito se desconectó al liberar la forma de onda");
+        }
+    }
+}

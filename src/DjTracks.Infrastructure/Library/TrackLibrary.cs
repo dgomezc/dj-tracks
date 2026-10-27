@@ -36,6 +36,17 @@ public sealed class TrackLibrary
     public Result<FileStream> OpenTrack(string root, string year, string style, string fileName,
         CancellationToken ct)
     {
+        var result = ResolveTrackFile(root, year, style, fileName, ct);
+        if (result.IsFailed)
+            return result.ToResult();
+
+        return new FileStream(result.Value.FullName, FileMode.Open, FileAccess.Read, FileShare.Read,
+            64 * 1024, FileOptions.Asynchronous | FileOptions.SequentialScan);
+    }
+
+    public Result<FileInfo> ResolveTrackFile(string root, string year, string style, string fileName,
+        CancellationToken ct)
+    {
         var directory = new DirectoryInfo(root);
         foreach (var name in new[] { year, style })
         {
@@ -54,8 +65,7 @@ public sealed class TrackLibrary
             return new AppError(ErrorKind.NotFound, "Canción no encontrada.",
                 "El fichero seleccionado ya no existe. Vuelve a cargar la biblioteca.");
 
-        return new FileStream(file.FullName, FileMode.Open, FileAccess.Read, FileShare.Read,
-            64 * 1024, FileOptions.Asynchronous | FileOptions.SequentialScan);
+        return file;
     }
 
     public TrackFilterOptions GetFilterOptions(string root, CancellationToken ct)
