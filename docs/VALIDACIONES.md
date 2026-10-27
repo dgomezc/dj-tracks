@@ -17,6 +17,44 @@ Consultar siempre el estado real de GitHub antes de actuar sobre un PR.
 - Continuidad confirmada: trabajar directamente en el checkout original, sin nuevos worktrees. Se han preservado los cambios locales preexistentes en los dos `Class1.cs`, sin incluirlos en los commits.
 - Novedad: `/tracks` navega Año → Estilo → canciones reales, con nombre de fichero, título, artista, álbum y duración. `/settings` conserva los cinco inputs de texto con sus ayudas, sin selector.
 - Revisión del 26/10/2026: el usuario rechazó el selector de carpetas y pidió volver al formulario anterior. Retirados los botones Examinar, el diálogo y el endpoint de navegación; se mantienen los cinco campos de texto, la validación y el guardado originales. La elección previa del selector queda revocada.
+- **Refactor transversal Vertical Slices (27/10/2026): pendiente de validación del usuario.** Pedido por el usuario antes de F1.2. Diseño validado en `arquitectura/flujo-get-tracks.html` ("Cambia todas las llamadas"). Rama `dgomezc-refactor-vertical-slices` (worktree), PR hacia `develop`. F1.2 no empieza hasta mergear este PR.
+
+## Refactor Vertical Slices + Result + FluentValidation (pendiente de validación)
+
+Cambios: las tres llamadas existentes (`GET /api/library/tracks`, `GET /api/settings`,
+`PUT /api/settings`) siguen el flujo UI → HTTP → endpoint → validador → handler →
+Infrastructure → `Result` → HTTP. Se elimina `weatherforecast`. Rutas, JSON y
+mensajes al usuario se mantienen; diferencias conocidas:
+
+- Fichero de ajustes inaccesible: ahora 503 (antes 500). Mismo mensaje.
+- Error de JSON de ajustes en `/tracks`: ahora muestra el mensaje común de ajustes
+  («El JSON de ajustes es inválido. Corrígelo o restaura una copia…»).
+- API caída en `/settings`: el mensaje ya no incluye «para confirmar los ajustes».
+- Al guardar ajustes, si hay rutas vacías o relativas solo se muestran esos errores;
+  las comprobaciones de disco (existe/legible/escribible) aparecen al corregirlos.
+
+### Comprobaciones del agente (27/10/2026)
+
+- `dotnet build DjTracks.slnx`: 0 errores, 0 advertencias.
+- API con datos temporales: 200, 400 (validador y disco), 404, 409 y 500 con los
+  mensajes esperados.
+- UI en navegador: errores por campo en `/settings`, guardado correcto, navegación
+  Año → Estilo → canciones, carpeta eliminada (404) y API detenida.
+
+### Checklist del usuario
+
+Preparación: abrir `DjTracks.slnx` de esta rama en Visual Studio 2026, perfil
+**DJ Tracks (Api + UI)**, F5. UI `http://localhost:5050`.
+
+- [ ] `/settings` carga las rutas guardadas.
+- [ ] Vaciar un campo y guardar → alerta «Revisa las rutas indicadas.» y «Introduce una ruta.» bajo el campo.
+- [ ] Ruta relativa (p. ej. `musica`) → «Introduce una ruta absoluta del servidor (local o de red).».
+- [ ] Ruta absoluta inexistente → «La carpeta no existe o el proceso de la API no puede leerla.».
+- [ ] Rutas correctas → «Rutas validadas y guardadas en el servidor.».
+- [ ] `/tracks` lista años → estilos → canciones como antes, con tags y duración.
+- [ ] Renombrar una carpeta de estilo y pulsar «Volver a cargar» dentro de ella → «La carpeta seleccionada ya no existe. Vuelve al nivel anterior.».
+- [ ] Detener solo la API y recargar `/tracks` → «No se pudo contactar con la API…».
+- [ ] Opcional: `http://localhost:5247/api/library/tracks?style=Tribal` → 400 «Selecciona un año antes del estilo.».
 
 ## F1.1: explorador de Tracks (validada por el usuario)
 
