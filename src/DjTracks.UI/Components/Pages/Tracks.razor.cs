@@ -1,13 +1,12 @@
-using System.Text.Json;
 using DjTracks.Domain;
+using DjTracks.UI.Shared;
 using Microsoft.AspNetCore.Components;
-using Microsoft.AspNetCore.Mvc;
 
 namespace DjTracks.UI.Components.Pages;
 
 public partial class Tracks
 {
-    [Inject] private IHttpClientFactory HttpClientFactory { get; set; } = default!;
+    [Inject] private HttpClient Http { get; set; } = default!;
     [Inject] private ILogger<Tracks> Logger { get; set; } = default!;
 
     private TrackListing? _listing;
@@ -37,26 +36,14 @@ public partial class Tracks
                 url += $"?year={Uri.EscapeDataString(year)}";
             if (style is not null)
                 url += $"&style={Uri.EscapeDataString(style)}";
-            using var client = HttpClientFactory.CreateClient("Api");
-            using var response = await client.GetAsync(url);
-            if (!response.IsSuccessStatusCode)
+
+            var result = await Http.GetForResultAsync<TrackListing>(url, Logger);
+            if (result.IsFailed)
             {
-                var problem = await response.Content.ReadFromJsonAsync<ProblemDetails>();
-                _error = problem?.Detail ?? problem?.Title
-                    ?? $"La API devolvió un error ({(int)response.StatusCode}).";
-                Logger.LogWarning("La API de Tracks devolvió HTTP {StatusCode}", (int)response.StatusCode);
+                _error = result.Errors[0].Message;
                 return;
             }
-            _listing = await response.Content.ReadFromJsonAsync<TrackListing>()
-                ?? throw new JsonException("Respuesta de biblioteca vacía.");
-        }
-        catch (Exception ex) when (ex is HttpRequestException or TaskCanceledException
-            or JsonException or NotSupportedException)
-        {
-            Logger.LogError(ex, "No se pudo cargar la biblioteca de Tracks");
-            _error = ex is JsonException or NotSupportedException
-                ? "La API devolvió una respuesta no válida. Revisa el servidor y vuelve a cargar."
-                : "No se pudo contactar con la API o se agotó el tiempo de espera. Comprueba que está iniciada y vuelve a cargar.";
+            _listing = result.Value;
         }
         finally
         {

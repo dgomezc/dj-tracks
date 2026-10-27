@@ -1,14 +1,12 @@
-using System.Net;
-using System.Text.Json;
 using DjTracks.Domain;
+using DjTracks.UI.Shared;
 using Microsoft.AspNetCore.Components;
-using Microsoft.AspNetCore.Mvc;
 
 namespace DjTracks.UI.Components.Pages;
 
 public partial class Settings
 {
-    [Inject] private IHttpClientFactory HttpClientFactory { get; set; } = default!;
+    [Inject] private HttpClient Http { get; set; } = default!;
     [Inject] private ILogger<Settings> Logger { get; set; } = default!;
 
     private PathSettings _settings = new();
@@ -36,39 +34,29 @@ public partial class Settings
 
         try
         {
-            using var client = HttpClientFactory.CreateClient("Api");
-            using var response = save
-                ? await client.PutAsJsonAsync("api/settings", _settings)
-                : await client.GetAsync("api/settings");
-
-            if (!response.IsSuccessStatusCode)
+            var result = save
+                ? await Http.PutForResultAsync<PathSettings, PathSettings>("api/settings", _settings, Logger)
+                : await Http.GetForResultAsync<PathSettings>("api/settings", Logger);
+            if (result.IsFailed)
             {
-                if (response.StatusCode >= HttpStatusCode.InternalServerError)
-                    _loaded = false;
-                var problem = await response.Content.ReadFromJsonAsync<HttpValidationProblemDetails>();
-                if (problem is not null)
+                var error = (AppError)result.Errors[0];
+                if (error.FieldErrors.Count > 0)
                 {
-                    _errors = new(problem.Errors, StringComparer.OrdinalIgnoreCase);
-                    _error = problem.Detail ?? problem.Title;
+                    _errors = new(error.FieldErrors, StringComparer.OrdinalIgnoreCase);
+                    _error = "Revisa las rutas indicadas.";
                 }
-                _error ??= $"La API devolvió un error ({(int)response.StatusCode}).";
-                Logger.LogWarning("La API de ajustes devolvió HTTP {StatusCode}", (int)response.StatusCode);
+                else
+                {
+                    // Sin errores por campo: ajustes o API inaccesibles; no se permite guardar.
+                    _error = error.Message;
+                    _loaded = false;
+                }
                 return;
             }
 
-            _settings = await response.Content.ReadFromJsonAsync<PathSettings>()
-                ?? throw new JsonException("Respuesta de ajustes vacía.");
+            _settings = result.Value;
             _loaded = true;
             _saved = save;
-        }
-        catch (Exception ex) when (ex is HttpRequestException or TaskCanceledException or JsonException
-            or NotSupportedException)
-        {
-            Logger.LogError(ex, "No se pudo {Operation} la configuración", save ? "guardar" : "cargar");
-            _error = ex is JsonException or NotSupportedException
-                ? "La API devolvió una respuesta no válida. Revisa el servidor y vuelve a cargar."
-                : "No se pudo contactar con la API o se agotó el tiempo de espera. Comprueba que está iniciada y vuelve a cargar para confirmar los ajustes.";
-            _loaded = false;
         }
         finally
         {
