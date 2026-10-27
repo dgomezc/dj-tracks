@@ -15,7 +15,7 @@ Consultar siempre el estado real de GitHub antes de actuar sobre un PR.
 - F1.2: **validada globalmente por el usuario el 26/10/2026**, incluida la multiselección, con "Perfecto, haz el PR pero de momento no sigas." No consta informe individual de cada comprobación; esta aceptación no amplía las pruebas del agente.
 - El 27/10/2026 el usuario autorizó integrar el port en el checkout original y mezclar los PRs: "trae los cambios y deja los pr mezclados y las ramas estables". F1.3 quedó pausada en esa entrega y se reanudó tras la instrucción posterior "continúa".
 - F1.3: **validada por el usuario el 27/10/2026** con «Todo ok, continúa». PR [#7](https://github.com/dgomezc/dj-tracks/pull/7) mergeado en `develop` el 27/10/2026 a las 10:34:24 UTC; merge commit `d86e1c4` (comprobado en GitHub).
-- F1.4: **en implementación**, rama `fase/f1-4-onda`; comparación FFMpegCore/FFmpeg y NAudio completada, decisión: mantener FFMpegCore por pipe. PR pendiente.
+- F1.4: **PR #8 abierto**, rama `fase/f1-4-onda`; validación manual del usuario pendiente. Comparación FFMpegCore/FFmpeg y NAudio completada; se mantiene FFMpegCore por pipe.
 - Checkout original actualizado por fast-forward a `develop` después de integrar F1.2; el trabajo de F1.3 se desarrolla en su rama dedicada. La rama del port se conserva como historial; no se han borrado ni reescrito ramas.
 - Entrega F1.2: PR [#5](https://github.com/dgomezc/dj-tracks/pull/5) **mergeado** en `develop` el 27/10/2026 a las 07:13:41 UTC, commit `8fc21f1` (comprobado en GitHub). Incluye el port y ambos historiales sin force-push. PR #6 también mergeado; no queda PR de F1.2 pendiente.
 - Continuidad confirmada: trabajar directamente en el checkout original, sin nuevos worktrees. Se han preservado los cambios locales preexistentes en los dos `Class1.cs`, sin incluirlos en los commits.
@@ -78,7 +78,7 @@ confirma la entrega F1.3 y autoriza mezclar el PR #7 antes de continuar con F1.4
   fase no añade una cola, onda, reproducción automática del siguiente track,
   estadísticas, ni soporte para Sessions/Remember.
 
-## F1.4: onda interactiva de Tracks (en implementación)
+## F1.4: onda interactiva de Tracks (validación manual pendiente; PR #8 abierto)
 
 La API genera 1024 picos por canción decodificando PCM estéreo a 44,1 kHz con
 FFmpegCore por pipe, sin escribir WAV intermedio. Guarda la respuesta JSON en
