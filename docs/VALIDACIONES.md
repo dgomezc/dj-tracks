@@ -14,7 +14,7 @@ Consultar siempre el estado real de GitHub antes de actuar sobre un PR.
 - F1.1: **validada por el usuario el 26/10/2026** con "Funciona todo. Continua". Aceptación global de la entrega y autorización de continuación; no amplía las comprobaciones individuales del agente. PR [#4](https://github.com/dgomezc/dj-tracks/pull/4) mergeado en `develop` a las 14:57:01 UTC, commit `e70aafc` (comprobado en GitHub).
 - F1.2: **validada globalmente por el usuario el 26/10/2026**, incluida la multiselección, con "Perfecto, haz el PR pero de momento no sigas." No consta informe individual de cada comprobación; esta aceptación no amplía las pruebas del agente.
 - El 27/10/2026 el usuario autorizó integrar el port en el checkout original y mezclar los PRs: "trae los cambios y deja los pr mezclados y las ramas estables". F1.3 quedó pausada en esa entrega y se reanudó tras la instrucción posterior "continúa".
-- F1.3: **entregada para validación manual**, rama `fase/f1-3-reproductor-basico`; PR [#7](https://github.com/dgomezc/dj-tracks/pull/7) abierto hacia `develop`. No se ha mezclado.
+- F1.3: **validada por el usuario el 27/10/2026** con «Todo ok, continúa»; autorización expresa para mezclar el PR #7 y seguir con F1.4. PR [#7](https://github.com/dgomezc/dj-tracks/pull/7) en proceso de merge.
 - Checkout original actualizado por fast-forward a `develop` después de integrar F1.2; el trabajo de F1.3 se desarrolla en su rama dedicada. La rama del port se conserva como historial; no se han borrado ni reescrito ramas.
 - Entrega F1.2: PR [#5](https://github.com/dgomezc/dj-tracks/pull/5) **mergeado** en `develop` el 27/10/2026 a las 07:13:41 UTC, commit `8fc21f1` (comprobado en GitHub). Incluye el port y ambos historiales sin force-push. PR #6 también mergeado; no queda PR de F1.2 pendiente.
 - Continuidad confirmada: trabajar directamente en el checkout original, sin nuevos worktrees. Se han preservado los cambios locales preexistentes en los dos `Class1.cs`, sin incluirlos en los commits.
@@ -55,17 +55,20 @@ configurada debe estar disponible para el proceso de la API y contener archivos
 MP3 bajo `Año/Estilo/`; no es necesaria una base de datos. No cambies ajustes ni
 la biblioteca para esta comprobación.
 
-- [ ] Navega a un año y un estilo (o aplica filtros) y pulsa el icono Reproducir
+- [x] Navega a un año y un estilo (o aplica filtros) y pulsa el icono Reproducir
   de una canción. Debe comenzar el audio y la barra inferior debe mostrar su
   título y artista.
-- [ ] En la barra inferior, pausa y reanuda: el sonido debe detenerse y continuar.
-- [ ] Cambia el volumen y usa la barra de tiempo para adelantar/retroceder; el
+- [x] En la barra inferior, pausa y reanuda: el sonido debe detenerse y continuar.
+- [x] Cambia el volumen y usa la barra de tiempo para adelantar/retroceder; el
   sonido debe reflejar el volumen y la posición elegidos.
-- [ ] Reproduce otra canción desde otra carpeta o desde resultados filtrados: el
+- [x] Reproduce otra canción desde otra carpeta o desde resultados filtrados: el
   reproductor debe cambiar al nuevo archivo y mantener sus controles operativos.
-- [ ] Comprueba que la barra no tapa el contenido en una ventana estrecha.
+- [x] Comprueba que la barra no tapa el contenido en una ventana estrecha.
 - [ ] Opcional: en las herramientas de red del navegador, una petición de audio
   con `Range` debe recibir 206 Partial Content durante el seek.
+
+Validación manual del usuario: «Todo ok, continúa» (27/10/2026). El usuario
+confirma la entrega F1.3 y autoriza mezclar el PR #7 antes de continuar con F1.4.
 
 ### Limitaciones conocidas
 
