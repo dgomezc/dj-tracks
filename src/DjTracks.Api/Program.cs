@@ -1,52 +1,30 @@
-using DjTracks.Api.Features.Settings;
 using DjTracks.Api.Features.Library;
-using DjTracks.Infrastructure.Library;
-using DjTracks.Infrastructure.Settings;
+using DjTracks.Api.Features.Settings;
+using DjTracks.Api.Shared;
+using FluentValidation;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 builder.Services.AddOpenApi();
-builder.Services.AddSingleton<TrackLibrary>();
-builder.Services.AddSingleton(new JsonSettingsStore(Path.GetFullPath(
-    builder.Configuration["Settings:FilePath"] ?? Path.Combine("App_Data", "settings.json"),
-    builder.Environment.ContentRootPath)));
+builder.Services.AddProblemDetails();
+// Singleton: el filtro de validación los resuelve una vez al construir cada endpoint.
+builder.Services.AddValidatorsFromAssemblyContaining<Program>(ServiceLifetime.Singleton);
+builder.Services.AddSettingsFeature();
+builder.Services.AddLibraryFeature();
 
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
     app.MapOpenApi();
 }
 
+app.UseExceptionHandler();
 app.UseHttpsRedirection();
-app.MapSettingsEndpoints();
-app.MapLibraryEndpoints();
 
-var summaries = new[]
-{
-    "Freezing", "Bracing", "Chilly", "Cool", "Mild", "Warm", "Balmy", "Hot", "Sweltering", "Scorching"
-};
-
-app.MapGet("/weatherforecast", () =>
-{
-    var forecast = Enumerable.Range(1, 5).Select(index =>
-        new WeatherForecast
-        (
-            DateOnly.FromDateTime(DateTime.Now.AddDays(index)),
-            Random.Shared.Next(-20, 55),
-            summaries[Random.Shared.Next(summaries.Length)]
-        ))
-        .ToArray();
-    return forecast;
-})
-.WithName("GetWeatherForecast");
+var api = app.MapGroup("/api").AddEndpointFilterFactory(ValidationFilter.Create);
+api.MapSettingsFeature();
+api.MapLibraryFeature();
 
 app.Run();
-
-internal record WeatherForecast(DateOnly Date, int TemperatureC, string? Summary)
-{
-    public int TemperatureF => 32 + (int)(TemperatureC / 0.5556);
-}

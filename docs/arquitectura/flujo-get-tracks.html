@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<title>DJ Tracks — Flujo Vertical Slice: obtener tracks</title>
+<style>
+  :root { --bg:#14161b; --card:#1e2129; --line:#343a46; --txt:#e6e8ee; --mut:#9aa3b2;
+          --ui:#4fa3ff; --http:#f0b429; --api:#36c48f; --mid:#9bd65c; --feat:#b78cff; --inf:#ff7a90; --dom:#7fd1d9; }
+  * { box-sizing:border-box; }
+  body { margin:0; font:15px/1.55 "Segoe UI",system-ui,sans-serif; background:var(--bg); color:var(--txt); }
+  main { max-width:1100px; margin:auto; padding:32px 24px 80px; }
+  h1 { margin:0 0 4px; font-size:28px; } h2 { margin:48px 0 12px; border-bottom:1px solid var(--line); padding-bottom:6px; }
+  h3 { margin:0 0 6px; font-size:17px; }
+  p.lead { color:var(--mut); margin-top:0; }
+  code, pre { font-family:Consolas,"Cascadia Code",monospace; font-size:13px; }
+  code { background:#2a2f3a; padding:1px 5px; border-radius:4px; }
+  pre { background:#0f1115; border:1px solid var(--line); border-radius:8px; padding:12px 14px; overflow:auto; margin:8px 0 0; }
+  pre code { background:none; padding:0; }
+  .legend { display:flex; flex-wrap:wrap; gap:10px; margin:16px 0; }
+  .tag { padding:3px 10px; border-radius:20px; font-size:12px; font-weight:600; color:#111; }
+  .ui{background:var(--ui)} .http{background:var(--http)} .api{background:var(--api)} .mid{background:var(--mid)}
+  .feat{background:var(--feat)} .inf{background:var(--inf)} .dom{background:var(--dom)}
+  .lanes { display:grid; grid-template-columns:repeat(5,1fr); gap:8px; text-align:center; margin:20px 0 8px; }
+  .lanes div { padding:10px 6px; border-radius:8px; font-weight:600; color:#111; font-size:13px; }
+  .flow { position:relative; margin-left:22px; border-left:3px dashed var(--line); padding-left:26px; }
+  .step { position:relative; background:var(--card); border:1px solid var(--line); border-left:6px solid; border-radius:10px; padding:14px 16px; margin:0 0 16px; }
+  .step::before { content:attr(data-n); position:absolute; left:-47px; top:12px; width:34px; height:34px; border-radius:50%;
+                  background:var(--bg); border:3px solid var(--line); display:grid; place-items:center; font-weight:700; }
+  .step.ui, .step.api, .step.mid, .step.feat, .step.inf, .step.dom { background:var(--card); }
+  .step.ui{border-left-color:var(--ui)} .step.api{border-left-color:var(--api)} .step.mid{border-left-color:var(--mid)}
+  .step.feat{border-left-color:var(--feat)} .step.inf{border-left-color:var(--inf)} .step.dom{border-left-color:var(--dom)}
+  .meta { display:grid; grid-template-columns:110px 1fr; gap:2px 10px; font-size:13px; margin:6px 0; }
+  .meta b { color:var(--mut); font-weight:600; }
+  .wire { text-align:center; color:var(--http); font-weight:700; margin:4px 0 18px; letter-spacing:.5px; }
+  table { width:100%; border-collapse:collapse; margin-top:8px; font-size:14px; }
+  th, td { border:1px solid var(--line); padding:7px 10px; text-align:left; vertical-align:top; }
+  th { background:#232733; }
+  .tree { white-space:pre; line-height:1.45; }
+  .new { color:var(--api); } .chg { color:var(--http); } .del { color:var(--inf); text-decoration:line-through; }
+  .note { border-left:4px solid var(--http); background:#2a2618; padding:10px 14px; border-radius:6px; margin:12px 0; }
+  ul.rules li { margin-bottom:4px; }
+</style>
+</head>
+<body>
+<main>
+<h1>Flujo Vertical Slice — <code>GET /api/library/tracks</code></h1>
+<p class="lead">Propuesta para validar: archivos, clases y métodos implicados cuando la página Tracks obtiene un listado
+(años, estilos o canciones). Inspirada en Anton Martyniuk (Endpoint + Handler + Validator por slice), simplificada:
+sin MediatR, sin reflexión para endpoints/handlers, sin eventos ni módulos. Validación de formato con FluentValidation
+aplicada automáticamente a toda la API; errores de negocio con FluentResults; middleware solo para lo imprevisto.</p>
+
+<div class="legend">
+  <span class="tag ui">DjTracks.UI</span><span class="tag http">HTTP</span>
+  <span class="tag mid">Api · Middleware / Filtro / Validator</span><span class="tag api">Api · Endpoint</span>
+  <span class="tag feat">Api · Handler (feature)</span><span class="tag inf">DjTracks.Infrastructure</span>
+  <span class="tag dom">DjTracks.Domain</span>
+</div>
+
+<h2>1. Reglas de la arquitectura</h2>
+<ul class="rules">
+  <li><b>UI</b>: el code-behind de cada página hace la petición HTTP con el <code>HttpClient</code> de la API, usando las extensiones compartidas <code>GetForResultAsync</code>/<code>PutForResultAsync</code>, que devuelven <code>Result&lt;T&gt;</code>. Sin API clients intermedios.</li>
+  <li><b>Endpoint</b>: define la ruta, recibe el <i>request</i>, llama al handler y traduce el <code>Result</code> a HTTP. Una línea de cuerpo. Sin validación, lógica ni <code>try/catch</code>.</li>
+  <li><b>Validación de formato</b>: reglas FluentValidation en <code>&lt;Feature&gt;Validators.cs</code> (un archivo por feature). Las ejecuta un <b>único filtro aplicado al grupo <code>/api</code></b>: ningún endpoint puede olvidarlo. Todo parámetro <code>*Request</code> <b>debe</b> tener validador o la API falla al construir el endpoint.</li>
+  <li><b>Handler</b>: recibe el request ya validado. Reglas de negocio (ajustes, disco), orquesta Infrastructure, logs y devuelve <code>Result&lt;T&gt;</code>. Crea sus errores en el punto donde ocurren (sin clases <code>&lt;Feature&gt;Errors</code>).</li>
+  <li><b>Infrastructure</b>: ficheros, tags y ajustes. Devuelve <code>Result</code> para fallos esperables (carpeta inexistente, JSON de ajustes inválido o inaccesible). Las demás excepciones se propagan.</li>
+  <li><b>Errores</b>: una sola clase <code>AppError</code> con un <code>ErrorKind</code>, compartida por Api, Infrastructure y UI. Un único <code>switch</code> traduce <code>ErrorKind</code> → código HTTP; la UI no hace la traducción inversa.</li>
+  <li><b>Imprevistos</b>: el manejador integrado de .NET (<code>AddProblemDetails</code> + <code>UseExceptionHandler</code>) registra la excepción y responde 500 <code>ProblemDetails</code>. Sin clase propia.</li>
+  <li><b>Registro explícito</b>: cada feature expone los métodos de extensión <code>Add&lt;Feature&gt;Feature()</code> (registra directamente sus handlers) y <code>Map&lt;Feature&gt;Feature()</code> (mapea directamente sus endpoints). Navegable con «Ir a definición». Solo los validadores se registran por escaneo (una línea).</li>
+</ul>
+
+<h2>2. Mapa del flujo</h2>
+<div class="lanes">
+  <div class="ui">UI · Página (code-behind)</div><div class="mid">Api · Middleware / Filtro</div>
+  <div class="api">Api · Endpoint</div><div class="feat">Api · Handler</div><div class="inf">Infrastructure</div>
+</div>
+<pre>
+Tracks.razor ─► Tracks.LoadAsync ─► Http.GetForResultAsync&lt;TrackListing&gt; ─HTTP GET─► [Middleware: UseExceptionHandler]
+                                                                                   │ grupo /api · binding [AsParameters] GetTracksRequest
+                                                                                   ▼
+                                                                    ValidationFilter (filtro del grupo /api)
+                                                                      └─► IValidator&lt;GetTracksRequest&gt;.ValidateAsync
+                                                                           │ inválido ─► 400 ValidationProblem (fin)
+                                                                           ▼ válido
+                                                                    GetTracksEndpoint.Handle
+                                                                           ▼
+                                                                    GetTracksHandler.HandleAsync
+                                                                      ├─► JsonSettingsStore.LoadAsync ─► Result&lt;PathSettings&gt;
+                                                                      └─► TrackLibrary.Browse ─► Result&lt;TrackListing&gt;
+                                                                           ▼
+                                                                    ResultExtensions.ToHttpResult
+      200 TrackListing | ProblemDetails 404/409/500/503   ◄────────────────┘
+      (excepción no prevista en cualquier punto ─► UseExceptionHandler integrado ─► 500)
+      ▼
+HttpClientResultExtensions.GetForResultAsync ─► Result&lt;TrackListing&gt; ─► Tracks (_listing | _error) ─► render
+</pre>
+
+<h2>3. Flujo detallado paso a paso</h2>
+<div class="flow">
+
+  <div class="step ui" data-n="1">
+    <h3>El usuario abre <code>/tracks</code> o pulsa una carpeta</h3>
+    <div class="meta"><b>Archivo</b><span><code>src/DjTracks.UI/Components/Pages/Tracks.razor</code> (sin cambios)</span>
+      <b>Método</b><span><code>OnInitializedAsync()</code> / <code>OpenFolderAsync(string folder)</code></span></div>
+    Determinan el nivel (raíz, año o año+estilo) y llaman a <code>LoadAsync(year, style)</code>.
+  </div>
+
+  <div class="step ui" data-n="2">
+    <h3>El code-behind llama a la API por HTTP</h3>
+    <div class="meta"><b>Archivo</b><span><code>src/DjTracks.UI/Components/Pages/Tracks.razor.cs</code> <span class="chg">(modificado)</span></span>
+      <b>Método</b><span><code>LoadAsync(string? year, string? style)</code></span>
+      <b>Inyecta</b><span><code>HttpClient Http</code> (sustituye a <code>IHttpClientFactory</code>) · <code>ILogger&lt;Tracks&gt; Logger</code></span>
+      <b>Registro</b><span><code>UI/Program.cs</code>: se mantiene <code>AddHttpClient("Api", …)</code> y se añade <code>AddScoped(sp =&gt; sp.GetRequiredService&lt;IHttpClientFactory&gt;().CreateClient("Api"))</code></span></div>
+    La URL vive en la página que la usa. Sin <code>ProblemDetails</code> ni <code>try/catch</code> HTTP: solo estado de pantalla.
+    <pre>var url = "api/library/tracks";
+if (year is not null) url += $"?year={Uri.EscapeDataString(year)}";
+if (style is not null) url += $"&amp;style={Uri.EscapeDataString(style)}";
+
+var result = await Http.GetForResultAsync&lt;TrackListing&gt;(url, Logger);
+if (result.IsFailed) { _error = result.Errors[0].Message; return; }
+_listing = result.Value;</pre>
+  </div>
+
+  <div class="step ui" data-n="3">
+    <h3>Conversión HTTP → Result (única para toda la UI)</h3>
+    <div class="meta"><b>Archivo</b><span><code>src/DjTracks.UI/Shared/HttpClientResultExtensions.cs</code> <span class="new">(nuevo)</span></span>
+      <b>Métodos</b><span><code>Task&lt;Result&lt;T&gt;&gt; GetForResultAsync&lt;T&gt;(this HttpClient http, string url, ILogger logger, CancellationToken ct = default)</code><br>
+        <code>Task&lt;Result&lt;T&gt;&gt; PutForResultAsync&lt;TBody, T&gt;(this HttpClient http, string url, TBody body, ILogger logger, CancellationToken ct = default)</code><br>
+        Ambos delegan en un privado <code>SendAsync&lt;T&gt;(Func&lt;Task&lt;HttpResponseMessage&gt;&gt; send, ILogger logger)</code></span>
+      <b>Error</b><span>Reutiliza <code>AppError</code> de Domain (sin tipo propio en la UI)</span></div>
+    <ul>
+      <li>2xx → <code>Result.Ok(body)</code>.</li>
+      <li>4xx/5xx → lee <code>HttpValidationProblemDetails</code> → <code>new AppError(ErrorKind.Unexpected, title, detail, errors)</code>. No traduce el código HTTP a <code>ErrorKind</code>: la página solo usa <code>Message</code> y <code>FieldErrors</code>.</li>
+      <li>API caída/timeout → <code>AppError</code> «No se pudo contactar con la API…»; JSON inválido → <code>AppError</code> «La API devolvió una respuesta no válida…». Log aquí.</li>
+    </ul>
+  </div>
+
+  <div class="wire">─── HTTP GET {ApiBaseUrl}/api/library/tracks?year=2024&amp;style=Tribal ───►</div>
+
+  <div class="step api" data-n="4">
+    <h3>Arranque de la API: registro explícito</h3>
+    <div class="meta"><b>Archivo</b><span><code>src/DjTracks.Api/Program.cs</code> <span class="chg">(modificado)</span></span>
+      <b>Paquetes</b><span><code>FluentValidation 12.2.0</code> · <code>FluentValidation.DependencyInjectionExtensions 12.2.0</code> (Api) · <code>FluentResults 4.0.0</code> (Domain)</span></div>
+    <pre>builder.Services.AddProblemDetails();
+builder.Services.AddValidatorsFromAssemblyContaining&lt;Program&gt;(ServiceLifetime.Singleton);
+builder.Services.AddSettingsFeature();
+builder.Services.AddLibraryFeature();
+...
+app.UseExceptionHandler();   // integrado: imprevistos → log + 500 ProblemDetails
+var api = app.MapGroup("/api").AddEndpointFilterFactory(ValidationFilter.Create);
+api.MapSettingsFeature();
+api.MapLibraryFeature();</pre>
+    Se elimina el <i>weatherforecast</i> de la plantilla. No hay middleware propio: el integrado basta para lo imprevisto.
+    <div class="meta"><b>Archivo</b><span><code>src/DjTracks.Api/Features/Library/LibraryFeature.cs</code> <span class="new">(nuevo; sustituye a <span class="del">LibraryEndpoints.cs</span>)</span></span>
+      <b>Métodos</b><span><code>AddLibraryFeature(this IServiceCollection services)</code> → registro directo: <code>AddSingleton&lt;TrackLibrary&gt;()</code>, <code>AddScoped&lt;GetTracksHandler&gt;()</code><br>
+        <code>MapLibraryFeature(this RouteGroupBuilder api)</code> → mapeo directo: <code>api.MapGetTracks()</code></span></div>
+    Cada slice nuevo añade una línea en cada método de su feature; <code>Program.cs</code> no cambia.
+  </div>
+
+  <div class="step mid" data-n="5">
+    <h3>Filtro de validación del grupo <code>/api</code></h3>
+    <div class="meta"><b>Archivo</b><span><code>src/DjTracks.Api/Shared/ValidationFilter.cs</code> <span class="new">(nuevo, único para toda la API)</span></span>
+      <b>Método</b><span><code>static EndpointFilterDelegate Create(EndpointFilterFactoryContext context, EndpointFilterDelegate next)</code></span></div>
+    Se ejecuta <b>una vez al construir cada endpoint</b>:
+    <ol>
+      <li>Recorre los parámetros del <code>Handle</code> (<code>context.MethodInfo</code>) cuyo tipo termina en <code>Request</code>.</li>
+      <li>Resuelve su <code>IValidator&lt;T&gt;</code>. Si no existe → <code>InvalidOperationException("GetTracksRequest no tiene validador")</code>: la API no atiende ese endpoint sin validar.</li>
+      <li>Si el endpoint no tiene request (p. ej. <code>GET /api/settings</code>) devuelve <code>next</code> sin coste.</li>
+    </ol>
+    En cada petición:
+    <pre>foreach (var (index, validator) in validators)
+{
+    var validation = await validator.ValidateAsync(
+        new ValidationContext&lt;object&gt;(ctx.Arguments[index]!), ctx.HttpContext.RequestAborted);
+    if (!validation.IsValid)
+        return Results.ValidationProblem(validation.ToDictionary(),
+            validation.Errors[0].ErrorMessage, title: "Revisa los datos enviados.");
+}
+return await next(ctx);</pre>
+    Inválido → <b>400</b> con errores por campo; endpoint y handler <b>no se ejecutan</b>.
+  </div>
+
+  <div class="step mid" data-n="6">
+    <h3>Validator de la feature</h3>
+    <div class="meta"><b>Archivo</b><span><code>src/DjTracks.Api/Features/Library/LibraryValidators.cs</code> <span class="new">(nuevo; todos los validadores de Library)</span></span>
+      <b>Clase</b><span><code>GetTracksRequestValidator : AbstractValidator&lt;GetTracksRequest&gt;</code> · regla privada <code>static bool BeFolderName(string? name)</code> dentro del propio validador</span></div>
+    <pre>RuleFor(r =&gt; r.Year).NotNull().When(r =&gt; r.Style is not null)
+    .WithMessage("Selecciona un año antes del estilo.");
+RuleFor(r =&gt; r.Year).Must(BeFolderName).When(r =&gt; r.Year is not null)
+    .WithMessage("El año y el estilo deben ser nombres de carpeta, no rutas.");
+RuleFor(r =&gt; r.Style).Must(BeFolderName).When(r =&gt; r.Style is not null)
+    .WithMessage("El año y el estilo deben ser nombres de carpeta, no rutas.");</pre>
+    <code>BeFolderName</code> rechaza vacíos, <code>.</code>, <code>..</code>, <code>/ \ :</code> y rutas absolutas. Reglas sacadas de <code>TrackLibrary</code>. Solo formato: sin disco ni ajustes. Sin archivo de reglas compartidas: cada regla vive en el único validador que la usa.
+  </div>
+
+  <div class="step api" data-n="7">
+    <h3>Endpoint: delega en el handler</h3>
+    <div class="meta"><b>Archivo</b><span><code>src/DjTracks.Api/Features/Library/GetTracks/GetTracks.Endpoint.cs</code> <span class="new">(nuevo)</span></span>
+      <b>Tipos</b><span><code>record GetTracksRequest(string? Year, string? Style)</code> · <code>static class GetTracksEndpoint</code></span>
+      <b>Métodos</b><span><code>MapGetTracks(this RouteGroupBuilder api)</code> · <code>static async Task&lt;IResult&gt; Handle([AsParameters] GetTracksRequest request, GetTracksHandler handler, CancellationToken ct)</code></span></div>
+    <pre>public static void MapGetTracks(this RouteGroupBuilder api) =&gt;
+    api.MapGet("library/tracks", Handle).WithTags("Library");
+
+private static async Task&lt;IResult&gt; Handle([AsParameters] GetTracksRequest request,
+    GetTracksHandler handler, CancellationToken ct) =&gt;
+    (await handler.HandleAsync(request, ct)).ToHttpResult();</pre>
+    Sin filtro declarado (lo pone el grupo), sin <code>try/catch</code>, sin ajustes ni ficheros.
+  </div>
+
+  <div class="step feat" data-n="8">
+    <h3>Handler: lógica del caso de uso</h3>
+    <div class="meta"><b>Archivo</b><span><code>src/DjTracks.Api/Features/Library/GetTracks/GetTracks.Handler.cs</code> <span class="new">(nuevo)</span></span>
+      <b>Clase</b><span><code>GetTracksHandler(JsonSettingsStore settings, TrackLibrary library, ILogger&lt;GetTracksHandler&gt; logger)</code></span>
+      <b>Método</b><span><code>Task&lt;Result&lt;TrackListing&gt;&gt; HandleAsync(GetTracksRequest request, CancellationToken ct)</code></span></div>
+    Secuencia (el request ya llega validado):
+    <pre>var settings = await settingsStore.LoadAsync(ct);
+if (settings.IsFailed)
+    return settings.ToResult();   // error ya creado y registrado en JsonSettingsStore
+if (string.IsNullOrWhiteSpace(settings.Value.Tracks))
+    return new AppError(ErrorKind.Conflict, "Configura la ruta de Tracks.",
+        "Abre Configuración y guarda las rutas antes de explorar la biblioteca.");
+try
+{
+    var listing = library.Browse(settings.Value.Tracks, request.Year, request.Style, ct);
+    // LogWarning por cada pista con Warning (tags ilegibles)
+    return listing;
+}
+catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or NotSupportedException)
+{
+    logger.LogError(ex, "No se pudo explorar la biblioteca de Tracks");
+    return new AppError(ErrorKind.Unavailable, "No se pudo leer la biblioteca.", "Comprueba la ruta de Tracks, …");
+}</pre>
+    Los errores se crean donde ocurren (sin <code>LibraryErrors.cs</code>). El único <code>catch</code> es el de la lectura de la biblioteca, con mensaje propio de Tracks; los fallos de ajustes ya llegan como <code>Result</code> (paso siguiente).
+  </div>
+
+  <div class="step feat" data-n="9">
+    <h3>Lectura de ajustes (devuelve Result)</h3>
+    <div class="meta"><b>Archivo</b><span><code>src/DjTracks.Infrastructure/Settings/JsonSettingsStore.cs</code> <span class="chg">(modificado)</span></span>
+      <b>Método</b><span><code>Task&lt;Result&lt;PathSettings&gt;&gt; LoadAsync(CancellationToken ct)</code> (antes <code>Task&lt;PathSettings&gt;</code>)</span></div>
+    Traduce una sola vez los fallos del fichero de ajustes para todos los handlers que lo leen (Tracks, Settings y, más adelante, Sessions, Remember y Playlists):
+    <ul>
+      <li><code>JsonException</code> → <code>AppError(Unexpected)</code> «El JSON de ajustes es inválido. Corrígelo o restaura una copia en el servidor y vuelve a cargar.»</li>
+      <li><code>IOException</code>/<code>UnauthorizedAccessException</code> → <code>AppError(Unavailable)</code> «Comprueba los permisos y la disponibilidad del fichero de ajustes en el servidor.»</li>
+    </ul>
+    Recibe <code>ILogger&lt;JsonSettingsStore&gt;</code> y registra la excepción con <code>LogError</code> en el mismo <code>catch</code>; los handlers solo devuelven el error. <code>SaveAsync</code> devuelve <code>Task&lt;Result&gt;</code> con el mismo criterio (mensajes «No se ha sobrescrito» / «No se ha confirmado ningún guardado»).
+  </div>
+
+  <div class="step inf" data-n="10">
+    <h3>Infrastructure: recorrer carpetas y leer tags</h3>
+    <div class="meta"><b>Archivo</b><span><code>src/DjTracks.Infrastructure/Library/TrackLibrary.cs</code> <span class="chg">(modificado)</span></span>
+      <b>Método</b><span><code>Result&lt;TrackListing&gt; Browse(string root, string? year, string? style, CancellationToken ct)</code></span>
+      <b>Privados</b><span><code>DirectoryInfo? FindChild(DirectoryInfo parent, string name)</code> · <code>IsRegularEntry(...)</code></span></div>
+    Pierde la validación de formato (ahora en el validator). Carpeta inexistente → <code>Result.Fail(new AppError(ErrorKind.NotFound, …))</code> en vez de <code>KeyNotFoundException</code>. Lista subcarpetas (años desc., estilos asc.) o lee MP3 con TagLibSharp como hoy.
+  </div>
+
+  <div class="step dom" data-n="11">
+    <h3>Domain: contratos y error único</h3>
+    <div class="meta"><b>Archivos</b><span><code>src/DjTracks.Domain/TrackListing.cs</code> (sin cambios) — contrato compartido API ↔ UI<br>
+      <code>src/DjTracks.Domain/AppError.cs</code> <span class="new">(nuevo)</span></span></div>
+    <pre>public enum ErrorKind { Validation, NotFound, Conflict, Unavailable, Unexpected }
+
+public sealed class AppError(ErrorKind kind, string title, string detail,
+    IDictionary&lt;string, string[]&gt;? fieldErrors = null) : Error(detail)
+{
+    public ErrorKind Kind { get; } = kind;
+    public string Title { get; } = title;
+    public IDictionary&lt;string, string[]&gt; FieldErrors { get; } = fieldErrors ?? new Dictionary&lt;string, string[]&gt;();
+}</pre>
+    Describe <i>qué</i> pasó, no el código HTTP. <code>Validation</code> con <code>FieldErrors</code> se usa para reglas de negocio por campo (p. ej. «la carpeta no existe» en Settings).
+  </div>
+
+  <div class="step api" data-n="12">
+    <h3>Result → respuesta HTTP</h3>
+    <div class="meta"><b>Archivo</b><span><code>src/DjTracks.Api/Shared/ResultExtensions.cs</code> <span class="new">(nuevo)</span></span>
+      <b>Método</b><span><code>IResult ToHttpResult&lt;T&gt;(this Result&lt;T&gt; result)</code></span></div>
+    <pre>if (result.IsSuccess) return Results.Ok(result.Value);
+var error = result.Errors.OfType&lt;AppError&gt;().First();
+var status = error.Kind switch
+{
+    ErrorKind.Validation  =&gt; 400, ErrorKind.NotFound    =&gt; 404,
+    ErrorKind.Conflict    =&gt; 409, ErrorKind.Unavailable =&gt; 503,
+    _                     =&gt; 500
+};
+return error.FieldErrors.Count &gt; 0
+    ? Results.ValidationProblem(error.FieldErrors, error.Message, title: error.Title, statusCode: status)
+    : Results.Problem(error.Message, title: error.Title, statusCode: status);</pre>
+  </div>
+
+  <div class="wire">◄─── 200 TrackListing (JSON) · o · ProblemDetails 400 / 404 / 409 / 500 / 503 ───</div>
+
+  <div class="step ui" data-n="13">
+    <h3>Vuelta a la UI y render</h3>
+    <div class="meta"><b>Recorrido</b><span><code>GetForResultAsync</code> → <code>Tracks.LoadAsync</code> → <code>Tracks.razor</code></span></div>
+    Éxito → <code>_listing</code> (carpetas o tabla); fallo → <code>_error</code> en el <code>MudAlert</code> (y, en Settings, <code>FieldErrors</code> bajo cada campo).
+  </div>
+</div>
+
+<h2>4. Traducción de errores</h2>
+<table>
+  <tr><th>Situación</th><th>Origen</th><th>Error</th><th>HTTP</th></tr>
+  <tr><td>Estilo sin año, nombre con ruta</td><td><code>GetTracksRequestValidator</code> vía <code>ValidationFilter</code></td><td>FluentValidation → <code>ValidationProblem</code></td><td>400</td></tr>
+  <tr><td>Carpeta de año/estilo ya no existe</td><td><code>TrackLibrary</code></td><td><code>AppError(NotFound)</code></td><td>404</td></tr>
+  <tr><td>Ruta Tracks no configurada</td><td><code>GetTracksHandler</code></td><td><code>AppError(Conflict)</code></td><td>409</td></tr>
+  <tr><td>JSON de ajustes inválido</td><td><code>JsonSettingsStore</code> (captura)</td><td><code>AppError(Unexpected)</code></td><td>500</td></tr>
+  <tr><td>Fichero de ajustes inaccesible</td><td><code>JsonSettingsStore</code> (captura)</td><td><code>AppError(Unavailable)</code></td><td>503</td></tr>
+  <tr><td>E/S o permisos al leer la biblioteca</td><td><code>GetTracksHandler</code> (captura)</td><td><code>AppError(Unavailable)</code></td><td>503</td></tr>
+  <tr><td>Excepción no prevista (bug)</td><td><code>UseExceptionHandler</code> integrado</td><td>—</td><td>500</td></tr>
+  <tr><td>API caída, timeout, respuesta no JSON</td><td><code>HttpClientResultExtensions</code> (UI)</td><td><code>AppError(Unavailable / Unexpected)</code></td><td>—</td></tr>
+</table>
+<p class="note">Criterio: <b>formato</b> del request → Validator (400 desde el filtro del grupo) · <b>negocio/disco/ajustes</b> → Handler/Infrastructure con <code>Result</code> · <b>imprevisto</b> → manejador integrado de .NET.<br>
+Los mensajes al usuario se mantienen idénticos a los actuales; solo cambia dónde se generan.</p>
+
+<h2>5. Estructura de carpetas resultante</h2>
+<pre class="tree">src/
+├─ DjTracks.Api/
+│  ├─ Program.cs                               <span class="chg">registro explícito + UseExceptionHandler + grupo /api con ValidationFilter</span>
+│  ├─ Shared/
+│  │  ├─ ValidationFilter.cs                   <span class="new">filtro único del grupo /api</span>
+│  │  └─ ResultExtensions.cs                   <span class="new">ToHttpResult()</span>
+│  └─ Features/
+│     ├─ Library/
+│     │  ├─ <span class="del">LibraryEndpoints.cs</span>
+│     │  ├─ LibraryFeature.cs                  <span class="new">AddLibraryFeature() · MapLibraryFeature()</span>
+│     │  ├─ LibraryValidators.cs               <span class="new">GetTracksRequestValidator (incluye BeFolderName)</span>
+│     │  └─ GetTracks/
+│     │     ├─ GetTracks.Endpoint.cs            <span class="new">GetTracksRequest + MapGetTracks + Handle</span>
+│     │     └─ GetTracks.Handler.cs             <span class="new">GetTracksHandler</span>
+│     └─ Settings/                             <span class="chg">(tras validar)</span>
+│        ├─ <span class="del">SettingsEndpoints.cs</span>
+│        ├─ SettingsFeature.cs · SettingsValidators.cs (incluye BeAbsolutePath)
+│        ├─ GetSettings/GetSettings.Endpoint.cs · GetSettings.Handler.cs
+│        └─ SaveSettings/SaveSettings.Endpoint.cs · SaveSettings.Handler.cs
+├─ DjTracks.Domain/
+│  ├─ AppError.cs                              <span class="new">AppError + ErrorKind</span>
+│  └─ TrackListing.cs · PathSettings.cs
+├─ DjTracks.Infrastructure/
+│  ├─ Library/TrackLibrary.cs                  <span class="chg">Browse → Result&lt;TrackListing&gt;</span>
+│  └─ Settings/JsonSettingsStore.cs            <span class="chg">LoadAsync → Result&lt;PathSettings&gt;</span>
+└─ DjTracks.UI/
+   ├─ Program.cs                               <span class="chg">HttpClient "Api" inyectable directamente</span>
+   ├─ Shared/HttpClientResultExtensions.cs     <span class="new">GetForResultAsync · PutForResultAsync → Result&lt;T&gt; con AppError</span>
+   └─ Components/Pages/Tracks.razor.cs · Settings.razor.cs   <span class="chg">llaman por HTTP con las extensiones</span>
+</pre>
+
+<h2>6. Aplicación al resto de llamadas (tras validar)</h2>
+<table>
+  <tr><th>Llamada actual</th><th>Slice API</th><th>Validator</th><th>UI</th></tr>
+  <tr><td><code>GET /api/library/tracks</code></td><td><code>Library/GetTracks</code></td><td><code>GetTracksRequestValidator</code>: año antes de estilo, nombres de carpeta</td><td><code>Tracks.razor.cs</code>: <code>Http.GetForResultAsync&lt;TrackListing&gt;</code></td></tr>
+  <tr><td><code>GET /api/settings</code></td><td><code>Settings/GetSettings</code> → <code>Result&lt;PathSettings&gt;</code></td><td>— (sin request)</td><td><code>Settings.razor.cs</code>: <code>Http.GetForResultAsync&lt;PathSettings&gt;</code></td></tr>
+  <tr><td><code>PUT /api/settings</code></td><td><code>Settings/SaveSettings</code>: normaliza, comprueba existencia/permisos en disco (<code>AppError(Validation)</code> por campo) y guarda</td><td><code>SaveSettingsRequestValidator</code>: cinco rutas obligatorias y absolutas (<code>BeAbsolutePath</code> privado)</td><td><code>Settings.razor.cs</code>: <code>Http.PutForResultAsync&lt;PathSettings, PathSettings&gt;</code>; con <code>FieldErrors</code> muestra «Revisa las rutas indicadas.» y el error bajo cada campo; sin ellos, el mensaje y deshabilita el formulario</td></tr>
+  <tr><td><code>GET /weatherforecast</code></td><td colspan="3">Se elimina (plantilla sin uso)</td></tr>
+</table>
+<p class="note"><code>PUT /api/settings</code> recibirá <code>SaveSettingsRequest</code> (mismos campos que <code>PathSettings</code>) para que el filtro lo valide por convención.<br>
+Las reglas comprueban el valor recortado (<code>Trim</code>) y el handler guarda la versión normalizada, como hoy.</p>
+</main>
+</body>
+</html>

@@ -1,18 +1,22 @@
 using DjTracks.Domain;
+using FluentResults;
 
 namespace DjTracks.Infrastructure.Library;
 
 public sealed class TrackLibrary
 {
-    public TrackListing Browse(string root, string? year, string? style, CancellationToken ct)
+    // year y style llegan validados como nombres de carpeta (GetTracksRequestValidator).
+    public Result<TrackListing> Browse(string root, string? year, string? style, CancellationToken ct)
     {
-        if (style is not null && year is null)
-            throw new ArgumentException("Selecciona un año antes del estilo.");
         var directory = new DirectoryInfo(root);
-        if (year is not null)
-            directory = FindChild(directory, year);
-        if (style is not null)
-            directory = FindChild(directory, style);
+        foreach (var name in new[] { year, style }.OfType<string>())
+        {
+            var child = FindChild(directory, name);
+            if (child is null)
+                return new AppError(ErrorKind.NotFound, "Carpeta no encontrada.",
+                    "La carpeta seleccionada ya no existe. Vuelve al nivel anterior.");
+            directory = child;
+        }
 
         ct.ThrowIfCancellationRequested();
         if (style is null)
@@ -23,7 +27,7 @@ public sealed class TrackLibrary
                 .OrderBy(name => name, StringComparer.OrdinalIgnoreCase).ToArray();
             if (year is null)
                 Array.Reverse(folders);
-            return new(year, style, folders, []);
+            return new TrackListing(year, style, folders, []);
         }
 
         List<TrackFile> tracks = [];
@@ -46,20 +50,13 @@ public sealed class TrackLibrary
                     "No se pudieron leer los tags o el audio. Comprueba el fichero y sus permisos."));
             }
         }
-        return new(year, style, [], tracks.ToArray());
+        return new TrackListing(year, style, [], tracks.ToArray());
     }
 
-    private static DirectoryInfo FindChild(DirectoryInfo parent, string name)
-    {
-        if (string.IsNullOrWhiteSpace(name) || name is "." or ".."
-            || name.IndexOfAny(['/', '\\', ':']) >= 0 || Path.IsPathRooted(name))
-            throw new ArgumentException("El año y el estilo deben ser nombres de carpeta, no rutas.");
-
-        return parent.EnumerateDirectories()
+    private static DirectoryInfo? FindChild(DirectoryInfo parent, string name) =>
+        parent.EnumerateDirectories()
             .FirstOrDefault(child => IsRegularEntry(child)
-                && child.Name.Equals(name, StringComparison.Ordinal))
-            ?? throw new KeyNotFoundException("La carpeta seleccionada ya no existe. Vuelve al nivel anterior.");
-    }
+                && child.Name.Equals(name, StringComparison.Ordinal));
 
     private static bool IsRegularEntry(FileSystemInfo entry) =>
         (entry.Attributes & FileAttributes.ReparsePoint) == 0;

@@ -1,10 +1,14 @@
 using System.Text.Json;
 using DjTracks.Domain;
+using FluentResults;
+using Microsoft.Extensions.Logging;
 
 namespace DjTracks.Infrastructure.Settings;
 
-public sealed class JsonSettingsStore(string filePath)
+public sealed class JsonSettingsStore(string filePath, ILogger<JsonSettingsStore> logger)
 {
+    private const string Title = "No se pudo acceder a los ajustes.";
+
     private static readonly JsonSerializerOptions JsonOptions = new(JsonSerializerDefaults.Web)
     {
         WriteIndented = true
@@ -12,12 +16,18 @@ public sealed class JsonSettingsStore(string filePath)
 
     private readonly SemaphoreSlim _gate = new(1, 1);
 
-    public async Task<PathSettings> LoadAsync(CancellationToken cancellationToken)
+    public async Task<Result<PathSettings>> LoadAsync(CancellationToken cancellationToken)
     {
         await _gate.WaitAsync(cancellationToken);
         try
         {
             return await ReadAsync(cancellationToken);
+        }
+        catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or JsonException)
+        {
+            return StorageError(ex, "",
+                "El JSON de ajustes es inválido. Corrígelo o restaura una copia en el servidor y vuelve a cargar.",
+                "Comprueba los permisos y la disponibilidad del fichero de ajustes en el servidor.");
         }
         finally
         {
@@ -25,7 +35,7 @@ public sealed class JsonSettingsStore(string filePath)
         }
     }
 
-    public async Task SaveAsync(PathSettings settings, CancellationToken cancellationToken)
+    public async Task<Result> SaveAsync(PathSettings settings, CancellationToken cancellationToken)
     {
         await _gate.WaitAsync(cancellationToken);
         string? temporaryPath = null;
@@ -45,6 +55,13 @@ public sealed class JsonSettingsStore(string filePath)
 
             cancellationToken.ThrowIfCancellationRequested();
             File.Move(temporaryPath, filePath, overwrite: true);
+            return Result.Ok();
+        }
+        catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or JsonException)
+        {
+            return StorageError(ex, " al guardar",
+                "El JSON de ajustes es inválido. Corrígelo o restaura una copia en el servidor y vuelve a cargar. No se ha sobrescrito.",
+                "Comprueba los permisos y la disponibilidad del fichero de ajustes en el servidor. No se ha confirmado ningún guardado.");
         }
         finally
         {
@@ -58,6 +75,14 @@ public sealed class JsonSettingsStore(string filePath)
                 _gate.Release();
             }
         }
+    }
+
+    private AppError StorageError(Exception ex, string operation, string invalidJson, string unavailable)
+    {
+        logger.LogError(ex, "Error al acceder al JSON de ajustes{Operation}", operation);
+        return ex is JsonException
+            ? new AppError(ErrorKind.Unexpected, Title, invalidJson)
+            : new AppError(ErrorKind.Unavailable, Title, unavailable);
     }
 
     private async Task<PathSettings> ReadAsync(CancellationToken cancellationToken)
