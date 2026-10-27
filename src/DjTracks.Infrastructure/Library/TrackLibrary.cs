@@ -33,6 +33,31 @@ public sealed class TrackLibrary
         return new TrackListing(year, style, [], ReadTracks(directory, ct));
     }
 
+    public Result<FileStream> OpenTrack(string root, string year, string style, string fileName,
+        CancellationToken ct)
+    {
+        var directory = new DirectoryInfo(root);
+        foreach (var name in new[] { year, style })
+        {
+            var child = FindChild(directory, name);
+            if (child is null)
+                return new AppError(ErrorKind.NotFound, "Carpeta no encontrada.",
+                    "La canción seleccionada ya no está en la biblioteca. Vuelve a cargarla.");
+            directory = child;
+        }
+
+        ct.ThrowIfCancellationRequested();
+        var file = directory.EnumerateFiles()
+            .FirstOrDefault(candidate => IsRegularEntry(candidate)
+                && candidate.Name.Equals(fileName, StringComparison.Ordinal));
+        if (file is null || !file.Extension.Equals(".mp3", StringComparison.OrdinalIgnoreCase))
+            return new AppError(ErrorKind.NotFound, "Canción no encontrada.",
+                "El fichero seleccionado ya no existe. Vuelve a cargar la biblioteca.");
+
+        return new FileStream(file.FullName, FileMode.Open, FileAccess.Read, FileShare.Read,
+            64 * 1024, FileOptions.Asynchronous | FileOptions.SequentialScan);
+    }
+
     public TrackFilterOptions GetFilterOptions(string root, CancellationToken ct)
     {
         var yearDirectories = new DirectoryInfo(root).EnumerateDirectories()

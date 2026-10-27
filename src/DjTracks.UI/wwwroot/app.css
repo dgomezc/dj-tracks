@@ -14,10 +14,45 @@ h1:focus {
     height: 80px;
     display: flex;
     align-items: center;
+    justify-content: space-between;
+    gap: 24px;
     padding: 0 24px;
     background: var(--mud-palette-surface);
     border-top: 1px solid var(--mud-palette-lines-default);
     z-index: 1300;
+}
+
+.player-track {
+    min-width: 0;
+    flex: 1;
+}
+
+.player-track-title,
+.player-track-artist {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.player-bar audio {
+    width: min(65vw, 760px);
+    height: 48px;
+}
+
+@media (max-width: 600px) {
+    .player-bar {
+        height: auto;
+        min-height: 80px;
+        align-items: stretch;
+        flex-direction: column;
+        gap: 4px;
+        padding: 8px 16px;
+    }
+
+    .player-bar audio {
+        width: 100%;
+        height: 40px;
+    }
 }
 
 .valid.modified:not([type=checkbox]) {

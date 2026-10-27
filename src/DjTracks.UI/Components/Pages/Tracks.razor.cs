@@ -1,6 +1,7 @@
 using DjTracks.Domain;
 using DjTracks.UI.Shared;
 using Microsoft.AspNetCore.Components;
+using Microsoft.AspNetCore.WebUtilities;
 
 namespace DjTracks.UI.Components.Pages;
 
@@ -8,6 +9,7 @@ public partial class Tracks
 {
     [Inject] private HttpClient Http { get; set; } = default!;
     [Inject] private ILogger<Tracks> Logger { get; set; } = default!;
+    [Inject] private AudioPlayerState AudioPlayer { get; set; } = default!;
 
     private TrackListing? _listing;
     private string? _year;
@@ -74,6 +76,28 @@ public partial class Tracks
     }
 
     private Task ReloadAsync() => RequestAsync();
+
+    private void PlayTrack(TrackFile track)
+    {
+        var year = track.Year ?? _year;
+        var style = track.Style ?? _style;
+        if (string.IsNullOrWhiteSpace(year) || string.IsNullOrWhiteSpace(style))
+        {
+            Logger.LogWarning("No se puede reproducir {FileName}: faltan el año o el estilo",
+                track.FileName);
+            _error = "No se puede reproducir esta canción porque faltan los datos de su carpeta.";
+            return;
+        }
+
+        var relativeUrl = QueryHelpers.AddQueryString("api/streaming/tracks", new Dictionary<string, string?>
+        {
+            ["year"] = year,
+            ["style"] = style,
+            ["fileName"] = track.FileName
+        });
+        var audioUrl = new Uri(Http.BaseAddress!, relativeUrl).AbsoluteUri;
+        AudioPlayer.Play(audioUrl, track.Title ?? track.FileName, string.Join(", ", track.Artists));
+    }
 
     private async Task RequestAsync()
     {

@@ -114,6 +114,7 @@ else if (_listing is not null)
                 <MudTh>Artista</MudTh>
                 <MudTh>Álbum</MudTh>
                 <MudTh>Duración</MudTh>
+                <MudTh>Reproducir</MudTh>
             </HeaderContent>
             <RowTemplate>
                 @if (_appliedFilter is not null)
@@ -134,13 +135,18 @@ else if (_listing is not null)
                 <MudTd DataLabel="Artista">@Display(string.Join(", ", context.Artists))</MudTd>
                 <MudTd DataLabel="Álbum">@Display(context.Album)</MudTd>
                 <MudTd DataLabel="Duración">@Duration(context.DurationSeconds)</MudTd>
+                <MudTd DataLabel="Reproducir">
+                    <MudIconButton Icon="@Icons.Material.Filled.PlayArrow" Color="Color.Primary"
+                                   aria-label="@($"Reproducir {context.FileName}")"
+                                   OnClick="() => PlayTrack(context)" />
+                </MudTd>
             </RowTemplate>
             <NoRecordsContent>
                 <MudText>@(_appliedFilter is null ? "No hay ficheros MP3 en este estilo." : "No hay canciones que coincidan con los filtros.")</MudText>
             </NoRecordsContent>
         </MudTable>
         <MudText Typo="Typo.body2" Class="mud-text-secondary mt-3">
-            Los tags ausentes se muestran como «Sin datos». La reproducción llegará en F1.3.
+            Los tags ausentes se muestran como «Sin datos». Pulsa el icono de reproducción para escuchar una canción.
         </MudText>
     }
 }
