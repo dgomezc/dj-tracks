@@ -18,6 +18,7 @@ Consultar siempre el estado real de GitHub antes de actuar sobre un PR.
 - Novedad: `/tracks` navega Año → Estilo → canciones reales, con nombre de fichero, título, artista, álbum y duración. `/settings` conserva los cinco inputs de texto con sus ayudas, sin selector.
 - Revisión del 26/10/2026: el usuario rechazó el selector de carpetas y pidió volver al formulario anterior. Retirados los botones Examinar, el diálogo y el endpoint de navegación; se mantienen los cinco campos de texto, la validación y el guardado originales. La elección previa del selector queda revocada.
 - **Refactor transversal Vertical Slices: validado por el usuario el 27/10/2026** con "Perfecto, documenta toda la arquitectura actual… Después mezcla el PR y sigue con el siguiente paso". Arquitectura documentada en `ARQUITECTURA.md`; merge autorizado. Pedido por el usuario antes de F1.2. Diseño validado en `arquitectura/flujo-get-tracks.html` ("Cambia todas las llamadas"). Rama `dgomezc-refactor-vertical-slices` (worktree), PR [#6](https://github.com/dgomezc/dj-tracks/pull/6) hacia `develop`. Siguiente: F1.2.
+- **F1.2**: funcionalidad validada globalmente por el usuario en la rama `fase/f1-2-filtros`, PR [#5](https://github.com/dgomezc/dj-tracks/pull/5), que sigue abierto y sin merge. Este port adapta la misma implementación a la arquitectura de PR #6 sobre `develop` (`c7c1508`); su destino de publicación queda pendiente de acuerdo. No empezar F1.3 ni modificar/cerrar #5.
 
 ## Refactor Vertical Slices + Result + FluentValidation (validado por el usuario)
 
@@ -55,6 +56,59 @@ Preparación: abrir `DjTracks.slnx` de esta rama en Visual Studio 2026, perfil
 - [ ] Renombrar una carpeta de estilo y pulsar «Volver a cargar» dentro de ella → «La carpeta seleccionada ya no existe. Vuelve al nivel anterior.».
 - [ ] Detener solo la API y recargar `/tracks` → «No se pudo contactar con la API…».
 - [ ] Opcional: `http://localhost:5247/api/library/tracks?style=Tribal` → 400 «Selecciona un año antes del estilo.».
+
+## F1.2: filtros de Tracks (funcionalidad validada en PR #5; port de arquitectura)
+
+La implementación funcional y su checklist fueron validadas globalmente por el
+usuario en la rama `fase/f1-2-filtros`; PR #5 permanece abierto y no se modifica
+ni se mezcla como parte de este port. La funcionalidad se porta sobre `develop`
+con PR #6 ya integrado, siguiendo `ARQUITECTURA.md`. La publicación del port queda
+pendiente de acuerdo; no se inicia F1.3.
+
+El panel «Filtros» empieza plegado y ofrece multiselección de años, estilos/grupos
+y subestilos. Los valores se mantienen como borrador hasta «Aplicar filtros»;
+las alternativas dentro de un campo se combinan con OR y los campos entre sí con
+AND. Un campo vacío significa todos. Day/Night son grupos separados de
+Instrumental/Vocal; el alias `Night Intrumental` se clasifica como Night +
+Instrumental. Estilos sin subestilo (por ejemplo Technohouse y Tribal) aparecen
+como grupos propios; al combinarlos con Instrumental/Vocal no hay coincidencias.
+Los resultados incluyen año y estilo reales, no duplican canciones ante valores
+repetidos, y se puede recargar la combinación aplicada, limpiar y volver al
+explorador Año → Estilo → canciones.
+
+En el port, `GET /api/library/tracks/filter-options` y
+`GET /api/library/tracks/search` son slices separados con handlers `Result`,
+validación FluentValidation y llamadas desde `HttpClientResultExtensions` en el
+code-behind. El endpoint original de exploración se conserva.
+
+### Preparación y checklist para validar el port
+
+En Visual Studio 2026 (.NET 10), abrir `DjTracks.slnx`, seleccionar **DJ Tracks
+(Api + UI)** y pulsar F5. UI: `http://localhost:5050/tracks`; API:
+`http://localhost:5247`. Se usan las rutas Tracks ya guardadas, accesibles por
+el proceso de la API, organizadas como `Año/Estilo/*.mp3`; no hace falta BD.
+No modificar la biblioteca ni el JSON privado. Si faltan combinaciones para
+probar, usar carpetas y archivos sintéticos desechables en una configuración
+aislada. Para detener solo API, iniciar los dos proyectos por separado con sus
+perfiles `http`.
+
+- [ ] Abrir `/tracks`: «Filtros» está plegado y sigue funcionando Año → Estilo → canciones. Abrir el panel: años y grupos reales; Day/Night separados de Instrumental/Vocal.
+- [ ] Aplicar un año + Day y todos los subestilos: solo canciones Day de ese año. Cambiar a Vocal y aplicar: solo Day Vocal. Repetir con Night e Instrumental; incluir `Night Intrumental` si existe.
+- [ ] Elegir varios años, ambos grupos y ambos subestilos: incluir todas las combinaciones coincidentes, mostrando el año y estilo en cada fila, también con nombres de fichero repetidos.
+- [ ] Aplicar Technohouse o Tribal y combinar después con Vocal: primero aparece solo el estilo elegido; al combinar con el subestilo incompatible, aparece «No hay canciones que coincidan con los filtros».
+- [ ] Cambiar selectores sin aplicar: no cambia el listado ni el resumen efectivo. «Volver a cargar» conserva la combinación aplicada; «Aplicar filtros» toma el borrador. Plegar el panel conserva resultados/resumen. «Limpiar filtros y volver a años» borra selecciones y recupera el explorador.
+- [ ] Con filtros aplicados, detener solo la API y recargar: error visible y sin listado anterior. Reiniciar API y recargar: se recupera la misma combinación. Recargar la página completa vuelve a Años con filtros plegados.
+
+### Validación y límites
+
+- Validación global original del usuario: «Perfecto, haz el PR pero de momento no sigas.» Se conserva como aceptación de la funcionalidad F1.2 en PR #5; no sustituye la revisión del port sobre PR #6.
+- Comprobaciones del agente del port: `dotnet build DjTracks.slnx` terminó con 0 errores y 0 advertencias. API aislada con dos años y carpetas sintéticas: opciones y explorador 200; búsqueda vacía 10 canciones; años 2025/2026 + Day/Night + ambos subestilos 8 canciones, incluyendo el alias; Tribal 2 y Tribal + Vocal 0; subestilo inválido 400 y año eliminado 404. Las filas conservan año/estilo y un MP3 inválido muestra el aviso esperado.
+- Navegador del port con API/UI aisladas: panel plegado inicialmente, filtros visibles al abrir, aplicación de 2025/2026 + Day/Night + Instrumental/Vocal (8 filas), cambio de borrador seguido de recarga conserva los filtros aplicados, aplicar el borrador reduce a 4 filas y limpiar vuelve al explorador. Aplicar campos vacíos devuelve los 10 resultados.
+- Los datos y ajustes sintéticos se crearon en una carpeta temporal; no se usó ni modificó la biblioteca o el JSON privado. No se generaron pruebas unitarias.
+- Pendiente del usuario: revisar en Visual Studio 2026 la experiencia sobre la biblioteca real siguiendo la checklist anterior. La confirmación global original se conserva, pero no se presenta como validación visual del port.
+- Los resultados consultan los ficheros bajo demanda, leen tags en todas las canciones coincidentes y no usan índice, caché ni paginación.
+- No incluye reproducción F1.3, watcher, persistencia de filtros ni actualización automática. No genera pruebas unitarias nuevas ni comprueba NAS/UNC real.
+- Estado del port: compilación y comprobaciones aisladas completadas; validación manual sobre la biblioteca real pendiente. No avanzar a F1.3 ni modificar el PR #5 sin acuerdo.
 
 ## F1.1: explorador de Tracks (validada por el usuario)
 

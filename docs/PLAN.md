@@ -60,7 +60,7 @@ El estado de entrega y las checklists se mantienen en `VALIDACIONES.md`. Una imp
 ### Bloque 1 — Tracks
 - **F1.1 Explorador de Tracks**: árbol/listado Año → Estilo → canciones (nombre de fichero, tags básicos).
   *Prueba*: navegar y ver el listado real.
-- **F1.2 Filtros**: filtro compacto (desplegable) por año y estilo, con Day/Night y subestilos separables.
+- **F1.2 Filtros**: filtro compacto (desplegable) con multiselección de años, estilos/grupos y subestilos, con Day/Night y subestilos separables.
   *Prueba*: combinaciones de filtros devuelven lo esperado.
 - **F1.3 Reproductor básico**: barra inferior con play/pausa, volumen, tiempo; reproducir al pulsar una canción (streaming con Range).
   *Prueba*: sonido y seek con barra simple.
