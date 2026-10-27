@@ -3,7 +3,7 @@
 Reproductor autoalojado de música electrónica. Plan completo en `docs/PLAN.md`; léelo antes de trabajar.
 
 ## Al iniciar o retomar una sesión
-- Lee este archivo, `docs/PLAN.md` y `docs/VALIDACIONES.md`. Estas son las instrucciones persistentes; no dependas del historial del chat.
+- Lee este archivo, `docs/PLAN.md`, `docs/ARQUITECTURA.md` y `docs/VALIDACIONES.md`. Estas son las instrucciones persistentes; no dependas del historial del chat.
 - Comprueba la rama, los cambios locales y el estado actual del PR antes de continuar. No asumas que un PR sigue abierto o que una fase está aprobada.
 - Retoma la fase pendiente y conserva las decisiones confirmadas del plan. No avances automáticamente si falta validación del usuario.
 
@@ -33,8 +33,9 @@ Reproductor autoalojado de música electrónica. Plan completo en `docs/PLAN.md`
 - No hagas merge sin autorización del usuario. Al autorizarlo, comprueba el estado del PR antes de actuar.
 
 ## Arquitectura
-- `src/DjTracks.Api`: Minimal API con vertical slices en `Features/<Feature>`.
-- `src/DjTracks.UI`: Blazor Server interactivo + MudBlazor.
+- **Obligatorio**: sigue `docs/ARQUITECTURA.md` (estructura, nomenclatura, flujo UI → HTTP → endpoint → validador → handler → `Result`, errores con `AppError`). Todo caso de uso nuevo debe seguir su receta.
+- `src/DjTracks.Api`: Minimal API con vertical slices en `Features/<Feature>/<Caso>` (Endpoint + Handler), validación con FluentValidation y patrón Result con FluentResults.
+- `src/DjTracks.UI`: Blazor Server interactivo + MudBlazor. Llama a la API por HTTP desde el code-behind con `HttpClientResultExtensions`.
 - `src/DjTracks.Domain`: entidades y enums. `src/DjTracks.Infrastructure`: ficheros, tags, onda, EF Core.
 - Biblioteca y playlists en ficheros; PostgreSQL solo para estadísticas.
 - No commitear secretos (usar user-secrets para la conexión a BD).

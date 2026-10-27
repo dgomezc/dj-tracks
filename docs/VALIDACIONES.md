@@ -17,9 +17,9 @@ Consultar siempre el estado real de GitHub antes de actuar sobre un PR.
 - Continuidad confirmada: trabajar directamente en el checkout original, sin nuevos worktrees. Se han preservado los cambios locales preexistentes en los dos `Class1.cs`, sin incluirlos en los commits.
 - Novedad: `/tracks` navega Año → Estilo → canciones reales, con nombre de fichero, título, artista, álbum y duración. `/settings` conserva los cinco inputs de texto con sus ayudas, sin selector.
 - Revisión del 26/10/2026: el usuario rechazó el selector de carpetas y pidió volver al formulario anterior. Retirados los botones Examinar, el diálogo y el endpoint de navegación; se mantienen los cinco campos de texto, la validación y el guardado originales. La elección previa del selector queda revocada.
-- **Refactor transversal Vertical Slices (27/10/2026): pendiente de validación del usuario.** Pedido por el usuario antes de F1.2. Diseño validado en `arquitectura/flujo-get-tracks.html` ("Cambia todas las llamadas"). Rama `dgomezc-refactor-vertical-slices` (worktree), PR [#6](https://github.com/dgomezc/dj-tracks/pull/6) hacia `develop`. F1.2 no empieza hasta mergear este PR.
+- **Refactor transversal Vertical Slices: validado por el usuario el 27/10/2026** con "Perfecto, documenta toda la arquitectura actual… Después mezcla el PR y sigue con el siguiente paso". Arquitectura documentada en `ARQUITECTURA.md`; merge autorizado. Pedido por el usuario antes de F1.2. Diseño validado en `arquitectura/flujo-get-tracks.html` ("Cambia todas las llamadas"). Rama `dgomezc-refactor-vertical-slices` (worktree), PR [#6](https://github.com/dgomezc/dj-tracks/pull/6) hacia `develop`. Siguiente: F1.2.
 
-## Refactor Vertical Slices + Result + FluentValidation (pendiente de validación)
+## Refactor Vertical Slices + Result + FluentValidation (validado por el usuario)
 
 Cambios: las tres llamadas existentes (`GET /api/library/tracks`, `GET /api/settings`,
 `PUT /api/settings`) siguen el flujo UI → HTTP → endpoint → validador → handler →
