@@ -14,28 +14,97 @@ public partial class Tracks
     private string? _style;
     private string? _error;
     private bool _busy;
+    private bool _filtersOpen;
+    private TrackFilterOptions? _filterOptions;
+    private IReadOnlyCollection<string> _filterYears = [];
+    private IReadOnlyCollection<string> _filterGroups = [];
+    private IReadOnlyCollection<string> _filterSubstyles = [];
+    private TrackFilter? _appliedFilter;
 
     protected override Task OnInitializedAsync() => LoadAsync(null, null);
 
     private Task OpenFolderAsync(string folder) =>
         _year is null ? LoadAsync(folder, null) : LoadAsync(_year, folder);
 
-    private async Task LoadAsync(string? year, string? style)
+    private Task LoadAsync(string? year, string? style)
+    {
+        if (_busy)
+            return Task.CompletedTask;
+        _appliedFilter = null;
+        _year = year;
+        _style = style;
+        return RequestAsync();
+    }
+
+    private Task ApplyFiltersAsync()
+    {
+        if (_busy)
+            return Task.CompletedTask;
+        _appliedFilter = new(_filterYears.ToArray(), _filterGroups.ToArray(),
+            _filterSubstyles.ToArray());
+        _year = null;
+        _style = null;
+        return RequestAsync();
+    }
+
+    private Task ClearFiltersAsync()
+    {
+        if (_busy)
+            return Task.CompletedTask;
+        _filterYears = _filterGroups = _filterSubstyles = [];
+        return LoadAsync(null, null);
+    }
+
+    private async Task OnFiltersExpandedAsync(bool expanded)
+    {
+        _filtersOpen = expanded;
+        if (expanded && !_busy)
+        {
+            _busy = true;
+            _error = null;
+            try
+            {
+                await LoadFilterOptionsAsync();
+            }
+            finally
+            {
+                _busy = false;
+            }
+        }
+    }
+
+    private Task ReloadAsync() => RequestAsync();
+
+    private async Task RequestAsync()
     {
         if (_busy)
             return;
         _busy = true;
         _error = null;
         _listing = null;
-        _year = year;
-        _style = style;
         try
         {
-            var url = "api/library/tracks";
-            if (year is not null)
-                url += $"?year={Uri.EscapeDataString(year)}";
-            if (style is not null)
-                url += $"&style={Uri.EscapeDataString(style)}";
+            if (_filtersOpen && !await LoadFilterOptionsAsync())
+                return;
+
+            var url = _appliedFilter is null ? "api/library/tracks" : "api/library/tracks/search";
+            List<string> query = [];
+            if (_appliedFilter is null)
+            {
+                AddQuery(query, "year", _year);
+                AddQuery(query, "style", _style);
+            }
+            else
+            {
+                foreach (var year in _appliedFilter.Years)
+                    AddQuery(query, "year", year);
+                foreach (var group in _appliedFilter.Groups)
+                    AddQuery(query, "group", group);
+                foreach (var substyle in _appliedFilter.Substyles)
+                    AddQuery(query, "substyle", substyle);
+            }
+            if (query.Count > 0)
+                url += "?" + string.Join("&", query);
 
             var result = await Http.GetForResultAsync<TrackListing>(url, Logger);
             if (result.IsFailed)
@@ -50,6 +119,32 @@ public partial class Tracks
             _busy = false;
         }
     }
+
+    private async Task<bool> LoadFilterOptionsAsync()
+    {
+        var result = await Http.GetForResultAsync<TrackFilterOptions>(
+            "api/library/tracks/filter-options", Logger);
+        if (result.IsFailed)
+        {
+            _error = result.Errors[0].Message;
+            _filterOptions = null;
+            return false;
+        }
+        _filterOptions = result.Value;
+        return true;
+    }
+
+    private static void AddQuery(List<string> query, string name, string? value)
+    {
+        if (value is not null)
+            query.Add($"{name}={Uri.EscapeDataString(value)}");
+    }
+
+    private string FilterSummary => _appliedFilter is null ? ""
+        : $"{SelectionSummary(_appliedFilter.Years, "Todos los años")} / {SelectionSummary(_appliedFilter.Groups, "Todos los estilos")} / {SelectionSummary(_appliedFilter.Substyles, "Todos los subestilos")}";
+
+    private static string SelectionSummary(string[] values, string emptyText) =>
+        values.Length == 0 ? emptyText : string.Join(", ", values);
 
     private static string Display(string? value) => string.IsNullOrWhiteSpace(value) ? "Sin datos" : value;
 
