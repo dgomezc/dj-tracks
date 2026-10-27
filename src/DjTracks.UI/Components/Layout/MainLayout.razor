@@ -50,8 +50,11 @@
                 <MudText Typo="Typo.caption" Class="mud-text-secondary player-track-artist">@AudioPlayer.Artist</MudText>
             }
         </MudStack>
-        <audio @key="AudioPlayer.AudioUrl" controls autoplay preload="metadata"
-               src="@AudioPlayer.AudioUrl" aria-label="Controles de reproducción"></audio>
+        <div class="player-controls">
+            <WaveformPlayer WaveformUrl="@AudioPlayer.WaveformUrl" />
+            <audio id="djtracks-audio" @key="AudioPlayer.AudioUrl" controls autoplay preload="metadata"
+                   src="@AudioPlayer.AudioUrl" aria-label="Controles de reproducción"></audio>
+        </div>
     }
 </footer>
 

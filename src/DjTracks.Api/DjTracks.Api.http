@@ -20,6 +20,11 @@ Range: bytes=0-1023
 
 ###
 
+GET {{DjTracks.Api_HostAddress}}/api/streaming/tracks/waveform?year=2025&style=Day%20Instrumental&fileName=Artist%20-%20Track.mp3
+Accept: application/x-ndjson
+
+###
+
 GET {{DjTracks.Api_HostAddress}}/api/settings
 Accept: application/json
 

@@ -89,14 +89,18 @@ public partial class Tracks
             return;
         }
 
-        var relativeUrl = QueryHelpers.AddQueryString("api/streaming/tracks", new Dictionary<string, string?>
+        var query = new Dictionary<string, string?>
         {
             ["year"] = year,
             ["style"] = style,
             ["fileName"] = track.FileName
-        });
-        var audioUrl = new Uri(Http.BaseAddress!, relativeUrl).AbsoluteUri;
-        AudioPlayer.Play(audioUrl, track.Title ?? track.FileName, string.Join(", ", track.Artists));
+        };
+        var audioUrl = new Uri(Http.BaseAddress!,
+            QueryHelpers.AddQueryString("api/streaming/tracks", query)).AbsoluteUri;
+        var waveformUrl = new Uri(Http.BaseAddress!,
+            QueryHelpers.AddQueryString("api/streaming/tracks/waveform", query)).AbsoluteUri;
+        AudioPlayer.Play(audioUrl, waveformUrl, track.Title ?? track.FileName,
+            string.Join(", ", track.Artists));
     }
 
     private async Task RequestAsync()

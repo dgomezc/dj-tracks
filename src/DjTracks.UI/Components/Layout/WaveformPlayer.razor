@@ -1,0 +1,178 @@
+@using DjTracks.Domain
+@using DjTracks.UI.Shared
+@using System.Text.Json
+@implements IAsyncDisposable
+@inject HttpClient Http
+@inject ILogger<WaveformPlayer> Logger
+@inject IJSRuntime JS
+
+<div class="player-waveform">
+    <canvas @ref="_canvas" role="slider" aria-label="Forma de onda. Usa las flechas para buscar"
+            aria-valuemin="0" aria-valuemax="100" tabindex="0"></canvas>
+    @if (_loading)
+    {
+        <MudProgressLinear Value="@_progress" Color="Color.Primary" Class="waveform-loading"
+                           aria-label="Generando forma de onda" />
+    }
+</div>
+@if (_error is not null)
+{
+    <MudText Typo="Typo.caption" Color="Color.Warning" role="status">@_error</MudText>
+}
+
+@code {
+    [Parameter] public string? WaveformUrl { get; set; }
+
+    private ElementReference _canvas;
+    private static readonly JsonSerializerOptions JsonOptions = new(JsonSerializerDefaults.Web);
+    private IJSObjectReference? _module;
+    private CancellationTokenSource? _loadCts;
+    private string? _requestedUrl;
+    private string? _renderedUrl;
+    private string? _error;
+    private bool _loading;
+    private double _progress;
+    private bool _disposed;
+
+    protected override void OnParametersSet()
+    {
+        if (WaveformUrl == _requestedUrl)
+            return;
+
+        _requestedUrl = WaveformUrl;
+        _renderedUrl = null;
+        _loadCts?.Cancel();
+        _loadCts?.Dispose();
+        _error = null;
+        _loading = !string.IsNullOrWhiteSpace(WaveformUrl);
+        _progress = 0;
+        if (string.IsNullOrWhiteSpace(WaveformUrl))
+            return;
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (_renderedUrl == _requestedUrl)
+            return;
+
+        _module ??= await JS.InvokeAsync<IJSObjectReference>("import",
+            "./Components/Layout/WaveformPlayer.razor.js");
+        await _module.InvokeVoidAsync("clearWaveform", _canvas);
+        _renderedUrl = _requestedUrl;
+
+        if (string.IsNullOrWhiteSpace(_requestedUrl))
+            return;
+
+        var url = _requestedUrl;
+        _loadCts = new CancellationTokenSource();
+        _ = LoadWaveformAsync(url, _loadCts.Token);
+    }
+
+    private async Task LoadWaveformAsync(string url, CancellationToken cancellationToken)
+    {
+        try
+        {
+            using var response = await Http.GetAsync(url, HttpCompletionOption.ResponseHeadersRead,
+                cancellationToken);
+            if (!response.IsSuccessStatusCode)
+            {
+                var body = await response.Content.ReadAsStringAsync(cancellationToken);
+                Logger.LogWarning("La API devolvió HTTP {StatusCode} en {Url}",
+                    (int)response.StatusCode, url);
+                if (!_disposed && _requestedUrl == url)
+                    _error = GetErrorMessage(body, (int)response.StatusCode);
+                return;
+            }
+
+            await using var stream = await response.Content.ReadAsStreamAsync(cancellationToken);
+            using var reader = new StreamReader(stream);
+            var completed = false;
+            while (await reader.ReadLineAsync(cancellationToken) is { } line)
+            {
+                var chunk = JsonSerializer.Deserialize<TrackWaveformChunk>(line, JsonOptions)
+                    ?? throw new JsonException("La API envió un bloque de onda vacío.");
+                if (_disposed || _requestedUrl != url)
+                    return;
+                if (chunk.Error is not null)
+                {
+                    _error = chunk.Error;
+                    return;
+                }
+
+                await _module!.InvokeVoidAsync("appendWaveformChunk", cancellationToken, _canvas,
+                    chunk.StartIndex, chunk.Peaks, chunk.TotalPeakCount, chunk.DurationSeconds);
+                _progress = chunk.IsComplete ? 100
+                    : chunk.TotalPeakCount > 0
+                        ? Math.Min(99, (chunk.StartIndex + chunk.Peaks.Length) * 100d
+                            / chunk.TotalPeakCount)
+                        : 0;
+                completed = chunk.IsComplete;
+                await InvokeAsync(StateHasChanged);
+                if (completed)
+                    break;
+            }
+
+            if (!completed && !_disposed && _requestedUrl == url)
+                _error = "La generación de la onda terminó antes de enviar todos los datos.";
+        }
+        catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
+        {
+        }
+        catch (Exception ex) when (ex is HttpRequestException or IOException or JsonException
+            or JSException)
+        {
+            Logger.LogError(ex, "No se pudo cargar progresivamente la onda desde {Url}", url);
+            if (!_disposed && _requestedUrl == url)
+                _error = "No se pudo cargar la forma de onda. Comprueba la API y vuelve a reproducir la canción.";
+        }
+        finally
+        {
+            if (!_disposed && _requestedUrl == url)
+            {
+                _loading = false;
+                await InvokeAsync(StateHasChanged);
+            }
+        }
+    }
+
+    private static string GetErrorMessage(string body, int statusCode)
+    {
+        try
+        {
+            using var document = JsonDocument.Parse(body);
+            var root = document.RootElement;
+            if (root.TryGetProperty("detail", out var detail)
+                && detail.ValueKind == JsonValueKind.String
+                && detail.GetString() is { Length: > 0 } message)
+                return message;
+            if (root.TryGetProperty("title", out var title)
+                && title.ValueKind == JsonValueKind.String
+                && title.GetString() is { Length: > 0 } titleMessage)
+                return titleMessage;
+        }
+        catch (JsonException)
+        {
+        }
+
+        return $"La API devolvió un error ({statusCode}) al generar la onda.";
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        _disposed = true;
+        _loadCts?.Cancel();
+        _loadCts?.Dispose();
+        if (_module is null)
+            return;
+
+        try
+        {
+            await _module.InvokeVoidAsync("disposeWaveform", _canvas);
+            await _module.DisposeAsync();
+        }
+        catch (JSDisconnectedException)
+        {
+            Logger.LogDebug("El circuito se desconectó al liberar la forma de onda");
+        }
+    }
+}

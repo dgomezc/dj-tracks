@@ -14,7 +14,7 @@ Reproductor autoalojado de música electrónica (Tracks, Sessions, Remember). Se
 | Playlists | Ficheros JSON en disco (carpeta configurable). Simple, portable y exportable a m3u |
 | PostgreSQL | Solo estadísticas (reproducciones). EF Core + Npgsql |
 | Tags/carátula | TagLibSharp (lectura de tags y carátula incrustada) |
-| Onda | Interfaz `IWaveformGenerator` con dos implementaciones (FFMpegCore y NAudio), seleccionable por configuración. Picos cacheados en disco (JSON). Se decidirá cuál mantener tras compararlas |
+| Onda | FFMpegCore decodifica PCM por pipe, transmite los picos en bloques para pintar la onda progresivamente y cachea el JSON final bajo `App_Data/Waveforms`; requiere FFmpeg disponible en la API. NAudio se comparó y se descartó por menor rendimiento |
 | Autenticación | Ninguna (red local/VPN) |
 | Playlists automáticos "vivos" | Se guardan los filtros; se resuelven al abrirlos contra un índice de la biblioteca. El índice se refresca con `FileSystemWatcher` + reescaneo horario (`BackgroundService`) por si el watcher falla en redes compartidas |
 | Audio | Endpoint con soporte de `Range` (seek) |
@@ -64,7 +64,7 @@ El estado de entrega y las checklists se mantienen en `VALIDACIONES.md`. Una imp
   *Prueba*: combinaciones de filtros devuelven lo esperado.
 - **F1.3 Reproductor básico**: barra inferior con play/pausa, volumen, tiempo; reproducir al pulsar una canción (streaming con Range).
   *Prueba*: sonido y seek con barra simple.
-- **F1.4 Onda**: generación y caché de picos; la línea de tiempo es la onda y permite clic para ir al punto exacto. Comparativa FFMpegCore vs NAudio (tiempo y fiabilidad).
+- **F1.4 Onda**: FFMpegCore decodifica PCM por pipe y transmite progresivamente bloques de picos mientras genera la onda; el resultado final se cachea en JSON. La forma de onda interactiva permite buscar con clic o teclado y sigue el tiempo de reproducción. FFmpeg debe estar instalado o configurado para la API. Comparativa con NAudio completada: el generador por pipe fue más rápido en las muestras medidas.
   *Prueba*: onda visible, clic salta; probar con track y con mix de 1h+.
 - **F1.5 Cola de reproducción**: añadir/quitar, anterior/siguiente, shuffle, bucle, panel de cola.
   *Prueba*: cada control por separado.

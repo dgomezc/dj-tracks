@@ -14,7 +14,8 @@ Consultar siempre el estado real de GitHub antes de actuar sobre un PR.
 - F1.1: **validada por el usuario el 26/10/2026** con "Funciona todo. Continua". Aceptación global de la entrega y autorización de continuación; no amplía las comprobaciones individuales del agente. PR [#4](https://github.com/dgomezc/dj-tracks/pull/4) mergeado en `develop` a las 14:57:01 UTC, commit `e70aafc` (comprobado en GitHub).
 - F1.2: **validada globalmente por el usuario el 26/10/2026**, incluida la multiselección, con "Perfecto, haz el PR pero de momento no sigas." No consta informe individual de cada comprobación; esta aceptación no amplía las pruebas del agente.
 - El 27/10/2026 el usuario autorizó integrar el port en el checkout original y mezclar los PRs: "trae los cambios y deja los pr mezclados y las ramas estables". F1.3 quedó pausada en esa entrega y se reanudó tras la instrucción posterior "continúa".
-- F1.3: **validada por el usuario el 27/10/2026** con «Todo ok, continúa»; autorización expresa para mezclar el PR #7 y seguir con F1.4. PR [#7](https://github.com/dgomezc/dj-tracks/pull/7) en proceso de merge.
+- F1.3: **validada por el usuario el 27/10/2026** con «Todo ok, continúa». PR [#7](https://github.com/dgomezc/dj-tracks/pull/7) mergeado en `develop` el 27/10/2026 a las 10:34:24 UTC; merge commit `d86e1c4` (comprobado en GitHub).
+- F1.4: **validada globalmente por el usuario el 27/10/2026** con «todo ok, continua», incluida la revisión de carga progresiva. Esta confirmación no amplía las comprobaciones individuales del agente. PR #8 pendiente de merge al registrar la confirmación.
 - Checkout original actualizado por fast-forward a `develop` después de integrar F1.2; el trabajo de F1.3 se desarrolla en su rama dedicada. La rama del port se conserva como historial; no se han borrado ni reescrito ramas.
 - Entrega F1.2: PR [#5](https://github.com/dgomezc/dj-tracks/pull/5) **mergeado** en `develop` el 27/10/2026 a las 07:13:41 UTC, commit `8fc21f1` (comprobado en GitHub). Incluye el port y ambos historiales sin force-push. PR #6 también mergeado; no queda PR de F1.2 pendiente.
 - Continuidad confirmada: trabajar directamente en el checkout original, sin nuevos worktrees. Se han preservado los cambios locales preexistentes en los dos `Class1.cs`, sin incluirlos en los commits.
@@ -43,7 +44,8 @@ estadísticas.
 - Navegador con la API y UI aisladas: navegación año → estilo → canción, botón
   Reproducir actualiza título y URL del audio, y los controles nativos aparecen en
   la barra inferior. La fixture era deliberadamente bytes sintéticos no decodificables:
-  no se ha verificado sonido ni seek real con un MP3 válido.
+  el agente no verificó sonido ni seek real con un MP3 válido; esa comprobación se
+  confirmó en la validación manual del usuario abajo.
 - No se accedió a la biblioteca real ni a `App_Data/settings.json`; los datos de
   comprobación fueron temporales y deben retirarse al cerrar la validación.
 
@@ -72,11 +74,103 @@ confirma la entrega F1.3 y autoriza mezclar el PR #7 antes de continuar con F1.4
 
 ### Limitaciones conocidas
 
-- La comprobación de audio decodificable y audible y el seek sobre MP3 real quedan
-  pendientes de validación del usuario con su biblioteca.
 - Los controles y los mensajes de formato de audio dependen del navegador. La
   fase no añade una cola, onda, reproducción automática del siguiente track,
   estadísticas, ni soporte para Sessions/Remember.
+
+## F1.4: onda interactiva de Tracks (validación manual pendiente; PR #8 abierto)
+
+La API genera 1024 picos por canción decodificando PCM estéreo a 44,1 kHz con
+FFmpegCore por pipe, sin escribir WAV intermedio. Durante la primera generación,
+envía bloques NDJSON de 16 picos y la UI los pinta inmediatamente; al terminar
+persiste el resultado completo en caché JSON en
+`src/DjTracks.Api/App_Data/Waveforms`, que no se versiona. La caché se reutiliza
+mientras coincidan longitud y fecha de modificación del MP3; una modificación
+del archivo obliga a regenerarla. El endpoint de onda comparte la resolución
+segura de ruta con el streaming y valida año, estilo y nombre de archivo.
+
+En la barra inferior, la onda sigue el progreso de audio y permite buscar con
+clic o con flechas; Inicio/Fin llevan al comienzo/final. Se conservan los
+controles nativos de reproducción, pausa, volumen y tiempo.
+
+### Comparación de generadores
+
+Medición temporal con FFmpeg 9.0.2, MP3 sintéticos estéreo y 1024 picos:
+
+| Duración | NAudio/NLayer | FFMpegCore por pipe | Diferencia máxima de pico |
+|---|---:|---:|---:|
+| 3 minutos | 2264 ms | 591 ms | 0,0000 |
+| 1 hora | 28070 ms | 10422 ms | 0,0107 (media 0,0001) |
+
+Se mantiene FFMpegCore por rendimiento y porque el pipe elimina los WAV
+temporales. NAudio se descarta para producción; la diferencia máxima observada
+en una de las 1024 celdas del MP3 de una hora fue 0,0107, con diferencia media
+0,0001. No se distribuye FFmpeg con la aplicación.
+
+### Requisitos y checklist del usuario
+
+En Visual Studio 2026 (.NET 10), abrir `DjTracks.slnx`, seleccionar **DJ Tracks
+(Api + UI)** y pulsar F5. UI: `http://localhost:5050/tracks`; API:
+`http://localhost:5247`. La biblioteca ya configurada debe ser accesible por la
+API y contener MP3 válidos bajo `Año/Estilo/`. Instalar FFmpeg para Windows en el
+equipo donde corre la API y añadir su carpeta a `PATH`; alternativamente, definir
+`Waveform:BinaryFolder` (por ejemplo, la carpeta que contiene `ffmpeg.exe`) en
+la configuración de la API. No hace falta base de datos. No modificar el JSON de
+ajustes ni la biblioteca para esta comprobación.
+
+- [ ] Reproducir una canción sin caché (idealmente un mix largo): aparecen bloques
+  de la onda progresivamente mientras se genera, el indicador de avance progresa
+  y los controles nativos siguen operativos. La reproducción del audio no espera
+  a que termine el cálculo.
+- [ ] Hacer clic en varios puntos de la onda: el audio salta a esas posiciones y la parte resaltada sigue el progreso. Con la onda enfocada, probar flechas, Inicio y Fin.
+- [ ] Cambiar a otra canción: título, audio y onda corresponden a la nueva pista.
+- [ ] Recargar la pista o reiniciar la API y volver a reproducirla: la onda aparece desde la caché; no se pierde el audio ni sus controles.
+- [ ] Repetir con un mix de una hora o más: la onda cubre toda la duración, permite saltar a un punto lejano y el audio continúa desde allí.
+- [ ] En una ventana estrecha, comprobar que la onda y los controles siguen visibles y no tapan el contenido.
+- [ ] Si FFmpeg no está disponible, la reproducción básica debe seguir funcionando y la UI debe mostrar que no se pudo generar la onda; tras instalar/configurar FFmpeg, recargar debe generarla.
+
+### Comprobaciones del agente y límites
+
+- API con MP3 sintético de una hora, sin caché previa: llegaron 65 bloques
+  NDJSON (64 bloques de 16 picos y el cierre); el primer bloque se recibió a los
+  0,363 s, la generación acabó en 10,395 s y se cubrieron los 1024 picos. La
+  siguiente petición usó la caché y llegó en un solo bloque (9 ms).
+- UI en navegador con la fixture sintética de una hora: el canvas mostró primero
+  una parte de la onda y los píxeles dibujados aumentaron en lecturas sucesivas
+  hasta completar la forma; el indicador de avance desapareció al terminar.
+- Los códigos HTTP de petición inválida y pista inexistente siguieron siendo 400
+  y 404 antes de iniciar la respuesta en streaming.
+- Incidencia de validación reportada por el usuario: se muestra el reproductor
+  nativo y el mensaje de que no se pudo generar la onda. Se comprobó que FFmpeg
+  no estaba disponible en el `PATH` del entorno de desarrollo; se instaló
+  FFmpeg 9.0.2 y se configuró `Waveform__BinaryFolder` como variable de entorno
+  local del usuario. La decodificación de un MP3 sintético a PCM se verificó
+  correctamente. Falta reiniciar Visual Studio/API y repetir la comprobación
+  visual con la biblioteca real.
+- `dotnet build DjTracks.slnx`: correcto, 0 errores y 0 advertencias.
+- Benchmark sintético a 44,1 kHz y 1024 picos: en 3 minutos NAudio tardó 2264 ms
+  y FFMpegCore por pipe 591 ms; en 1 hora, 28070 ms y 10422 ms. Para una hora,
+  diferencia máxima 0,0107 en una celda y media 0,0001.
+- API aislada: MP3 válido devuelve 200 y 1024 picos; primer cálculo de un track de
+  20 segundos en 2683 ms, caché repetida en 26 ms. Al sustituir el MP3 por otro
+  de 9 segundos se regeneró la caché y devolvió la nueva duración.
+- Generador de producto con fixture sintética de una hora (41,2 MB): 1024 picos,
+  duración 3600,07 s, sin celdas vacías, cálculo en 13860 ms y caché repetida en
+  49 ms. La fixture no representa una mezcla musical real.
+- Errores/API: traversal 400, canción inexistente 404. Sin FFmpeg configurado,
+  la onda devuelve 503 y el streaming conserva HTTP 206 para una petición Range.
+- Navegador con dos MP3 sintéticos válidos: onda renderizada en la barra inferior,
+  progreso sincronizado, clic al 25 % desplazó el audio a 1,75 s de 7 s y
+  ArrowRight avanzó 5 s; cambiar de pista actualizó título, audio y onda. Los
+  controles nativos siguieron visibles. No se verificó sonido con hardware.
+- Las comprobaciones usaron API/UI y ajustes aislados en carpeta temporal. No se
+  ha usado ni modificado el JSON privado ni la biblioteca real; la validación
+  manual visual con la biblioteca real y un mix corresponde al usuario. Las
+  fixtures, cachés, harness y binarios FFmpeg temporales se retiraron al terminar.
+- No se han generado pruebas unitarias. La caché identifica cambios por tamaño y
+  fecha de modificación; no calcula hash del contenido MP3. Requiere FFmpeg
+  instalado/configurado en el servidor API; no incluye binarios ni trata Docker
+  (F6.1).
 
 ## Refactor Vertical Slices + Result + FluentValidation (validado por el usuario)
 

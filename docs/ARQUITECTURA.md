@@ -13,7 +13,7 @@ genéricos, sin clientes HTTP intermedios ni clases de errores por feature.
 | Proyecto | Responsabilidad | Depende de | Paquetes clave |
 |---|---|---|---|
 | `DjTracks.Domain` | Contratos compartidos API ↔ UI (records), `AppError`/`ErrorKind` | — | FluentResults |
-| `DjTracks.Infrastructure` | Ficheros, tags, ajustes, (futuro) onda y EF Core | Domain | TagLibSharp, Logging.Abstractions |
+| `DjTracks.Infrastructure` | Ficheros, tags, ajustes, onda y EF Core | Domain | TagLibSharp, FFMpegCore, Logging.Abstractions |
 | `DjTracks.Api` | Minimal API en vertical slices | Domain, Infrastructure | FluentValidation (+ DependencyInjectionExtensions) |
 | `DjTracks.UI` | Blazor Server + MudBlazor; llama a la API por HTTP | Domain | MudBlazor |
 
@@ -66,6 +66,12 @@ src/DjTracks.UI/
 ├─ Shared/HttpClientResultExtensions.cs
 └─ Components/Pages/<Página>.razor + <Página>.razor.cs
 ```
+
+La forma de onda de Tracks se genera en Infrastructure mediante `IWaveformGenerator`
+y FFMpegCore. El slice `Streaming/GetTrackWaveform` envía los picos en bloques
+NDJSON durante la primera generación y la UI los dibuja al recibirlos; después
+entrega la caché JSON de `Api/App_Data/Waveforms` en un solo bloque. La UI controla
+el seek en `WaveformPlayer`; no accede al sistema de ficheros ni invoca FFmpeg.
 
 | Elemento | Nombre | Namespace |
 |---|---|---|
