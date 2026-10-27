@@ -86,8 +86,8 @@ se conserva al navegar dentro de la aplicación, no se guarda en disco ni se
 comparte con otras pestañas y una recarga completa inicia otra sesión.
 No necesita un endpoint ni base de datos.
 
-- «Añadir a la cola» agrega una entrada sin interrumpir el audio, incluso si es
-  una canción repetida. «Reproducir» selecciona su primera entrada existente o
+- «Añadir a la cola» agrega una entrada sin interrumpir el audio; si el archivo
+  ya está en la cola, no lo añade ni reinicia la reproducción. «Reproducir» selecciona su entrada existente o
   la añade si no estaba; pulsarla de nuevo reinicia la canción.
 - «Cola (N)» abre el panel derecho. Permite iniciar cualquier entrada, quitarla
   y vaciar la cola. Quitar la entrada actual reproduce la siguiente en el orden
@@ -124,18 +124,38 @@ mediante `PATH` o `Waveform__BinaryFolder`. No se necesita base de datos.
   al terminar se reinicia la misma; anterior/siguiente aún cambian de canción.
 - [ ] Quitar una entrada no activa: no interrumpe el audio. Quitar la actual:
   reproduce otra disponible. Vaciar: desaparecen audio y onda; contador cero.
-- [ ] Añadir la misma canción dos veces: son entradas independientes y cada una
-  puede quitarse. Navegar a Inicio y volver: se conserva la cola de la sesión.
+- [ ] Añadir varias veces el mismo archivo, desde explorador y filtros: solo hay
+  una entrada y el contador no aumenta; no cambia la pista ni su posición.
+  Archivos distintos con el mismo título sí pueden coexistir. Quitar el archivo
+  permite volver a añadirlo. Navegar a Inicio y volver: se conserva la cola.
+- [ ] Mantener la cola abierta al cambiar con anterior/siguiente y al acabar
+  automáticamente una canción: el icono activo pasa inmediatamente a la nueva
+  entrada sin cerrar ni reabrir el panel. Probar también shuffle y bucle de cola.
 - [ ] En ventana estrecha, comprobar panel, cierre, controles y onda sin que el
   reproductor tape las últimas filas. Una recarga completa vacía la cola.
 
 ### Comprobaciones del agente
 
+Revisión del 27/10/2026 solicitada por el usuario: no admitir archivos repetidos
+y corregir el icono activo que quedaba desactualizado con el panel abierto.
+La comprobación anterior de duplicados queda sustituida por la checklist nueva.
+Repetir anterior/siguiente, avance automático, shuffle, bucle y quitar/vaciar;
+son nuevas las comprobaciones de rechazo de duplicados y del indicador en vivo.
+
+- Revisión comprobada: compilación completa, 0 errores y advertencias. Navegador
+  con dos MP3 sintéticos distintos y el mismo título: se mantienen dos entradas,
+  añadir otra vez el mismo archivo no aumenta el contador ni recrea el audio ni
+  cambia su posición. Tras quitarlo se puede volver a añadir.
+- Con el panel abierto, el icono activo se actualiza al usar anterior/siguiente,
+  al finalizar realmente el audio, con shuffle, al volver al inicio por bucle de
+  cola y al quitar la pista actual. Vaciar retira las entradas y el audio, sin
+  error de circuito. Pendiente repetir con la biblioteca real del usuario.
 - Compilación completa correcta con 0 errores y 0 advertencias.
 - Navegador con API, ajustes y tres MP3 sintéticos aislados: añadir sin iniciar,
   reproducción, anterior/siguiente, avance mediante evento de fin y fin real del
   audio, shuffle recorriendo tres entradas distintas, reinicio de la canción en
-  bucle, vuelta al inicio con bucle de cola, quitar actual, vaciar y duplicados.
+  bucle, vuelta al inicio con bucle de cola, quitar actual y vaciar. La aceptación
+  de duplicados de la entrega inicial queda revocada por esta revisión.
 - Onda renderizada y seek por clic conservados tras cambiar de pista; el circuito
   Blazor no muestra error. Inspección en ventana estrecha: reproductor de 167 px
   y reserva inferior de 300 px en el contenido.

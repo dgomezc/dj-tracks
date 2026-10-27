@@ -67,7 +67,7 @@ El estado de entrega y las checklists se mantienen en `VALIDACIONES.md`. Una imp
 - **F1.4 Onda**: FFMpegCore decodifica PCM por pipe y transmite progresivamente bloques de picos mientras genera la onda; el resultado final se cachea en JSON. La forma de onda interactiva permite buscar con clic o teclado y sigue el tiempo de reproducción. FFmpeg debe estar instalado o configurado para la API. Comparativa con NAudio completada: el generador por pipe fue más rápido en las muestras medidas.
   *Prueba*: onda visible, clic salta; probar con track y con mix de 1h+.
 - **F1.5 Cola de reproducción**: añadir/quitar, anterior/siguiente, shuffle, bucle, panel de cola.
-  Cola en memoria por sesión de la UI, con duplicados independientes; avance
+  Cola en memoria por sesión de la UI, sin archivos repetidos; avance
   automático al terminar, bucle de canción o de cola y recorrido aleatorio.
   *Prueba*: cada control por separado.
 - **F1.6 Ficha de "ahora suena"**: carátula e información en la zona principal.
