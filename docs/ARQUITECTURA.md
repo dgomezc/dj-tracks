@@ -73,6 +73,13 @@ NDJSON durante la primera generación y la UI los dibuja al recibirlos; después
 entrega la caché JSON de `Api/App_Data/Waveforms` en un solo bloque. La UI controla
 el seek en `WaveformPlayer`; no accede al sistema de ficheros ni invoca FFmpeg.
 
+La cola de reproducción se mantiene únicamente en la UI, en el servicio scoped
+`AudioPlayerState`, mediante entradas `QueuedTrack` con identificador independiente
+(admite duplicados). `PlaybackQueue` muestra y modifica esa cola; `MainLayout`
+enlaza controles y eventos de fin del audio. No accede a ficheros ni crea casos de
+uso HTTP: reutiliza las URLs de streaming y onda resueltas desde Tracks. La cola
+no es una playlist persistente; su estado se pierde al recargar la sesión.
+
 | Elemento | Nombre | Namespace |
 |---|---|---|
 | Caso de uso | Verbo + sustantivo: `GetTracks`, `SaveSettings`, `GetSessions`, `CreatePlaylist` | — |

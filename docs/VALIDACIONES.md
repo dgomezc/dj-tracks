@@ -15,7 +15,8 @@ Consultar siempre el estado real de GitHub antes de actuar sobre un PR.
 - F1.2: **validada globalmente por el usuario el 26/10/2026**, incluida la multiselección, con "Perfecto, haz el PR pero de momento no sigas." No consta informe individual de cada comprobación; esta aceptación no amplía las pruebas del agente.
 - El 27/10/2026 el usuario autorizó integrar el port en el checkout original y mezclar los PRs: "trae los cambios y deja los pr mezclados y las ramas estables". F1.3 quedó pausada en esa entrega y se reanudó tras la instrucción posterior "continúa".
 - F1.3: **validada por el usuario el 27/10/2026** con «Todo ok, continúa». PR [#7](https://github.com/dgomezc/dj-tracks/pull/7) mergeado en `develop` el 27/10/2026 a las 10:34:24 UTC; merge commit `d86e1c4` (comprobado en GitHub).
-- F1.4: **validada globalmente por el usuario el 27/10/2026** con «todo ok, continua», incluida la revisión de carga progresiva. Esta confirmación no amplía las comprobaciones individuales del agente. PR #8 pendiente de merge al registrar la confirmación.
+- F1.4: **validada globalmente por el usuario el 27/10/2026** con «todo ok, continua», incluida la revisión de carga progresiva. Esta confirmación no amplía las comprobaciones individuales del agente. PR [#8](https://github.com/dgomezc/dj-tracks/pull/8) mergeado en `develop` a las 14:26:25 UTC; merge commit `1d43cc8`.
+- F1.5: implementada en `fase/f1-5-cola`; pendiente de entrega y validación manual del usuario. F1.6 no iniciada.
 - Checkout original actualizado por fast-forward a `develop` después de integrar F1.2; el trabajo de F1.3 se desarrolla en su rama dedicada. La rama del port se conserva como historial; no se han borrado ni reescrito ramas.
 - Entrega F1.2: PR [#5](https://github.com/dgomezc/dj-tracks/pull/5) **mergeado** en `develop` el 27/10/2026 a las 07:13:41 UTC, commit `8fc21f1` (comprobado en GitHub). Incluye el port y ambos historiales sin force-push. PR #6 también mergeado; no queda PR de F1.2 pendiente.
 - Continuidad confirmada: trabajar directamente en el checkout original, sin nuevos worktrees. Se han preservado los cambios locales preexistentes en los dos `Class1.cs`, sin incluirlos en los commits.
@@ -78,7 +79,70 @@ confirma la entrega F1.3 y autoriza mezclar el PR #7 antes de continuar con F1.4
   fase no añade una cola, onda, reproducción automática del siguiente track,
   estadísticas, ni soporte para Sessions/Remember.
 
-## F1.4: onda interactiva de Tracks (validación manual pendiente; PR #8 abierto)
+## F1.5: cola de reproducción (validación manual pendiente)
+
+La cola reside en `AudioPlayerState`, con alcance de sesión interactiva de la UI:
+se conserva al navegar dentro de la aplicación, no se guarda en disco ni se
+comparte con otras pestañas y una recarga completa inicia otra sesión.
+No necesita un endpoint ni base de datos.
+
+- «Añadir a la cola» agrega una entrada sin interrumpir el audio, incluso si es
+  una canción repetida. «Reproducir» selecciona su primera entrada existente o
+  la añade si no estaba; pulsarla de nuevo reinicia la canción.
+- «Cola (N)» abre el panel derecho. Permite iniciar cualquier entrada, quitarla
+  y vaciar la cola. Quitar la entrada actual reproduce la siguiente en el orden
+  de reproducción; si era la última, reproduce la anterior disponible. Vaciar
+  detiene el audio y retira la onda.
+- Anterior/siguiente recorren la cola. Sin pista activa, siguiente inicia la
+  primera. Sin bucle, los controles se deshabilitan en los extremos y al acabar
+  la última canción se detiene la reproducción.
+- Shuffle baraja el recorrido una vez, manteniendo la pista actual al principio.
+  Cada entrada se recorre una vez antes de llegar al final. Las entradas nuevas
+  se incorporan al final del recorrido. Desactivarlo recupera el orden de adición.
+  El panel conserva siempre el orden de adición.
+- Bucle alterna **no → cola → canción → no**. «Cola» vuelve al principio al
+  terminar; «canción» repite la actual al terminar. Anterior/siguiente permiten
+  cambiar de canción también con bucle de canción.
+
+### Preparación y checklist del usuario
+
+En Visual Studio 2026 (.NET 10), abrir `DjTracks.slnx` en `fase/f1-5-cola`, elegir
+**DJ Tracks (Api + UI)** y pulsar F5. Abrir `http://localhost:5050/tracks`
+(API `http://localhost:5247`). Se necesitan al menos tres MP3 válidos bajo
+`Año/Estilo/` en la biblioteca ya configurada y FFmpeg disponible para la API
+mediante `PATH` o `Waveform__BinaryFolder`. No se necesita base de datos.
+
+- [ ] Añadir tres canciones con el nuevo botón de cola: aumenta el contador,
+  sin iniciar ni interrumpir el audio. Abrir «Cola (3)» y verificar las entradas.
+- [ ] Reproducir una entrada del panel y probar anterior/siguiente: cambian
+  audio, título, entrada resaltada y onda. Pausa, volumen y seek siguen funcionando.
+- [ ] Con bucle desactivado, dejar acabar una canción: pasa a la siguiente; al
+  acabar la última se detiene. Los controles se deshabilitan en los extremos.
+- [ ] Activar shuffle y recorrer las tres entradas: no se repiten antes de llegar
+  al final. Desactivarlo: vuelve el orden de adición.
+- [ ] Bucle de cola: al acabar la última vuelve a la primera. Bucle de canción:
+  al terminar se reinicia la misma; anterior/siguiente aún cambian de canción.
+- [ ] Quitar una entrada no activa: no interrumpe el audio. Quitar la actual:
+  reproduce otra disponible. Vaciar: desaparecen audio y onda; contador cero.
+- [ ] Añadir la misma canción dos veces: son entradas independientes y cada una
+  puede quitarse. Navegar a Inicio y volver: se conserva la cola de la sesión.
+- [ ] En ventana estrecha, comprobar panel, cierre, controles y onda sin que el
+  reproductor tape las últimas filas. Una recarga completa vacía la cola.
+
+### Comprobaciones del agente
+
+- Compilación completa correcta con 0 errores y 0 advertencias.
+- Navegador con API, ajustes y tres MP3 sintéticos aislados: añadir sin iniciar,
+  reproducción, anterior/siguiente, avance mediante evento de fin y fin real del
+  audio, shuffle recorriendo tres entradas distintas, reinicio de la canción en
+  bucle, vuelta al inicio con bucle de cola, quitar actual, vaciar y duplicados.
+- Onda renderizada y seek por clic conservados tras cambiar de pista; el circuito
+  Blazor no muestra error. Inspección en ventana estrecha: reproductor de 167 px
+  y reserva inferior de 300 px en el contenido.
+- No se ha comprobado sonido con hardware ni la biblioteca real. No se generaron
+  tests unitarios. Los procesos y datos sintéticos se retiraron tras comprobar.
+
+## F1.4: onda interactiva de Tracks (validada por el usuario; PR #8 mergeado)
 
 La API genera 1024 picos por canción decodificando PCM estéreo a 44,1 kHz con
 FFmpegCore por pipe, sin escribir WAV intermedio. Durante la primera generación,
