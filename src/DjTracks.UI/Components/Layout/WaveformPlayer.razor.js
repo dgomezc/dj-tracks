@@ -6,16 +6,20 @@ export function clearWaveform(canvas) {
     cancelAnimationFrame(instance.frame);
     instance.frame = 0;
     instance.peaks = [];
+    instance.loadedCount = 0;
     draw(instance);
 }
 
-export function setWaveform(canvas, peaks, duration) {
+export function appendWaveformChunk(canvas, startIndex, newPeaks, peakCount, duration) {
     const audio = document.getElementById("djtracks-audio");
     if (!(audio instanceof HTMLAudioElement))
         throw new Error("No se encontró el reproductor de audio para sincronizar la onda.");
     let instance = instances.get(canvas);
     if (!instance) {
-        instance = { canvas, audio, peaks, duration, frame: 0 };
+        instance = {
+            canvas, audio, peaks: new Array(peakCount).fill(0),
+            loadedCount: 0, duration, frame: 0
+        };
         instance.draw = () => draw(instance);
         instance.seek = event => {
             const bounds = canvas.getBoundingClientRect();
@@ -49,14 +53,21 @@ export function setWaveform(canvas, peaks, duration) {
         instance.resize = new ResizeObserver(instance.draw);
         instance.resize.observe(canvas);
         instances.set(canvas, instance);
-    } else if (instance.audio !== audio) {
+    } else if (instance.peaks.length !== peakCount) {
+        instance.peaks = new Array(peakCount).fill(0);
+        instance.loadedCount = 0;
+    }
+
+    if (instance.audio !== audio) {
         detach(instance);
         instance.audio = audio;
         attachAudio(instance);
     }
 
-    instance.peaks = peaks;
     instance.duration = duration;
+    for (let index = 0; index < newPeaks.length; index++)
+        instance.peaks[startIndex + index] = newPeaks[index];
+    instance.loadedCount = Math.max(instance.loadedCount, startIndex + newPeaks.length);
     draw(instance);
 }
 
@@ -110,6 +121,7 @@ function draw(instance) {
     const context = canvas.getContext("2d");
     context.setTransform(scale, 0, 0, scale, 0, 0);
     context.clearRect(0, 0, width, height);
+    if (peaks.length === 0) return;
     const style = getComputedStyle(canvas);
     const primary = style.getPropertyValue("--mud-palette-primary").trim() || style.color;
     const muted = style.getPropertyValue("--mud-palette-text-secondary").trim() || style.color;
@@ -120,7 +132,7 @@ function draw(instance) {
     const barWidth = Math.max(1, width / peaks.length);
     const maxPeak = Math.max(0, ...peaks);
 
-    peaks.forEach((peak, index) => {
+    peaks.slice(0, instance.loadedCount).forEach((peak, index) => {
         const x = index * width / peaks.length;
         const normalizedPeak = maxPeak > 0 ? Math.sqrt(peak / maxPeak) : 0;
         const amplitude = Math.max(1, normalizedPeak * (height * 0.88) / 2);

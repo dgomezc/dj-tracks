@@ -15,7 +15,8 @@ public sealed class TrackWaveformCache(string cacheDirectory, IWaveformGenerator
     private const int CacheVersion = 1;
     private static readonly JsonSerializerOptions JsonOptions = new(JsonSerializerDefaults.Web);
 
-    public async Task<Result<TrackWaveform>> GetAsync(FileInfo file, CancellationToken cancellationToken)
+    public async Task<Result<TrackWaveform>> GetAsync(FileInfo file, CancellationToken cancellationToken,
+        Func<TrackWaveformChunk, CancellationToken, ValueTask>? onChunk = null)
     {
         file.Refresh();
         if (!file.Exists)
@@ -25,18 +26,15 @@ public sealed class TrackWaveformCache(string cacheDirectory, IWaveformGenerator
         var modifiedTicks = file.LastWriteTimeUtc.Ticks;
         var cachePath = GetCachePath(file.FullName);
 
+        CacheEntry? cached = null;
         try
         {
             if (File.Exists(cachePath))
             {
                 await using var cachedFile = new FileStream(cachePath, FileMode.Open, FileAccess.Read,
                     FileShare.Read | FileShare.Delete, 4096, FileOptions.Asynchronous);
-                var cached = await JsonSerializer.DeserializeAsync<CacheEntry>(
+                cached = await JsonSerializer.DeserializeAsync<CacheEntry>(
                     cachedFile, JsonOptions, cancellationToken);
-                if (cached is { Version: CacheVersion, PeakCount: PeakCount }
-                    && cached.FileLength == length && cached.ModifiedTicks == modifiedTicks
-                    && cached.Peaks is { Length: PeakCount } && cached.DurationSeconds > 0)
-                    return Result.Ok(new TrackWaveform(cached.DurationSeconds, cached.Peaks));
             }
         }
         catch (JsonException ex)
@@ -48,9 +46,19 @@ public sealed class TrackWaveformCache(string cacheDirectory, IWaveformGenerator
             logger.LogWarning(ex, "No se pudo leer la caché de onda para {FileName}", file.Name);
         }
 
+        if (cached is { Version: CacheVersion, PeakCount: PeakCount }
+            && cached.FileLength == length && cached.ModifiedTicks == modifiedTicks
+            && cached.Peaks is { Length: PeakCount } && cached.DurationSeconds > 0)
+        {
+            if (onChunk is not null)
+                await onChunk(new TrackWaveformChunk(0, cached.Peaks, PeakCount,
+                    cached.DurationSeconds, IsComplete: true), cancellationToken);
+            return Result.Ok(new TrackWaveform(cached.DurationSeconds, cached.Peaks));
+        }
+
         try
         {
-            var waveform = await generator.GenerateAsync(file, PeakCount, cancellationToken);
+            var waveform = await generator.GenerateAsync(file, PeakCount, onChunk, cancellationToken);
             file.Refresh();
             if (!file.Exists || file.Length != length || file.LastWriteTimeUtc.Ticks != modifiedTicks)
                 return new AppError(ErrorKind.Conflict, "La canción ha cambiado.",
@@ -76,6 +84,10 @@ public sealed class TrackWaveformCache(string cacheDirectory, IWaveformGenerator
                 if (File.Exists(temporaryPath))
                     File.Delete(temporaryPath);
             }
+
+            if (onChunk is not null)
+                await onChunk(new TrackWaveformChunk(PeakCount, [], PeakCount,
+                    waveform.DurationSeconds, IsComplete: true), cancellationToken);
 
             return Result.Ok(waveform);
         }

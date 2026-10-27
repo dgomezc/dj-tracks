@@ -19,6 +19,7 @@ public sealed class FfmpegWaveformGenerator
     }
 
     public async Task<TrackWaveform> GenerateAsync(FileInfo file, int peakCount,
+        Func<TrackWaveformChunk, CancellationToken, ValueTask>? onChunk,
         CancellationToken cancellationToken)
     {
         using var audio = TagLib.File.Create(file.FullName);
@@ -26,7 +27,8 @@ public sealed class FfmpegWaveformGenerator
         if (!double.IsFinite(duration) || duration <= 0)
             throw new InvalidDataException("El MP3 no contiene una duración válida.");
 
-        var sink = new PeakPipeSink(peakCount, (long)(duration * SampleRate));
+        var sink = new PeakPipeSink(peakCount, Math.Max(1, (long)(duration * SampleRate)),
+            duration, onChunk);
         await FFMpegArguments.FromFileInput(file.FullName)
             .OutputToPipe(sink, options => options
                 .ForceFormat("s16le")
@@ -37,11 +39,16 @@ public sealed class FfmpegWaveformGenerator
         if (sink.FramesRead == 0)
             throw new InvalidDataException("FFmpeg no devolvió muestras de audio.");
 
+        await sink.FlushRemainingAsync(cancellationToken);
         return new TrackWaveform(duration, sink.Peaks);
     }
 
-    private sealed class PeakPipeSink(int peakCount, long expectedFrames) : IPipeSink
+    private sealed class PeakPipeSink(int peakCount, long expectedFrames, double durationSeconds,
+        Func<TrackWaveformChunk, CancellationToken, ValueTask>? onChunk) : IPipeSink
     {
+        private const int ChunkSize = 16;
+        private int _nextPeak;
+
         public float[] Peaks { get; } = new float[peakCount];
         public long FramesRead { get; private set; }
 
@@ -69,6 +76,10 @@ public sealed class FfmpegWaveformGenerator
                     FramesRead++;
                 }
 
+                var completedBuckets = (int)Math.Min(Peaks.Length,
+                    FramesRead * Peaks.Length / expectedFrames);
+                await EmitCompletedChunksAsync(completedBuckets, cancellationToken);
+
                 bufferedBytes = totalBytes - completeBytes;
                 if (bufferedBytes > 0)
                     Buffer.BlockCopy(buffer, completeBytes, buffer, 0, bufferedBytes);
@@ -76,6 +87,28 @@ public sealed class FfmpegWaveformGenerator
 
             if (bufferedBytes != 0)
                 throw new InvalidDataException("FFmpeg devolvió una trama PCM incompleta.");
+        }
+
+        public ValueTask FlushRemainingAsync(CancellationToken cancellationToken) =>
+            EmitChunkAsync(Peaks.Length, cancellationToken);
+
+        private async ValueTask EmitCompletedChunksAsync(int completedBuckets,
+            CancellationToken cancellationToken)
+        {
+            while (completedBuckets - _nextPeak >= ChunkSize)
+                await EmitChunkAsync(_nextPeak + ChunkSize, cancellationToken);
+        }
+
+        private async ValueTask EmitChunkAsync(int endIndex, CancellationToken cancellationToken)
+        {
+            if (onChunk is null || endIndex <= _nextPeak)
+                return;
+
+            var startIndex = _nextPeak;
+            var peaks = Peaks[startIndex..endIndex];
+            _nextPeak = endIndex;
+            await onChunk(new TrackWaveformChunk(startIndex, peaks, Peaks.Length,
+                durationSeconds, IsComplete: false), cancellationToken);
         }
     }
 }

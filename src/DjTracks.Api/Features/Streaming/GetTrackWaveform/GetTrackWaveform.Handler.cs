@@ -10,6 +10,7 @@ public sealed class GetTrackWaveformHandler(JsonSettingsStore settingsStore, Tra
     TrackWaveformCache waveformCache, ILogger<GetTrackWaveformHandler> logger)
 {
     public async Task<Result<TrackWaveform>> HandleAsync(GetTrackWaveformRequest request,
+        Func<TrackWaveformChunk, CancellationToken, ValueTask> onChunk,
         CancellationToken ct)
     {
         var settings = await settingsStore.LoadAsync(ct);
@@ -25,7 +26,7 @@ public sealed class GetTrackWaveformHandler(JsonSettingsStore settingsStore, Tra
                 request.Style!, request.FileName!, ct);
             return file.IsFailed
                 ? file.ToResult()
-                : await waveformCache.GetAsync(file.Value, ct);
+                : await waveformCache.GetAsync(file.Value, ct, onChunk);
         }
         catch (OperationCanceledException)
         {
