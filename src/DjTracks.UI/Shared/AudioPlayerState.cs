@@ -28,6 +28,9 @@ public sealed class AudioPlayerState
 
     public void Enqueue(string audioUrl, string waveformUrl, string title, string? artist)
     {
+        if (_queue.Any(item => item.AudioUrl == audioUrl))
+            return;
+
         AddTrack(audioUrl, waveformUrl, title, artist);
         Changed?.Invoke();
     }
