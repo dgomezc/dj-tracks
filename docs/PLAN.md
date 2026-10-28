@@ -141,6 +141,8 @@ El estado de entrega y las checklists se mantienen en `VALIDACIONES.md`. Una imp
   nunca Sessions, rutas absolutas ni URLs. Orden de incorporación y sin repetidos.
   Nombres de 1–120 caracteres, recortados y únicos sin distinguir mayúsculas;
   renombrar conserva ID y entradas. Borrar pide confirmación y solo elimina el JSON.
+  Revisión del usuario (28/10/2026): crear y renombrar en ventana modal con
+  Aceptar/Cancelar, y tooltip en todos los botones que solo muestran icono.
   Decisión del usuario del 28/10/2026: cargar **añade al final** de la cola, sin
   duplicados ni iniciar/interrumpir audio; no sustituye la cola. Resuelve tags
   actuales y reutiliza onda/portada de cada biblioteca. Si falta un MP3, muestra

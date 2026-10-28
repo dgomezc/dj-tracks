@@ -191,7 +191,9 @@ y reutiliza `TrackLibrary.ReadTrack` para tags actuales, sin escanear toda la
 carpeta por canción. Cualquier referencia ausente cancela la carga completa
 antes de cambiar la cola; la edición del JSON sigue disponible para quitarla.
 
-`Playlists.razor.cs` gestiona por HTTP nombres, entradas y carga. Construye URLs
+`Playlists.razor.cs` gestiona por HTTP nombres, entradas y carga. Crear y renombrar
+usan un único `BbDialog` con Cancelar/Aceptar; el error de la API se queda en el modal.
+Construye URLs
 de streaming/onda/portada con los mismos identificadores y orden de query que
 Tracks/Remember; `AudioPlayerState.Enqueue` conserva audio/posición y rechaza
 duplicados también entre un listado y una playlist. No guarda tags/URLs en JSON.
@@ -311,6 +313,11 @@ handler/Infrastructure con `Result` · **imprevisto** → manejador integrado.
   proyecto: no uses clases de Tailwind en el marcado propio; crea clases en `app.css`.
 - Textos y `aria-label` en español: pasa las etiquetas de los componentes (`AriaLabel`, `Placeholder`,
   `ClearLabel`, `LightLabel`…) cuando su valor por defecto esté en inglés.
+- Botones con solo icono: usa `IconButton` (`Components/Layout/IconButton.razor`), que envuelve `BbButton`
+  en `BbTooltip` (`AsChild="true"`). `Label` es el tooltip corto de la acción; `AriaLabel` puede añadir el
+  elemento afectado (por ejemplo el fichero). El tooltip aparece con hover y con foco de teclado.
+- Altas y ediciones de un único campo (p. ej. nombre de playlist): modal `BbDialog` controlado con
+  Cancelar/Aceptar. Cancelar o Escape no guardan; un error de la API se muestra dentro del modal.
 - Documentación: servidor MCP de Blazor Blueprint configurado en `.mcp.json` (Visual Studio y Copilot).
   Se ejecuta con `npx` dentro de WSL (Ubuntu con Node mediante nvm). Con Node instalado en Windows
   se puede usar `"command": "npx", "args": ["-y", "@blazorblueprint/mcp@latest"]`.

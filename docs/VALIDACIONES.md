@@ -45,6 +45,10 @@ Consultar siempre el estado real de GitHub antes de actuar sobre un PR.
   [#15](https://github.com/dgomezc/dj-tracks/pull/15) abierto hacia `develop`,
   pendiente de validación. F4.2 y F2.3 no iniciadas. Decisión confirmada: cargar añade al final,
   sin duplicados ni interrumpir audio; no sustituye la cola.
+- Revisión de F4.1 pedida el 28/10/2026: «Pon tooltips a los botones que sólo tienen
+  icono… Para crear o editar un playlist creo que es mejor hacerlo desde una ventana
+  modal con opciones de aceptar y cancelar». Aplicada en la misma rama y PR #15;
+  pendiente de nueva validación.
 - Eliminados ambos `Class1.cs` vacíos por petición expresa del usuario del 28/10/2026, en commit separado de F2.1. No quedan esos cambios locales pendientes.
 - Checkout original actualizado por fast-forward a `develop` después de integrar F1.2; el trabajo de F1.3 se desarrolla en su rama dedicada. La rama del port se conserva como historial; no se han borrado ni reescrito ramas.
 - Entrega F1.2: PR [#5](https://github.com/dgomezc/dj-tracks/pull/5) **mergeado** en `develop` el 27/10/2026 a las 07:13:41 UTC, commit `8fc21f1` (comprobado en GitHub). Incluye el port y ambos historiales sin force-push. PR #6 también mergeado; no queda PR de F1.2 pendiente.
@@ -58,8 +62,10 @@ Consultar siempre el estado real de GitHub antes de actuar sobre un PR.
 ## F4.1: playlists manuales (validación manual pendiente)
 
 Gestión en `/playlists` y panel izquierdo (cuando el ancho lo permite).
-Crear/renombrar/borrar con confirmación; añadir canciones desde Tracks y Remember
-con el botón «Añadir a playlist»; quitar entradas desde la gestión.
+Crear y renombrar en ventana modal con Cancelar/Aceptar; borrar con confirmación;
+añadir canciones desde Tracks y Remember
+con el botón «Añadir a playlist»; quitar entradas desde la gestión. Todos los
+botones de solo icono muestran tooltip con su acción.
 Sessions excluidas. Nombre de 1–120 caracteres sin controles, espacios exteriores
 recortados, único sin distinguir mayúsculas. Orden de incorporación y referencias
 sin repetidos; homónimos de distinta biblioteca/carpeta son diferentes.
@@ -85,6 +91,19 @@ de Configuración deben existir; Playlists requiere lectura/escritura para la AP
 Usar MP3 de Tracks (`Año\Estilo`) y Remember (`Cortas`/`Largas`); FFmpeg en PATH
 o `Waveform__BinaryFolder` para la onda. No requiere BD ni modificar los MP3.
 
+- [ ] **Nuevo (revisión):** «Nueva playlist» abre un modal con el foco en Nombre.
+  Cancelar, Escape o abrir y cerrar sin escribir no crean nada; Aceptar vacío o con
+  nombre repetido muestra el error dentro del modal sin cerrarlo; Aceptar válido
+  cierra, abre la playlist y actualiza el lateral. Enter en el campo equivale a Aceptar.
+- [ ] **Nuevo (revisión):** «Renombrar playlist» abre el modal con el nombre actual.
+  Cambiar el texto y Cancelar/Escape conserva el nombre; al reabrir vuelve a mostrar
+  el actual. Aceptar renombra, muestra «Playlist renombrada.» y actualiza lateral.
+- [ ] **Nuevo (revisión):** pasar el ratón y tabular por los botones de icono muestra
+  su tooltip en español: cabecera (modo claro/oscuro, Configuración), reproductor
+  (anterior, siguiente, aleatorio), filas de Tracks/Sessions/Remember (Reproducir,
+  Añadir a la cola, Añadir a playlist), Cola (Reproducir/Sonando ahora, Quitar de la
+  cola, Cerrar cola) y tabla de la playlist (Quitar de la playlist). Los botones
+  siguen haciendo lo mismo y el tooltip desaparece al salir.
 - [ ] Crear dos playlists con nombres distintos: aparecen ordenadas en gestión y
   lateral; nombres vacíos, largos o repetidos avisan sin alterar las existentes.
 - [ ] Desde Tracks (también resultados filtrados) y Remember Cortas/Largas,
@@ -149,6 +168,18 @@ o `Waveform__BinaryFolder` para la onda. No requiere BD ni modificar los MP3.
   ni varias APIs sobre el mismo directorio (no soportado). No hay watcher entre
   ventanas: usar Recargar. Los servicios/fixtures aislados se retiraron al acabar;
   ajustes privados y datos reales sin tocar.
+- Revisión tooltips/modal (28/10/2026): consultado MCP Blueprint (Tooltip/Dialog);
+  build 0 errores/advertencias. Fixture aislado en navegador: crear vacío muestra
+  error en el modal sin cerrarlo; crear válido navega y actualiza lateral; renombrar
+  abre con el nombre actual y foco en el campo; Cancelar y Escape no guardan y al
+  reabrir se restaura; duplicado (mayúsculas) muestra el 409 en el modal; válido
+  renombra y actualiza lateral. Tooltips abiertos por hover y por foco (eventos
+  sintéticos: el canvas no tiene foco del sistema) en cabecera, reproductor, filas
+  de Tracks/Sessions/Remember y Cola; se ven sobre el panel de Cola; quitar con
+  tooltip abierto no deja tooltips huérfanos. Play, añadir a cola/playlist, Cerrar
+  cola y modo claro/oscuro siguen funcionando. Capturas Light Green oscuro/claro y
+  Cyberpunk claro/oscuro; modal a 320 px sin desbordamiento (botones apilados).
+  No comprobados con teclado físico ni lector de pantalla.
 
 Validación del usuario pendiente. No mezclar ni avanzar a F4.2.
 
