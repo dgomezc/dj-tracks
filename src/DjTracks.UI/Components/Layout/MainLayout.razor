@@ -76,7 +76,10 @@
         </div>
         var playbackVersion = AudioPlayer.PlaybackVersion;
         <div class="player-controls" @key="playbackVersion">
-            <WaveformPlayer WaveformUrl="@AudioPlayer.WaveformUrl" />
+            @if (AudioPlayer.WaveformUrl is not null)
+            {
+                <WaveformPlayer WaveformUrl="@AudioPlayer.WaveformUrl" />
+            }
             <audio id="djtracks-audio" controls autoplay preload="metadata"
                    src="@AudioPlayer.AudioUrl" aria-label="Controles de reproducción"
                    @onended="() => AudioPlayer.OnEnded(playbackVersion)"></audio>

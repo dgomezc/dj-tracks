@@ -17,7 +17,7 @@
                 {
                     <LucideIcon Name="disc-3" Size="40" />
                     <span class="text-small" role="status">
-                        @(_loading ? "Cargando carátula…" : _error is null ? "Sin carátula" : "Carátula no disponible")
+                        @(current.SessionFolder is not null ? "Sesión" : _loading ? "Cargando carátula…" : _error is null ? "Sin carátula" : "Carátula no disponible")
                     </span>
                 }
             </div>
@@ -26,7 +26,15 @@
                 <div>Artista: @Display(current.Artist)</div>
                 <div>Álbum: @Display(current.Details.Album)</div>
                 <div>Año (carpeta): @Display(current.Details.Year)</div>
-                <div>Estilo (carpeta): @Display(current.Details.Style)</div>
+                @if (current.SessionFolder is not null)
+                {
+                    <div>Sesión (carpeta): @current.SessionFolder</div>
+                    <p class="text-muted">Onda y tracklist de sesiones disponibles en la fase F2.2.</p>
+                }
+                else
+                {
+                    <div>Estilo (carpeta): @Display(current.Details.Style)</div>
+                }
                 <div>Duración: @Duration(current.Details.DurationSeconds)</div>
                 <div class="text-small">Fichero: @current.Details.FileName</div>
                 @if (current.Details.Warning is not null)

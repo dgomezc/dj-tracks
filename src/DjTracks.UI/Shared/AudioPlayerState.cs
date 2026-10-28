@@ -21,19 +21,21 @@ public sealed class AudioPlayerState
 
     public event Action? Changed;
 
-    public void Play(string audioUrl, string waveformUrl, string artworkUrl, TrackFile details)
+    public void Play(string audioUrl, string? waveformUrl, string? artworkUrl, TrackFile details,
+        string? sessionFolder = null)
     {
         var track = _queue.FirstOrDefault(item => item.AudioUrl == audioUrl)
-            ?? AddTrack(audioUrl, waveformUrl, artworkUrl, details);
+            ?? AddTrack(audioUrl, waveformUrl, artworkUrl, details, sessionFolder);
         Select(track);
     }
 
-    public void Enqueue(string audioUrl, string waveformUrl, string artworkUrl, TrackFile details)
+    public void Enqueue(string audioUrl, string? waveformUrl, string? artworkUrl, TrackFile details,
+        string? sessionFolder = null)
     {
         if (_queue.Any(item => item.AudioUrl == audioUrl))
             return;
 
-        AddTrack(audioUrl, waveformUrl, artworkUrl, details);
+        AddTrack(audioUrl, waveformUrl, artworkUrl, details, sessionFolder);
         Changed?.Invoke();
     }
 
@@ -113,9 +115,10 @@ public sealed class AudioPlayerState
         Changed?.Invoke();
     }
 
-    private QueuedTrack AddTrack(string audioUrl, string waveformUrl, string artworkUrl, TrackFile details)
+    private QueuedTrack AddTrack(string audioUrl, string? waveformUrl, string? artworkUrl, TrackFile details,
+        string? sessionFolder)
     {
-        var track = new QueuedTrack(Guid.NewGuid(), audioUrl, waveformUrl, artworkUrl, details);
+        var track = new QueuedTrack(Guid.NewGuid(), audioUrl, waveformUrl, artworkUrl, details, sessionFolder);
         _queue.Add(track);
         _order.Add(track.Id);
         return track;

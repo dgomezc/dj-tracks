@@ -3,19 +3,24 @@
 @inject AudioPlayerState Player
 
 <BbSheet Open="@Open" OpenChanged="@OpenChanged">
-    <BbSheetContent Side="SheetSide.Right" Class="playback-queue">
+    <BbSheetContent Side="SheetSide.Right" Class="playback-queue" ShowClose="false">
         <BbSheetHeader>
             <BbSheetTitle>Cola (@Player.Queue.Count)</BbSheetTitle>
             <BbSheetDescription>Canciones pendientes de reproducir.</BbSheetDescription>
         </BbSheetHeader>
-        <div class="queue-actions">
+        <div class="queue-actions button-row">
             <BbButton Variant="ButtonVariant.Outline" OnClick="Player.Clear" Disabled="@(Player.Queue.Count == 0)">
                 Vaciar cola
             </BbButton>
+            <BbSheetClose>
+                <BbButton Variant="ButtonVariant.Ghost" Size="ButtonSize.Icon" AriaLabel="Cerrar cola">
+                    <LucideIcon Name="x" />
+                </BbButton>
+            </BbSheetClose>
         </div>
         @if (Player.Queue.Count == 0)
         {
-            <p class="queue-empty" role="status">La cola está vacía. Añade canciones desde Tracks.</p>
+            <p class="queue-empty" role="status">La cola está vacía. Añade audio desde Tracks o Sessions.</p>
         }
         <div class="queue-list">
             @foreach (var track in Player.Queue)
@@ -30,6 +35,10 @@
                     <div class="queue-entry-text">
                         <div class="queue-entry-title">@track.Title</div>
                         <div class="text-muted text-small">@track.Artist</div>
+                        @if (track.SessionFolder is not null)
+                        {
+                            <div class="text-muted text-small">Sessions · @track.Details.Year · @track.SessionFolder</div>
+                        }
                     </div>
                     <BbButton Variant="ButtonVariant.Ghost" Size="ButtonSize.Icon"
                               OnClick="() => Player.Remove(track.Id)"
