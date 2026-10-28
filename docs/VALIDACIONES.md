@@ -27,7 +27,8 @@ Consultar siempre el estado real de GitHub antes de actuar sobre un PR.
 - PR #12 mergeado en `develop` el 28/10/2026 a las 09:59:32 UTC, commit `8bb2fd1`
   (comprobado en GitHub); checkout original actualizado por fast-forward.
 - F2.2 en `fase/f2-2-tracklist`: lectura y presentación del tracklist de la sesión
-  activa. Entrega pendiente de validación del usuario; F2.3 no iniciada.
+  activa. PR [#13](https://github.com/dgomezc/dj-tracks/pull/13) abierto hacia
+  `develop`, pendiente de validación del usuario; F2.3 no iniciada.
 - Eliminados ambos `Class1.cs` vacíos por petición expresa del usuario del 28/10/2026, en commit separado de F2.1. No quedan esos cambios locales pendientes.
 - Checkout original actualizado por fast-forward a `develop` después de integrar F1.2; el trabajo de F1.3 se desarrolla en su rama dedicada. La rama del port se conserva como historial; no se han borrado ni reescrito ramas.
 - Entrega F1.2: PR [#5](https://github.com/dgomezc/dj-tracks/pull/5) **mergeado** en `develop` el 27/10/2026 a las 07:13:41 UTC, commit `8fc21f1` (comprobado en GitHub). Incluye el port y ambos historiales sin force-push. PR #6 también mergeado; no queda PR de F1.2 pendiente.
