@@ -49,6 +49,11 @@ Consultar siempre el estado real de GitHub antes de actuar sobre un PR.
   icono… Para crear o editar un playlist creo que es mejor hacerlo desde una ventana
   modal con opciones de aceptar y cancelar». Aplicada en la misma rama y PR #15;
   pendiente de nueva validación.
+- Segunda revisión de F4.1 (28/10/2026): «Desde el listado de canciones de la playlist
+  deberíamos tener un botón para escuchar la canción o para añadirla a la cola. El botón
+  de añadir nuevo playlist debería estar en el panel izquierdo… Para editar o renombrar
+  una playlist podemos poner un botón al lado del nombre de la playlist en el panel
+  izquierdo». Aplicada en la misma rama y PR #15; pendiente de validación.
 - Eliminados ambos `Class1.cs` vacíos por petición expresa del usuario del 28/10/2026, en commit separado de F2.1. No quedan esos cambios locales pendientes.
 - Checkout original actualizado por fast-forward a `develop` después de integrar F1.2; el trabajo de F1.3 se desarrolla en su rama dedicada. La rama del port se conserva como historial; no se han borrado ni reescrito ramas.
 - Entrega F1.2: PR [#5](https://github.com/dgomezc/dj-tracks/pull/5) **mergeado** en `develop` el 27/10/2026 a las 07:13:41 UTC, commit `8fc21f1` (comprobado en GitHub). Incluye el port y ambos historiales sin force-push. PR #6 también mergeado; no queda PR de F1.2 pendiente.
@@ -91,6 +96,17 @@ de Configuración deben existir; Playlists requiere lectura/escritura para la AP
 Usar MP3 de Tracks (`Año\Estilo`) y Remember (`Cortas`/`Largas`); FFmpeg en PATH
 o `Waveform__BinaryFolder` para la onda. No requiere BD ni modificar los MP3.
 
+- [ ] **Nuevo (2ª revisión):** en escritorio (≥960 px) el «+» junto a «Playlists
+  manuales» del panel izquierdo abre el modal de nueva playlist; el lápiz junto a
+  cada nombre abre el de renombrar con ese nombre. Renombrar la playlist abierta
+  actualiza el título y los botones de `/playlists`; renombrar otra solo cambia su
+  nombre. En `/playlists` de escritorio ya no aparecen «Nueva playlist» ni
+  «Renombrar playlist»; en móvil (<960 px, sin lateral) sí, con el mismo modal.
+- [ ] **Nuevo (2ª revisión):** en la tabla de una playlist, «Reproducir» suena la
+  canción con onda, carátula y datos en «Ahora suena»; «Añadir a la cola» la agrega
+  sin interrumpir el audio y, si ya estaba, avisa sin duplicarla. Funciona con
+  canciones de Tracks y de Remember. Si falta el MP3 de esa canción, avisa sin
+  tocar la cola; las demás canciones se pueden seguir reproduciendo.
 - [ ] **Nuevo (revisión):** «Nueva playlist» abre un modal con el foco en Nombre.
   Cancelar, Escape o abrir y cerrar sin escribir no crean nada; Aceptar vacío o con
   nombre repetido muestra el error dentro del modal sin cerrarlo; Aceptar válido
@@ -180,6 +196,17 @@ o `Waveform__BinaryFolder` para la onda. No requiere BD ni modificar los MP3.
   cola y modo claro/oscuro siguen funcionando. Capturas Light Green oscuro/claro y
   Cyberpunk claro/oscuro; modal a 320 px sin desbordamiento (botones apilados).
   No comprobados con teclado físico ni lector de pantalla.
+- Segunda revisión (28/10/2026): build 0 errores/advertencias. API en fixture:
+  `playback?entryId=` devuelve solo esa entrada, 404 con entrada inexistente y sin
+  parámetro sigue devolviendo todas. Navegador a ~800 px: lateral oculto y botones
+  de crear/renombrar visibles en la página; «Añadir a la cola» agrega y la segunda
+  vez avisa «ya estaba en la cola»; «Reproducir» muestra la canción en «Ahora suena»
+  y la añade a la cola. A 1300 px (iframe escalado): «+» y lápices en el lateral,
+  botones de la página ocultos; renombrar la playlist abierta desde el lápiz
+  (duplicado con error en el modal, válido actualiza título, selector y lateral);
+  Escape en otra no guarda y al reabrir muestra el nombre actual; renombrarla solo
+  cambia su nombre; «+» crea y navega a la nueva. Tooltip del lápiz visible.
+  Capturas en Light Green oscuro y Cyberpunk oscuro y claro (modal incluido).
 
 Validación del usuario pendiente. No mezclar ni avanzar a F4.2.
 

@@ -192,7 +192,11 @@ carpeta por canción. Cualquier referencia ausente cancela la carga completa
 antes de cambiar la cola; la edición del JSON sigue disponible para quitarla.
 
 `Playlists.razor.cs` gestiona por HTTP nombres, entradas y carga. Crear y renombrar
-usan un único `BbDialog` con Cancelar/Aceptar; el error de la API se queda en el modal.
+usan `PlaylistDialog` (`BbDialog` con Cancelar/Aceptar; el error de la API se queda
+en el modal), compartido por el panel lateral («+» y lápiz por playlist) y por
+`/playlists`, donde esos botones solo se muestran sin lateral (`.narrow-only`).
+Reproducir o encolar una canción usa `GET playlists/{id}/playback?entryId=` para
+resolver solo esa entrada; sin `entryId` resuelve toda la playlist.
 Construye URLs
 de streaming/onda/portada con los mismos identificadores y orden de query que
 Tracks/Remember; `AudioPlayerState.Enqueue` conserva audio/posición y rechaza
@@ -201,7 +205,8 @@ duplicados también entre un listado y una playlist. No guarda tags/URLs en JSON
 `PlaylistSidebar` muestra nombres/contadores/enlaces de gestión. Ambos hacen HTTP
 en code-behind con `HttpClientResultExtensions` (GET/POST/PUT/DELETE).
 `PlaylistChanges`, scoped y sin HTTP ni datos, notifica cambios al panel lateral
-del mismo circuito. Recargar actualiza cambios de otras ventanas; no hay watcher
+del mismo circuito y avisa del renombrado (`Renamed`) para que `/playlists`
+actualice el nombre sin recargar. Recargar actualiza cambios de otras ventanas; no hay watcher
 ni sincronización automática entre circuitos en esta fase. `/playlists` en la
 cabecera mantiene la gestión accesible cuando el lateral se oculta en móvil.
 La cola sigue en memoria: editar/borrar una playlist no modifica la cola ya cargada.
