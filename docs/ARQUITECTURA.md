@@ -179,15 +179,23 @@ handler/Infrastructure con `Result` · **imprevisto** → manejador integrado.
 - Componentes estilados de Blazor Blueprint (`Bb*`, paquete `BlazorBlueprint.Components`) directamente
   en `DjTracks.UI`; sin proyecto de componentes propio ni primitivas salvo necesidad real.
   Iconos con `<LucideIcon Name="..." />` (`BlazorBlueprint.Icons.Lucide`).
-- Registro en `Program.cs` con `AddBlazorBlueprintComponents` (radio por defecto de 1rem del tema).
+- Registro en `Program.cs` con `AddBlazorBlueprintComponents()`.
   `MainLayout` contiene `<BbPortalHost />`, necesario para popovers, selects y paneles (`BbSheet`).
-- Tema: `wwwroot/theme.css` contiene las variables shadcn del tema "Light Green" de tweakcn
-  (`:root` claro y `.dark` oscuro). Orden en `App.razor`: `theme.css` → `blazorblueprint.css` →
+- Temas: `wwwroot/theme.css` contiene las variables shadcn de varios temas de tweakcn. "Light Green"
+  es el predeterminado (`:root` claro y `.dark` oscuro); el resto usa `:root[data-app-theme="<id>"]`
+  y `:root[data-app-theme="<id>"].dark`. `--radius` lleva `!important` porque el `ThemeService` de
+  Blueprint lo escribe en línea en `<html>`. Orden en `App.razor`: `theme.css` → `blazorblueprint.css` →
   `app.css`, y el script `theme-init.js` de Blueprint en `<head>` para aplicar el modo antes de pintar.
+  Las fuentes de los temas se cargan desde Google Fonts en `App.razor`.
+- Selector de tema en Configuración: `AppThemes` (`Shared/AppThemes.cs`) lista los temas. La elección
+  se guarda en la cookie `djt-theme` y `App.razor` la renderiza en el servidor como `data-app-theme`
+  (así no hay parpadeo y la navegación mejorada de Blazor no borra el atributo). `Settings.razor.js`
+  cambia el atributo y la cookie al momento.
 - Modo claro/oscuro: `BbDarkModeToggle` en la cabecera. Se guarda en `localStorage` (`bb-theme`);
   sin preferencia guardada se sigue la del sistema.
-- Para cambiar de tema basta con regenerar `theme.css` desde otro tema de tweakcn
-  (`https://tweakcn.com/r/themes/<id>`), sin tocar componentes.
+- Añadir un tema: genera sus bloques en `theme.css` desde `https://tweakcn.com/r/themes/<id>`
+  (variables `theme` + `light` en el bloque base, `dark` en el `.dark`), añádelo a `AppThemes.All`
+  y, si usa una fuente nueva, al enlace de Google Fonts. No hay que tocar componentes.
 - Estilos propios en `wwwroot/app.css` usando solo variables del tema (`--primary`, `--muted-foreground`,
   `--border`, `--card`…). Las utilidades de Blueprint llevan prefijo `bb:` y no hay Tailwind en el
   proyecto: no uses clases de Tailwind en el marcado propio; crea clases en `app.css`.

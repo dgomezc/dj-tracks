@@ -18,7 +18,7 @@ Consultar siempre el estado real de GitHub antes de actuar sobre un PR.
 - F1.4: **validada globalmente por el usuario el 27/10/2026** con «todo ok, continua», incluida la revisión de carga progresiva. Esta confirmación no amplía las comprobaciones individuales del agente. PR [#8](https://github.com/dgomezc/dj-tracks/pull/8) mergeado en `develop` a las 14:26:25 UTC; merge commit `1d43cc8`.
 - F1.5: **validada globalmente por el usuario el 28/10/2026** con «Todo ok, continúa», incluidas las revisiones sin duplicados, indicador activo y panel fijo al hacer scroll. PR [#9](https://github.com/dgomezc/dj-tracks/pull/9) mergeado en `develop` a las 06:28:03 UTC, commit `b90f570` (comprobado en GitHub). Esta confirmación no amplía las comprobaciones individuales del agente.
 - F1.6: **validada globalmente por el usuario el 28/10/2026** con «Todo ok. Mezcla el pr y de momento para.». Autorizado el merge del PR [#10](https://github.com/dgomezc/dj-tracks/pull/10) hacia `develop`. Esta aceptación no amplía las comprobaciones individuales del agente. **Trabajo pausado por petición expresa; F2.1 no iniciada.**
-- **Migración transversal MudBlazor → Blazor Blueprint (28/10/2026): pendiente de validación del usuario.** Rama `dgomezc-analisis-blazor-blueprint`, PR [#11](https://github.com/dgomezc/dj-tracks/pull/11) hacia `develop` (ver sección "Migración a Blazor Blueprint"). Antes de iniciar F2.1, las sesiones deben releer `AGENTS.md` y `docs/ARQUITECTURA.md` (sección 8). F2.1 sigue sin iniciar.
+- **Migración transversal MudBlazor → Blazor Blueprint (28/10/2026): migración validada por el usuario («Funciona perfecto»); revisión con selector de temas pendiente de validación.** Rama `dgomezc-analisis-blazor-blueprint`, PR [#11](https://github.com/dgomezc/dj-tracks/pull/11) hacia `develop` (ver sección "Migración a Blazor Blueprint"). Antes de iniciar F2.1, las sesiones deben releer `AGENTS.md` y `docs/ARQUITECTURA.md` (sección 8). F2.1 sigue sin iniciar.
 - Checkout original actualizado por fast-forward a `develop` después de integrar F1.2; el trabajo de F1.3 se desarrolla en su rama dedicada. La rama del port se conserva como historial; no se han borrado ni reescrito ramas.
 - Entrega F1.2: PR [#5](https://github.com/dgomezc/dj-tracks/pull/5) **mergeado** en `develop` el 27/10/2026 a las 07:13:41 UTC, commit `8fc21f1` (comprobado en GitHub). Incluye el port y ambos historiales sin force-push. PR #6 también mergeado; no queda PR de F1.2 pendiente.
 - Continuidad confirmada: trabajar directamente en el checkout original, sin nuevos worktrees. Se han preservado los cambios locales preexistentes en los dos `Class1.cs`, sin incluirlos en los commits.
@@ -88,6 +88,35 @@ pulsa F5. Abre `http://localhost:5050`. Usa la biblioteca y los ajustes reales y
 - Algunos componentes de Blueprint traen textos internos en inglés; se han pasado en español los
   visibles y los `aria-label` usados.
 - La fuente Inter se carga desde Google Fonts; sin conexión se usa la fuente del sistema.
+### Revisión: selector de temas (28/10/2026)
+
+Petición del usuario tras validar la migración: elegir el tema en Configuración, conservando
+"Light Green" y añadiendo Radioactive, Cyberpunk, Agentica Node, Bugchud!, Cyberpook y ESLinks.
+
+- Nueva tarjeta "Tema de la interfaz" en Configuración (`BbSelect`). El cambio es inmediato.
+- Se guarda en la cookie `djt-theme` (por navegador). `App.razor` la lee y renderiza
+  `data-app-theme` en `<html>`, por lo que se mantiene al recargar y al navegar sin parpadeo.
+- El modo claro/oscuro sigue siendo independiente (botón de la cabecera) y funciona con todos los temas.
+- Cada tema aplica sus colores, radio y fuente (Geist, Afacad, Space Grotesk, JetBrains Mono… desde Google Fonts).
+- La onda se redibuja también al cambiar de tema.
+- Se elimina el ajuste `DefaultRadius` de `Program.cs`: el radio de cada tema lleva `!important` en `theme.css`.
+
+Comprobado por el agente: `dotnet build DjTracks.slnx` con 0 errores y 0 advertencias. En el
+navegador integrado, el selector muestra los 7 temas. Al elegir Cyberpunk cambian `data-app-theme`,
+la cookie, `--primary`, `--radius` (0.5rem) y la fuente (Geist). Tras recargar y navegar a Tracks se
+mantiene, con modo oscuro y claro correctos (captura de Cyberpunk oscuro revisada).
+
+Checklist del usuario (perfil **DJ Tracks (Api + UI)**, F5, `http://localhost:5050/settings`):
+
+1. La tarjeta "Tema de la interfaz" muestra "Light Green" la primera vez.
+2. Elige cada tema: la interfaz cambia al momento (colores, bordes y tipografía) sin recargar.
+3. Con cada tema, alterna claro/oscuro con el botón de la cabecera: ambos modos se ven bien y son legibles.
+4. Recarga (F5) y navega a Tracks e Inicio: se conserva el tema elegido sin parpadeo del anterior.
+5. Con una canción sonando, cambia de tema: la onda adopta los colores nuevos.
+6. Abre la cola y un desplegable de filtros: paneles y listas usan el tema elegido.
+7. Vuelve a "Light Green": queda como antes del cambio.
+
+No hace falta repetir el resto de comprobaciones de la migración.
 ## F1.3: reproductor básico
 
 La tabla de Tracks permite iniciar una canción desde su fila. La barra inferior

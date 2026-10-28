@@ -7,7 +7,7 @@ Reproductor autoalojado de música electrónica (Tracks, Sessions, Remember). Se
 | Tema | Decisión |
 |---|---|
 | Frontend | Blazor Server interactivo (.NET 10, ya existente en `src/DjTracks.UI`) |
-| UI | Blazor Blueprint (componentes `Bb*`), tema "Light Green" de tweakcn con modo claro y oscuro y selector; por defecto sigue la preferencia del sistema (sustituye a MudBlazor desde la migración posterior a F1.6) |
+| UI | Blazor Blueprint (componentes `Bb*`), temas de tweakcn seleccionables en Configuración ("Light Green" por defecto) con modo claro y oscuro y selector; por defecto sigue la preferencia del sistema (sustituye a MudBlazor desde la migración posterior a F1.6) |
 | Backend | ASP.NET Minimal API + Vertical Slices (`src/DjTracks.Api/Features/<Feature>`) |
 | Proyectos | `Api`, `UI`, `Domain`, `Infrastructure` (ya creados en `DjTracks.slnx`) |
 | Biblioteca musical | Sin BD: se lee del sistema de ficheros (carpetas = año/estilo) |

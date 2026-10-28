@@ -35,7 +35,7 @@ Reproductor autoalojado de música electrónica. Plan completo en `docs/PLAN.md`
 ## Arquitectura
 - **Obligatorio**: sigue `docs/ARQUITECTURA.md` (estructura, nomenclatura, flujo UI → HTTP → endpoint → validador → handler → `Result`, errores con `AppError`). Todo caso de uso nuevo debe seguir su receta.
 - `src/DjTracks.Api`: Minimal API con vertical slices en `Features/<Feature>/<Caso>` (Endpoint + Handler), validación con FluentValidation y patrón Result con FluentResults.
-- `src/DjTracks.UI`: Blazor Server interactivo + Blazor Blueprint (componentes `Bb*` con el tema "Light Green" de tweakcn, modos claro y oscuro; ver `docs/ARQUITECTURA.md`, sección 8). Llama a la API por HTTP desde el code-behind con `HttpClientResultExtensions`.
+- `src/DjTracks.UI`: Blazor Server interactivo + Blazor Blueprint (componentes `Bb*` con temas de tweakcn seleccionables, modos claro y oscuro; ver `docs/ARQUITECTURA.md`, sección 8). Llama a la API por HTTP desde el code-behind con `HttpClientResultExtensions`.
 - `src/DjTracks.Domain`: entidades y enums. `src/DjTracks.Infrastructure`: ficheros, tags, onda, EF Core.
 - Biblioteca y playlists en ficheros; PostgreSQL solo para estadísticas.
 - No commitear secretos (usar user-secrets para la conexión a BD).
