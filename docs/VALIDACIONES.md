@@ -17,7 +17,7 @@ Consultar siempre el estado real de GitHub antes de actuar sobre un PR.
 - F1.3: **validada por el usuario el 27/10/2026** con «Todo ok, continúa». PR [#7](https://github.com/dgomezc/dj-tracks/pull/7) mergeado en `develop` el 27/10/2026 a las 10:34:24 UTC; merge commit `d86e1c4` (comprobado en GitHub).
 - F1.4: **validada globalmente por el usuario el 27/10/2026** con «todo ok, continua», incluida la revisión de carga progresiva. Esta confirmación no amplía las comprobaciones individuales del agente. PR [#8](https://github.com/dgomezc/dj-tracks/pull/8) mergeado en `develop` a las 14:26:25 UTC; merge commit `1d43cc8`.
 - F1.5: **validada globalmente por el usuario el 28/10/2026** con «Todo ok, continúa», incluidas las revisiones sin duplicados, indicador activo y panel fijo al hacer scroll. PR [#9](https://github.com/dgomezc/dj-tracks/pull/9) mergeado en `develop` a las 06:28:03 UTC, commit `b90f570` (comprobado en GitHub). Esta confirmación no amplía las comprobaciones individuales del agente.
-- F1.6: implementada en `fase/f1-6-ahora-suena`, PR [#10](https://github.com/dgomezc/dj-tracks/pull/10) abierto hacia `develop`, desde el checkout original. Validación manual pendiente. F2.1 no iniciada.
+- F1.6: **validada globalmente por el usuario el 28/10/2026** con «Todo ok. Mezcla el pr y de momento para.». Autorizado el merge del PR [#10](https://github.com/dgomezc/dj-tracks/pull/10) hacia `develop`. Esta aceptación no amplía las comprobaciones individuales del agente. **Trabajo pausado por petición expresa; F2.1 no iniciada.**
 - Checkout original actualizado por fast-forward a `develop` después de integrar F1.2; el trabajo de F1.3 se desarrolla en su rama dedicada. La rama del port se conserva como historial; no se han borrado ni reescrito ramas.
 - Entrega F1.2: PR [#5](https://github.com/dgomezc/dj-tracks/pull/5) **mergeado** en `develop` el 27/10/2026 a las 07:13:41 UTC, commit `8fc21f1` (comprobado en GitHub). Incluye el port y ambos historiales sin force-push. PR #6 también mergeado; no queda PR de F1.2 pendiente.
 - Continuidad confirmada: trabajar directamente en el checkout original, sin nuevos worktrees. Se han preservado los cambios locales preexistentes en los dos `Class1.cs`, sin incluirlos en los commits.
@@ -80,7 +80,11 @@ confirma la entrega F1.3 y autoriza mezclar el PR #7 antes de continuar con F1.4
   fase no añade una cola, onda, reproducción automática del siguiente track,
   estadísticas, ni soporte para Sessions/Remember.
 
-## F1.6: ficha de «ahora suena» (validación manual pendiente)
+## F1.6: ficha de «ahora suena» (validada por el usuario)
+
+Confirmación global del 28/10/2026: «Todo ok. Mezcla el pr y de momento para.».
+Se registra la validación y autorización de merge, sin dar por realizadas
+comprobaciones individuales adicionales. No continuar a F2.1 hasta nueva petición.
 
 La zona principal muestra la canción seleccionada sin sustituir el explorador.
 La ficha sigue reproducción directa, anterior/siguiente, cambio automático,
@@ -149,7 +153,8 @@ todos los estados, usar MP3 con carátula incrustada y otros sin carátula/tags.
   Los cambios ajenos en ambos `Class1.cs` se mantienen fuera de los commits.
   Los servicios y las fixtures temporales de esta comprobación se retiraron.
 
-Validación del usuario pendiente; no mezclar ni avanzar a F2.1 sin confirmación.
+Validación global del usuario recibida. Merge autorizado; continuación a F2.1
+expresamente pausada.
 
 ## F1.5: cola de reproducción (validada por el usuario)
 
