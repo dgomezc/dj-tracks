@@ -49,21 +49,29 @@ public partial class Sessions
         }
     }
 
-    private void Enqueue(TrackFile file)
+    private void PlaySession(TrackFile file, bool enqueue = false)
     {
         if (_year is null || _session is null)
         {
-            Logger.LogWarning("No se puede añadir {FileName}: falta año o carpeta de sesión", file.FileName);
-            _error = "Vuelve a abrir la carpeta de la sesión antes de añadir su audio.";
+            Logger.LogWarning("No se puede reproducir {FileName}: falta año o carpeta de sesión", file.FileName);
+            _error = "Vuelve a abrir la carpeta de la sesión antes de reproducir o añadir su audio.";
             return;
         }
 
-        var url = new Uri(Http.BaseAddress!, QueryHelpers.AddQueryString("api/streaming/sessions",
-            new Dictionary<string, string?>
-            {
-                ["year"] = _year, ["session"] = _session, ["fileName"] = file.FileName
-            })).AbsoluteUri;
-        Player.Enqueue(url, null, null, file, _session);
+        var query = new Dictionary<string, string?>
+        {
+            ["year"] = _year, ["session"] = _session, ["fileName"] = file.FileName
+        };
+        var audioUrl = new Uri(Http.BaseAddress!,
+            QueryHelpers.AddQueryString("api/streaming/sessions", query)).AbsoluteUri;
+        var waveformUrl = new Uri(Http.BaseAddress!,
+            QueryHelpers.AddQueryString("api/streaming/sessions/waveform", query)).AbsoluteUri;
+        var artworkUrl = new Uri(Http.BaseAddress!,
+            QueryHelpers.AddQueryString("api/streaming/sessions/artwork", query)).AbsoluteUri;
+        if (enqueue)
+            Player.Enqueue(audioUrl, waveformUrl, artworkUrl, file, _session);
+        else
+            Player.Play(audioUrl, waveformUrl, artworkUrl, file, _session);
     }
 
     private static string Display(string? value) => string.IsNullOrWhiteSpace(value) ? "Sin datos" : value;

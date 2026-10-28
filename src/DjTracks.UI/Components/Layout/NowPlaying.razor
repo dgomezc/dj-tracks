@@ -17,7 +17,7 @@
                 {
                     <LucideIcon Name="disc-3" Size="40" />
                     <span class="text-small" role="status">
-                        @(current.SessionFolder is not null ? "Sesión" : _loading ? "Cargando carátula…" : _error is null ? "Sin carátula" : "Carátula no disponible")
+                        @(_loading ? "Cargando carátula…" : _error is null ? "Sin carátula" : "Carátula no disponible")
                     </span>
                 }
             </div>
@@ -29,7 +29,7 @@
                 @if (current.SessionFolder is not null)
                 {
                     <div>Sesión (carpeta): @current.SessionFolder</div>
-                    <p class="text-muted">Onda y tracklist de sesiones disponibles en la fase F2.2.</p>
+                    <p class="text-muted">La lectura del tracklist de sesiones estará disponible en F2.2.</p>
                 }
                 else
                 {
