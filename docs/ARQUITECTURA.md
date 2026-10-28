@@ -150,6 +150,24 @@ La ficha distribuye información y tracklist en dos columnas flexibles cuando
 su ancho disponible lo permite; si no, el tracklist pasa debajo. No depende del
 ancho total de la ventana (el panel lateral también ocupa espacio).
 
+Remember tiene un solo nivel de carpetas: `Cortas`/`Largas` (identificadores
+exactos validados, no rutas). `RememberLibrary` resuelve la categoría con
+`TrackLibrary.FindChild`; reutiliza las operaciones internas de lectura de tags,
+resolución de MP3 e imagen incrustada, sin simular año/estilo ni duplicarlas.
+`RememberListing(Category, Files)` contiene `TrackFile` con Year/Style nulos.
+Los helpers extraídos mantienen el comportamiento de Tracks y Sessions.
+
+Slices explícitos `Library/GetRemember`, `Streaming/StreamRemember`,
+`GetRememberWaveform` y `GetRememberArtwork`: handlers cargan Settings.Remember,
+Result/AppError y logging; audio Range y la misma caché/generador de onda por
+ruta completa. El listado no recorre subcarpetas y las entradas reparse point
+se excluyen también de la resolución directa.
+La página Remember llama por HTTP desde su code-behind, selector Cortas/Largas
+con Cortas inicial, tabla Blueprint y Play/añadir. `QueuedTrack.RememberCategory`
+opcional se conserva en ambos caminos para ficha y cola, sin TracklistUrl;
+NowPlaying distingue categoría de año/estilo y no mantiene el tracklist de una
+sesión anterior. No hay playlists persistentes, filtrado de Tracks ni BD nuevos.
+
 | Elemento | Nombre | Namespace |
 |---|---|---|
 | Caso de uso | Verbo + sustantivo: `GetTracks`, `SaveSettings`, `GetSessions`, `CreatePlaylist` | — |

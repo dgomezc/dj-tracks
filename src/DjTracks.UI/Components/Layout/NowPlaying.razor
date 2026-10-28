@@ -26,12 +26,19 @@
                 <h3 class="now-playing-title">@current.Title</h3>
                 <div>Artista: @Display(current.Artist)</div>
                 <div>Álbum: @Display(current.Details.Album)</div>
-                <div>Año (carpeta): @Display(current.Details.Year)</div>
+                @if (current.RememberCategory is not null)
+                {
+                    <div>Remember (carpeta): @current.RememberCategory</div>
+                }
+                else
+                {
+                    <div>Año (carpeta): @Display(current.Details.Year)</div>
+                }
                 @if (current.SessionFolder is not null)
                 {
                     <div>Sesión (carpeta): @current.SessionFolder</div>
                 }
-                else
+                else if (current.RememberCategory is null)
                 {
                     <div>Estilo (carpeta): @Display(current.Details.Style)</div>
                 }

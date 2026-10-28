@@ -1,10 +1,18 @@
 using DjTracks.Api.Features.Library.GetTracks;
 using DjTracks.Api.Features.Library.GetSessions;
 using DjTracks.Api.Features.Library.GetSessionTracklist;
+using DjTracks.Api.Features.Library.GetRemember;
 using DjTracks.Api.Features.Library.GetFilteredTracks;
 using FluentValidation;
 
 namespace DjTracks.Api.Features.Library;
+
+public sealed class GetRememberRequestValidator : AbstractValidator<GetRememberRequest>
+{
+    public GetRememberRequestValidator() =>
+        RuleFor(request => request.Category).Must(category => category is "Cortas" or "Largas")
+            .WithMessage("Selecciona Cortas o Largas.");
+}
 
 public sealed class GetTracksRequestValidator : AbstractValidator<GetTracksRequest>
 {

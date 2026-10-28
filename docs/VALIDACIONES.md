@@ -32,6 +32,13 @@ Consultar siempre el estado real de GitHub antes de actuar sobre un PR.
   las comprobaciones individuales del agente. Autorizada la integración del
   PR [#13](https://github.com/dgomezc/dj-tracks/pull/13). Continuación confirmada:
   F3.1 Remember; F2.3 opcional queda para el final.
+- PR #13 mergeado en `develop` el 28/10/2026 a las 12:29:27 UTC, commit `afdc690`
+  (comprobado en GitHub); checkout original actualizado por fast-forward.
+- F3.1 Remember en `fase/f3-1-remember`, PR [#14](https://github.com/dgomezc/dj-tracks/pull/14)
+  validada globalmente por el usuario el 28/10/2026 con «ok, continua».
+  Esta aceptación no amplía las comprobaciones individuales del agente.
+  Autorizadas su integración y la continuación con F4.1; F2.3 opcional
+  sigue aplazada para el final.
 - Eliminados ambos `Class1.cs` vacíos por petición expresa del usuario del 28/10/2026, en commit separado de F2.1. No quedan esos cambios locales pendientes.
 - Checkout original actualizado por fast-forward a `develop` después de integrar F1.2; el trabajo de F1.3 se desarrolla en su rama dedicada. La rama del port se conserva como historial; no se han borrado ni reescrito ramas.
 - Entrega F1.2: PR [#5](https://github.com/dgomezc/dj-tracks/pull/5) **mergeado** en `develop` el 27/10/2026 a las 07:13:41 UTC, commit `8fc21f1` (comprobado en GitHub). Incluye el port y ambos historiales sin force-push. PR #6 también mergeado; no queda PR de F1.2 pendiente.
@@ -41,6 +48,88 @@ Consultar siempre el estado real de GitHub antes de actuar sobre un PR.
 - **Refactor transversal Vertical Slices: validado por el usuario el 27/10/2026** con "Perfecto, documenta toda la arquitectura actual… Después mezcla el PR y sigue con el siguiente paso". Arquitectura documentada en `ARQUITECTURA.md`. PR [#6](https://github.com/dgomezc/dj-tracks/pull/6) mergeado en `develop` (`c7c1508`). Diseño validado en `arquitectura/flujo-get-tracks.html` ("Cambia todas las llamadas").
 - Port F1.2 recibido de `dgomezc-fase-f1-2-filtros` (`1354305` código, `c38cddb` documentación). Se integra mediante merge en la rama original: se conservan ambos historiales y se resuelven los conflictos de código con la versión adaptada a Result/FluentValidation. Sin PR duplicado ni reescritura de ramas. Cambios preexistentes y JSON privado conservados; no se borran worktrees.
 - Comprobación de integración en checkout original (27/10/2026): `src` coincide con el port recibido; compilación completa con 0 errores y advertencias. API/UI aisladas con MP3 sintéticos: multiaño/multigrupo/multisubestilo, alias, ausencia de duplicados, resultados vacíos, explorador, errores 400/404, opciones, carga de ajustes y página Tracks correctos. No equivale a validación visual de biblioteca real. Servicios y fixtures temporales retirados después de comprobar.
+
+## F3.1: Remember (validada por el usuario)
+
+`/remember` abre Cortas y permite cambiar a Largas. MP3 por nombre ascendente,
+tags básicos, duración, avisos de tags ilegibles por archivo, vacío y errores
+explícitos. Play inicia la entrada; añadir no interrumpe ni duplica. Cola
+compartida con Tracks/Sessions; streaming Range, onda progresiva/cacheada y
+portada incrustada del MP3. Ficha/cola identifican Remember y categoría sin
+atribuir año/estilo de carpetas ni mantener tracklist anterior.
+
+La raíz configurada contiene `Cortas\Audio.mp3` y `Largas\Audio.mp3` (nombres
+exactos); MP3 directamente dentro de cada categoría, sin niveles adicionales.
+Extensión `.MP3` admitida; otros archivos, subcarpetas y enlaces excluidos.
+Una categoría inexistente muestra error y permite seleccionar la otra.
+No se añaden playlists, filtros de Tracks ni base de datos.
+
+### Arranque y checklist del usuario
+
+Visual Studio 2026 (.NET 10), abrir `DjTracks.slnx` en `fase/f3-1-remember`,
+perfil **DJ Tracks (Api + UI)** y F5. UI `http://localhost:5050/remember`, API
+`http://localhost:5247`. Mantener rutas Tracks/Sessions/Remember configuradas y
+accesibles a la API; Remember apunta a la raíz que contiene Cortas y Largas.
+Usar MP3 válidos; FFmpeg disponible para la API (PATH o `Waveform__BinaryFolder`)
+para la onda, sin BD. Reiniciar Api/UI y recargar completamente la página
+para renovar la cola en memoria.
+
+- [ ] Abrir Remember: Cortas inicial; cambiar a Largas y volver; lista correcta,
+  nombre ascendente, tags/duración o «Sin datos». Volver a cargar mantiene
+  categoría. Archivos corruptos avisan por fila sin impedir ver los demás;
+  vacíos muestran mensaje. Subcarpetas y TXT no se listan.
+- [ ] Play inicia el MP3; audio/pausa/volumen/seek y onda interactiva operativos.
+  Primera onda progresiva, después cacheada. Portada incrustada propia; sin
+  imagen muestra «Sin carátula». Ficha muestra Remember · Cortas/Largas,
+  sin año/estilo ni tracklist de Sessions.
+- [ ] Añadir sin iniciar/interrumpir audio; repetir y Play después de añadir
+  no duplican. Mismo nombre en Cortas/Largas/Tracks/Sessions puede coexistir.
+- [ ] Cola mixta: anterior/siguiente y fin automático con panel abierto actualizan
+  indicador, ficha, onda y portada/tracklist correspondientes. Shuffle/bucle,
+  quitar actual y vaciar conservan comportamiento previo.
+- [ ] Navegar Remember/Tracks/Sessions/Inicio conserva cola/audio. Explorar otra
+  categoría no cambia lo que suena. Recarga completa vacía la cola.
+- [ ] Claro/oscuro con Light Green y otro tema, ventana estrecha/lista larga:
+  selector, tabla, controles, ficha y cola legibles sin tapar controles.
+- [ ] Con datos de prueba, categoría o almacenamiento ausente: error visible,
+  recargar y elegir otra categoría permiten recuperar; Configuración accesible.
+  No modificar/borrar datos reales para provocar errores.
+
+### Comprobaciones del agente
+
+- `dotnet build DjTracks.slnx`: correcto, 0 errores y advertencias; sin tests nuevos.
+- API con MP3 sintéticos válidos: Cortas/Largas, orden ascendente, tags y aviso
+  por corrupto, extensión `.MP3`, Year/Style nulos, TXT/subcarpetas excluidos.
+  Range bytes=4-9: 206 y seis bytes. Portada PNG idéntica a la incrustada y null
+  sin imagen. Primera onda 65 bloques NDJSON/1024 picos; caché un bloque completo.
+- Categoría inválida, ruta/traversal y archivo no MP3:
+  400; fichero ausente 404; portada corrupta 503. Categoría ausente y categoría
+  junction devuelven 404 en los cuatro endpoints. Vacío 200, sin ajustes 409,
+  JSON inválido 500, almacenamiento ausente 503. Datos/ajustes de prueba aislados.
+- Regresión API de Tracks/Sessions: carátulas correctas y tracklist de Sessions
+  conservado tras extraer helpers internos para reutilizar lectura/resolución.
+- Navegador: Cortas inicial, cambiar categoría y recargar mantienen selección;
+  vacío y error por carpeta desaparecida visibles, recuperación seleccionando
+  Cortas. Añadir no inicia audio; repetir y Play tras añadir no duplican.
+  Homónimos Cortas/Largas y otras bibliotecas coexisten. Explorar/añadir conserva
+  elemento audio activo. MP3 con áñ, `&`, `+` reproduce correctamente.
+- Play: audio real avanza, onda dibujada, portada cargada y ficha sin año/estilo.
+  Largas sin imagen retira portada anterior. Clic en onda a 50 % busca a unos
+  22,6 s de 45 s. Fin real del audio avanza con Cola abierta y procedencia
+  Remember · Cortas/Largas correcta. Shuffle, bucle cola, quitar actual y vaciar
+  probados; vaciar retira audio y panel de tracklist.
+- Cola mixta: Sessions recupera su tracklist/portada/onda; Remember los sustituye
+  sin mantener tracklist; Tracks conserva ficha de año/estilo y portada/onda.
+  Navegar de vuelta a Remember conserva el mismo audio.
+- Capturas inspeccionadas a 642 px en Light Green y Cyberpunk, claro/oscuro,
+  con tags, corrupto y portada/ausencia: datos y controles legibles, sin
+  desbordamiento de página. Temas aplicados temporalmente en DOM, modo con botón.
+  Consultados MCP Blueprint DataTable y documentación .NET.
+- No se ha comprobado sonido por hardware, biblioteca real ni todos los
+  tamaños/temas. Servicios y biblioteca temporal retirados después de comprobar;
+  ajustes privados y datos reales sin tocar.
+
+Validación global del usuario recibida el 28/10/2026 con «ok, continua».
 
 ## F2.2: tracklist de la sesión activa (validada por el usuario)
 

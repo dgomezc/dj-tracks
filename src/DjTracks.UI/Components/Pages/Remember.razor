@@ -1,6 +1,71 @@
 @page "/remember"
+@using DjTracks.Domain
 
 <PageTitle>Remember - DJ Tracks</PageTitle>
 
-<BbTypographyH2 Class="page-title">Remember Tracks</BbTypographyH2>
-<BbTypographyMuted>Tracks Remember (fase F3.1).</BbTypographyMuted>
+<BbTypographyH2 Class="page-title">Remember</BbTypographyH2>
+<BbTypographyMuted Class="page-intro">Explora Cortas y Largas. Reproduce sus MP3 o añádelos a la cola.</BbTypographyMuted>
+
+<nav class="button-row breadcrumb-row" aria-label="Categoría de Remember">
+    @foreach (var category in Categories)
+    {
+        <BbButton Variant="@(category == _category ? ButtonVariant.Secondary : ButtonVariant.Outline)"
+                  aria-pressed="@(category == _category ? "true" : "false")"
+                  OnClick="() => LoadAsync(category)" Disabled="@_busy">@category</BbButton>
+    }
+    <BbButton Variant="ButtonVariant.Ghost" OnClick="ReloadAsync" Disabled="@_busy">Volver a cargar</BbButton>
+</nav>
+@if (_busy)
+{
+    <div class="busy-indicator" role="status">
+        <BbSpinner Size="SpinnerSize.Small" AriaLabel="Cargando Remember" />
+        <span>Cargando Remember…</span>
+    </div>
+}
+@if (_error is not null)
+{
+    <BbAlert Variant="AlertVariant.Danger" Class="page-alert">
+        <BbAlertDescription>@_error</BbAlertDescription>
+    </BbAlert>
+    <BbLink Href="/settings">Abrir Configuración</BbLink>
+}
+else if (_listing is not null)
+{
+    <h3 class="section-title">@_category · @_listing.Files.Length archivos MP3</h3>
+    <BbDataTable TData="TrackFile" Data="@_listing.Files" ShowToolbar="false" ShowPagination="false"
+                 AriaLabel="Archivos de Remember" Class="tracks-table">
+        <Columns>
+            <BbDataTableColumn TData="TrackFile" TValue="string" Header="Fichero" Property="@(file => file.FileName)">
+                <CellTemplate Context="file">
+                    <div class="file-name">@file.FileName</div>
+                    @if (file.Warning is not null)
+                    {
+                        <div class="text-warning text-small" role="status">@file.Warning</div>
+                    }
+                </CellTemplate>
+            </BbDataTableColumn>
+            <BbDataTableColumn TData="TrackFile" TValue="string" Header="Título" Property="@(file => Display(file.Title))" />
+            <BbDataTableColumn TData="TrackFile" TValue="string" Header="Artista" Property="@(file => Display(string.Join(", ", file.Artists)))" />
+            <BbDataTableColumn TData="TrackFile" TValue="string" Header="Álbum" Property="@(file => Display(file.Album))" />
+            <BbDataTableColumn TData="TrackFile" TValue="string" Header="Duración" Property="@(file => Duration(file.DurationSeconds))" />
+            <BbDataTableColumn TData="TrackFile" TValue="string" Header="Reproducción / cola" Id="actions">
+                <CellTemplate Context="file">
+                    <div class="row-actions">
+                        <BbButton Size="ButtonSize.Icon" AriaLabel="@($"Reproducir {file.FileName}")" OnClick="() => PlayRemember(file)">
+                            <LucideIcon Name="play" />
+                        </BbButton>
+                        <BbButton Variant="ButtonVariant.Ghost" Size="ButtonSize.Icon"
+                                  AriaLabel="@($"Añadir a la cola {file.FileName}")" OnClick="() => PlayRemember(file, enqueue: true)">
+                            <LucideIcon Name="list-plus" />
+                        </BbButton>
+                    </div>
+                </CellTemplate>
+            </BbDataTableColumn>
+        </Columns>
+        <EmptyTemplate>No hay ficheros MP3 en esta categoría de Remember.</EmptyTemplate>
+    </BbDataTable>
+    <BbTypographyMuted Class="page-note">
+        Añadir no inicia ni interrumpe el audio. La ficha muestra la categoría de carpeta;
+        la onda se carga progresivamente y la carátula se lee del MP3.
+    </BbTypographyMuted>
+}

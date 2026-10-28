@@ -4,6 +4,9 @@ using DjTracks.Api.Features.Streaming.StreamTrack;
 using DjTracks.Api.Features.Streaming.StreamSession;
 using DjTracks.Api.Features.Streaming.GetSessionArtwork;
 using DjTracks.Api.Features.Streaming.GetSessionWaveform;
+using DjTracks.Api.Features.Streaming.StreamRemember;
+using DjTracks.Api.Features.Streaming.GetRememberArtwork;
+using DjTracks.Api.Features.Streaming.GetRememberWaveform;
 using FluentValidation;
 
 namespace DjTracks.Api.Features.Streaming;
@@ -81,6 +84,39 @@ public sealed class GetSessionWaveformRequestValidator : AbstractValidator<GetSe
             .WithMessage("El año debe ser un nombre de carpeta, no una ruta.");
         RuleFor(request => request.Session).Must(StreamingRequestRules.BeFolderName)
             .WithMessage("La sesión debe ser un nombre de carpeta, no una ruta.");
+        RuleFor(request => request.FileName).Must(StreamingRequestRules.BeAudioFileName)
+            .WithMessage("El fichero debe ser un nombre de archivo MP3, no una ruta.");
+    }
+}
+
+public sealed class StreamRememberRequestValidator : AbstractValidator<StreamRememberRequest>
+{
+    public StreamRememberRequestValidator()
+    {
+        RuleFor(request => request.Category).Must(category => category is "Cortas" or "Largas")
+            .WithMessage("Selecciona Cortas o Largas.");
+        RuleFor(request => request.FileName).Must(StreamingRequestRules.BeAudioFileName)
+            .WithMessage("El fichero debe ser un nombre de archivo MP3, no una ruta.");
+    }
+}
+
+public sealed class GetRememberArtworkRequestValidator : AbstractValidator<GetRememberArtworkRequest>
+{
+    public GetRememberArtworkRequestValidator()
+    {
+        RuleFor(request => request.Category).Must(category => category is "Cortas" or "Largas")
+            .WithMessage("Selecciona Cortas o Largas.");
+        RuleFor(request => request.FileName).Must(StreamingRequestRules.BeAudioFileName)
+            .WithMessage("El fichero debe ser un nombre de archivo MP3, no una ruta.");
+    }
+}
+
+public sealed class GetRememberWaveformRequestValidator : AbstractValidator<GetRememberWaveformRequest>
+{
+    public GetRememberWaveformRequestValidator()
+    {
+        RuleFor(request => request.Category).Must(category => category is "Cortas" or "Largas")
+            .WithMessage("Selecciona Cortas o Largas.");
         RuleFor(request => request.FileName).Must(StreamingRequestRules.BeAudioFileName)
             .WithMessage("El fichero debe ser un nombre de archivo MP3, no una ruta.");
     }

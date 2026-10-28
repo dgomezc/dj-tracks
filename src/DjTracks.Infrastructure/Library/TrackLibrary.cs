@@ -51,7 +51,12 @@ public sealed class TrackLibrary
         if (result.IsFailed)
             return result.ToResult();
 
-        using var audio = TagLib.File.Create(result.Value.FullName);
+        return ReadArtwork(result.Value, ct);
+    }
+
+    internal static Result<TrackArtwork> ReadArtwork(FileInfo file, CancellationToken ct)
+    {
+        using var audio = TagLib.File.Create(file.FullName);
         ct.ThrowIfCancellationRequested();
         var picture = audio.Tag.Pictures.FirstOrDefault(item => item.Type == TagLib.PictureType.FrontCover)
             ?? audio.Tag.Pictures.FirstOrDefault();
@@ -78,6 +83,12 @@ public sealed class TrackLibrary
             directory = child;
         }
 
+        return ResolveAudioFile(directory, fileName, ct);
+    }
+
+    internal static Result<FileInfo> ResolveAudioFile(DirectoryInfo directory, string fileName,
+        CancellationToken ct)
+    {
         ct.ThrowIfCancellationRequested();
         var file = directory.EnumerateFiles()
             .FirstOrDefault(candidate => IsRegularEntry(candidate)
@@ -164,7 +175,7 @@ public sealed class TrackLibrary
     private static bool IsRegularEntry(FileSystemInfo entry) =>
         (entry.Attributes & FileAttributes.ReparsePoint) == 0;
 
-    private static TrackFile[] ReadTracks(DirectoryInfo directory, CancellationToken ct)
+    internal static TrackFile[] ReadTracks(DirectoryInfo directory, CancellationToken ct)
     {
         List<TrackFile> tracks = [];
         foreach (var file in directory.EnumerateFiles()

@@ -1,5 +1,30 @@
 @DjTracks.Api_HostAddress = http://localhost:5247
 
+GET {{DjTracks.Api_HostAddress}}/api/library/remember?category=Cortas
+Accept: application/json
+
+###
+
+GET {{DjTracks.Api_HostAddress}}/api/library/remember?category=Largas
+Accept: application/json
+
+###
+
+GET {{DjTracks.Api_HostAddress}}/api/streaming/remember?category=Cortas&fileName=Artista%20-%20Tema.mp3
+Range: bytes=0-1023
+
+###
+
+GET {{DjTracks.Api_HostAddress}}/api/streaming/remember/waveform?category=Cortas&fileName=Artista%20-%20Tema.mp3
+Accept: application/x-ndjson
+
+###
+
+GET {{DjTracks.Api_HostAddress}}/api/streaming/remember/artwork?category=Cortas&fileName=Artista%20-%20Tema.mp3
+Accept: application/json
+
+###
+
 # Lee el primer TXT compatible de la carpeta del MP3; null/null si no hay ninguno.
 GET {{DjTracks.Api_HostAddress}}/api/library/sessions/tracklist?year=2026&session=Nombre%20de%20sesión&fileName=Sesión.mp3
 Accept: application/json
