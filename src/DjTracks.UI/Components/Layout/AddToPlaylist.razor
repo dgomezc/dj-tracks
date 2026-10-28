@@ -1,0 +1,35 @@
+<BbSheet Open="@_open" OpenChanged="SetOpen">
+    <BbSheetContent Side="SheetSide.Right" ShowClose="false" Class="playlist-picker">
+        <BbSheetHeader>
+            <BbSheetTitle>Añadir a playlist</BbSheetTitle>
+            <BbSheetDescription>@_track?.FileName · @_track?.Library</BbSheetDescription>
+        </BbSheetHeader>
+        <div class="playlist-form">
+            <BbButton Variant="ButtonVariant.Ghost" OnClick="() => SetOpen(false)" AriaLabel="Cerrar selector de playlist">Cerrar</BbButton>
+            @if (_busy)
+            {
+                <span role="status">Procesando playlist…</span>
+            }
+            @if (_error is not null)
+            {
+                <BbAlert Variant="AlertVariant.Danger"><BbAlertDescription>@_error</BbAlertDescription></BbAlert>
+            }
+            @if (_message is not null)
+            {
+                <p role="status">@_message</p>
+            }
+            <BbField>
+                <BbFieldLabel>Playlist de destino</BbFieldLabel>
+                <BbSelect TValue="string" @bind-Value="_selected" Options="@Options" Disabled="@_busy"
+                          AriaLabel="Playlist de destino" Placeholder="Selecciona una playlist" />
+            </BbField>
+            <BbButton OnClick="AddAsync" Disabled="@(_busy || _selected is null)">Guardar canción en playlist</BbButton>
+            <BbButton Variant="ButtonVariant.Outline" OnClick="LoadAsync" Disabled="@_busy">Recargar playlists</BbButton>
+            @if (_playlists?.Length == 0)
+            {
+                <p>No hay playlists. Crea una en Gestionar playlists y vuelve al listado para añadir canciones.</p>
+            }
+            <BbLink Href="/playlists" OnClick="() => SetOpen(false)">Gestionar playlists</BbLink>
+        </div>
+    </BbSheetContent>
+</BbSheet>

@@ -1,0 +1,99 @@
+@page "/playlists"
+@page "/playlists/{Id:guid}"
+@using DjTracks.Domain
+
+<PageTitle>Playlists - DJ Tracks</PageTitle>
+<BbTypographyH2 Class="page-title">Playlists manuales</BbTypographyH2>
+<BbTypographyMuted Class="page-intro">
+    Mezcla Tracks y Remember. Cargar añade al final de la cola sin duplicados ni interrumpir el audio.
+</BbTypographyMuted>
+<div class="playlist-form">
+    <div class="button-row">
+        <BbButton OnClick="OpenCreate" Disabled="@_busy" Class="narrow-only">
+            <Icon><LucideIcon Name="plus" /></Icon>
+            <ChildContent>Nueva playlist</ChildContent>
+        </BbButton>
+        <BbButton Variant="ButtonVariant.Outline" OnClick="LoadAsync" Disabled="@_busy">Volver a cargar playlists</BbButton>
+    </div>
+    @if (_busy)
+    {
+        <span role="status">Procesando playlists…</span>
+    }
+    @if (_error is not null)
+    {
+        <BbAlert Variant="AlertVariant.Danger"><BbAlertDescription>@_error</BbAlertDescription></BbAlert>
+        <BbLink Href="/settings">Abrir Configuración</BbLink>
+    }
+    @if (_message is not null)
+    {
+        <p role="status">@_message</p>
+    }
+    @if (_catalog is not null)
+    {
+        <nav class="button-row" aria-label="Seleccionar playlist">
+            @foreach (var playlist in _catalog)
+            {
+                <BbButton Href="@($"/playlists/{playlist.Id}")"
+                          Class="playlist-choice"
+                          Variant="@(playlist.Id == Id ? ButtonVariant.Secondary : ButtonVariant.Outline)">
+                    @playlist.Name (@playlist.Entries.Length)
+                </BbButton>
+            }
+        </nav>
+        @if (_catalog.Length == 0)
+        {
+            <p>No hay playlists. Crea una y añade canciones desde Tracks o Remember.</p>
+        }
+    }
+    @if (_playlist is not null)
+    {
+        <h3 class="section-title">@_playlist.Name · @_playlist.Entries.Length canciones</h3>
+        <div class="button-row">
+            <BbButton OnClick="LoadQueueAsync" Disabled="@(_busy || _playlist.Entries.Length == 0)">Añadir playlist a la cola</BbButton>
+            <BbButton Variant="ButtonVariant.Outline" OnClick="OpenRename" Disabled="@_busy" Class="narrow-only">
+                <Icon><LucideIcon Name="pencil" /></Icon>
+                <ChildContent>Renombrar playlist</ChildContent>
+            </BbButton>
+            <BbButton Variant="ButtonVariant.Outline" OnClick="() => _confirmDelete = true" Disabled="@_busy">Borrar playlist</BbButton>
+        </div>
+        @if (_confirmDelete)
+        {
+            <BbAlert Variant="AlertVariant.Warning">
+                <BbAlertDescription>
+                    ¿Borrar «@_playlist.Name»? Solo se elimina su JSON; no los MP3 ni la cola actual.
+                    <div class="button-row">
+                        <BbButton OnClick="DeleteAsync" Disabled="@_busy">Confirmar borrado</BbButton>
+                        <BbButton Variant="ButtonVariant.Outline" OnClick="() => _confirmDelete = false" Disabled="@_busy">Cancelar</BbButton>
+                    </div>
+                </BbAlertDescription>
+            </BbAlert>
+        }
+        <BbDataTable TData="PlaylistEntry" Data="@_playlist.Entries" ShowToolbar="false" ShowPagination="false"
+                     AriaLabel="Canciones de la playlist" Class="tracks-table">
+            <Columns>
+                <BbDataTableColumn TData="PlaylistEntry" TValue="string" Header="Fichero" Property="@(entry => entry.Track.FileName)" />
+                <BbDataTableColumn TData="PlaylistEntry" TValue="string" Header="Biblioteca" Property="@(entry => entry.Track.Library)" />
+                <BbDataTableColumn TData="PlaylistEntry" TValue="string" Header="Carpetas"
+                                   Property="@(entry => entry.Track.Category ?? $"{entry.Track.Year} / {entry.Track.Style}")" />
+                <BbDataTableColumn TData="PlaylistEntry" TValue="string" Header="Acciones" Id="actions">
+                    <CellTemplate Context="entry">
+                        <div class="row-actions">
+                            <IconButton Label="Reproducir" Icon="play" Variant="ButtonVariant.Default" Disabled="@_busy"
+                                        OnClick="() => PlayEntryAsync(entry.Id, play: true)" AriaLabel="@($"Reproducir {entry.Track.FileName}")" />
+                            <IconButton Label="Añadir a la cola" Icon="list-plus" Disabled="@_busy"
+                                        OnClick="() => PlayEntryAsync(entry.Id, play: false)" AriaLabel="@($"Añadir a la cola {entry.Track.FileName}")" />
+                            <IconButton Label="Quitar de la playlist" Icon="trash-2" Disabled="@_busy"
+                                        OnClick="() => RemoveAsync(entry.Id)" AriaLabel="@($"Quitar de la playlist {entry.Track.FileName}")" />
+                        </div>
+                    </CellTemplate>
+                </BbDataTableColumn>
+            </Columns>
+            <EmptyTemplate>Playlist vacía. Añade canciones desde Tracks o Remember.</EmptyTemplate>
+        </BbDataTable>
+        <BbTypographyMuted>
+            Se conserva el orden de incorporación. Las referencias se guardan sin rutas absolutas.
+            Si falta un MP3 al cargar, se informa del error sin modificar la cola; puedes quitar su entrada aquí.
+        </BbTypographyMuted>
+    }
+</div>
+<PlaylistDialog @bind-Open="_dialogOpen" Playlist="@(_renaming ? _playlist : null)" />

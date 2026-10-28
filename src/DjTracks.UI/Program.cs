@@ -10,6 +10,7 @@ builder.Services.AddRazorComponents()
 // Radio de 1rem del tema "Light Green" de tweakcn; el ThemeService lo aplica en <html>.
 builder.Services.AddBlazorBlueprintComponents();
 builder.Services.AddScoped<AudioPlayerState>();
+builder.Services.AddScoped<PlaylistChanges>();
 builder.Services.AddHttpClient("Api", client =>
     client.BaseAddress = new Uri(builder.Configuration["ApiBaseUrl"]!));
 builder.Services.AddScoped(sp => sp.GetRequiredService<IHttpClientFactory>().CreateClient("Api"));

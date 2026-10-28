@@ -12,11 +12,7 @@
             <BbButton Variant="ButtonVariant.Outline" OnClick="Player.Clear" Disabled="@(Player.Queue.Count == 0)">
                 Vaciar cola
             </BbButton>
-            <BbSheetClose>
-                <BbButton Variant="ButtonVariant.Ghost" Size="ButtonSize.Icon" AriaLabel="Cerrar cola">
-                    <LucideIcon Name="x" />
-                </BbButton>
-            </BbSheetClose>
+            <IconButton Label="Cerrar cola" Icon="x" OnClick="() => OpenChanged.InvokeAsync(false)" />
         </div>
         @if (Player.Queue.Count == 0)
         {
@@ -27,11 +23,10 @@
             {
                 var isCurrent = Player.Current?.Id == track.Id;
                 <div @key="track.Id" class="queue-entry">
-                    <BbButton Variant="@(isCurrent ? ButtonVariant.Secondary : ButtonVariant.Ghost)" Size="ButtonSize.Icon"
-                              OnClick="() => Player.PlayQueued(track.Id)"
-                              AriaLabel="@($"Reproducir de la cola {track.Title}")">
-                        <LucideIcon Name="@(isCurrent ? "audio-lines" : "play")" />
-                    </BbButton>
+                    <IconButton Label="@(isCurrent ? "Sonando ahora" : "Reproducir")" Icon="@(isCurrent ? "audio-lines" : "play")"
+                                Variant="@(isCurrent ? ButtonVariant.Secondary : ButtonVariant.Ghost)"
+                                OnClick="() => Player.PlayQueued(track.Id)"
+                                AriaLabel="@($"Reproducir de la cola {track.Title}")" />
                     <div class="queue-entry-text">
                         <div class="queue-entry-title">@track.Title</div>
                         <div class="text-muted text-small">@track.Artist</div>
@@ -44,11 +39,8 @@
                             <div class="text-muted text-small">Remember · @track.RememberCategory</div>
                         }
                     </div>
-                    <BbButton Variant="ButtonVariant.Ghost" Size="ButtonSize.Icon"
-                              OnClick="() => Player.Remove(track.Id)"
-                              AriaLabel="@($"Quitar de la cola {track.Title}")">
-                        <LucideIcon Name="trash-2" />
-                    </BbButton>
+                    <IconButton Label="Quitar de la cola" Icon="trash-2" OnClick="() => Player.Remove(track.Id)"
+                                AriaLabel="@($"Quitar de la cola {track.Title}")" />
                 </div>
             }
         </div>

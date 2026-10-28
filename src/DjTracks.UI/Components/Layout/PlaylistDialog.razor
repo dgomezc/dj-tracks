@@ -1,0 +1,25 @@
+<BbDialog Open="@Open" OpenChanged="OnOpenChanged">
+    <BbDialogContent Class="playlist-dialog" ShowClose="false" CloseOnOverlayClick="false">
+        <form @onsubmit="SaveAsync" @onsubmit:preventDefault>
+            <BbDialogHeader>
+                <BbDialogTitle>@(Playlist is null ? "Nueva playlist" : "Renombrar playlist")</BbDialogTitle>
+                <BbDialogDescription>
+                    @(Playlist is null ? "Escribe un nombre único de hasta 120 caracteres." : "Escribe el nuevo nombre. Cancelar conserva el nombre actual.")
+                </BbDialogDescription>
+            </BbDialogHeader>
+            <BbField Class="playlist-dialog-field">
+                <BbFieldLabel For="playlist-dialog-name">Nombre</BbFieldLabel>
+                <BbInput Id="playlist-dialog-name" @bind-Value="_name" Disabled="@_busy" maxlength="120"
+                         data-autofocus="true" />
+                @if (_error is not null)
+                {
+                    <BbFieldError>@_error</BbFieldError>
+                }
+            </BbField>
+            <BbDialogFooter>
+                <BbButton Variant="ButtonVariant.Outline" OnClick="CloseAsync" Disabled="@_busy">Cancelar</BbButton>
+                <BbButton Type="ButtonType.Submit" Disabled="@_busy">@(_busy ? "Guardando…" : "Aceptar")</BbButton>
+            </BbDialogFooter>
+        </form>
+    </BbDialogContent>
+</BbDialog>

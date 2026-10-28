@@ -3,6 +3,7 @@ using DjTracks.UI.Shared;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.WebUtilities;
 using BlazorBlueprint.Primitives;
+using DjTracks.UI.Components.Layout;
 
 namespace DjTracks.UI.Components.Pages;
 
@@ -23,6 +24,10 @@ public partial class Tracks
     private IEnumerable<string>? _filterGroups;
     private IEnumerable<string>? _filterSubstyles;
     private TrackFilter? _appliedFilter;
+    private AddToPlaylist _playlistPicker = default!;
+
+    private Task AddToPlaylistAsync(TrackFile track) => _playlistPicker.ShowAsync(
+        new("Tracks", track.FileName, track.Year ?? _year, track.Style ?? _style));
 
     private static readonly SelectOption<string>[] SubstyleOptions =
         [new("Instrumental", "Instrumental"), new("Vocal", "Vocal")];

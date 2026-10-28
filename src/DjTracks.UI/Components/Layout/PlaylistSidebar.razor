@@ -1,0 +1,39 @@
+@implements IDisposable
+
+<div class="panel-heading">
+    <p class="panel-label">Playlists manuales</p>
+    <IconButton Label="Nueva playlist" Icon="plus" OnClick="() => OpenDialog(null)" />
+</div>
+<BbLink Href="/playlists">Gestionar playlists</BbLink>
+<BbButton Variant="ButtonVariant.Ghost" Disabled="@_busy" OnClick="LoadAsync">Recargar playlists</BbButton>
+@if (_busy)
+{
+    <span role="status">Cargando playlists…</span>
+}
+@if (_error is not null)
+{
+    <p class="text-warning" role="alert">@_error</p>
+}
+else if (_playlists is not null)
+{
+    @if (_playlists.Length == 0)
+    {
+        <BbTypographyMuted>Sin playlists</BbTypographyMuted>
+    }
+    <nav class="playlist-links" aria-label="Playlists manuales">
+        @foreach (var playlist in _playlists)
+        {
+            <div class="playlist-link-row">
+                <NavLink href="@($"/playlists/{playlist.Id}")" class="app-nav-link">
+                    @playlist.Name (@playlist.Entries.Length)
+                </NavLink>
+                <IconButton Label="Renombrar playlist" Icon="pencil" OnClick="() => OpenDialog(playlist)"
+                            AriaLabel="@($"Renombrar playlist {playlist.Name}")" />
+            </div>
+        }
+    </nav>
+}
+<BbSeparator />
+<p class="panel-label">Playlists automáticos</p>
+<BbTypographyMuted>Disponibles en una fase posterior</BbTypographyMuted>
+<PlaylistDialog @bind-Open="_dialogOpen" Playlist="@_dialogPlaylist" />

@@ -84,7 +84,7 @@ body {
     display: flex;
     flex-direction: column;
     gap: 8px;
-    padding: 16px;
+    padding: 16px 16px 300px;
     background: var(--sidebar);
     color: var(--sidebar-foreground);
     border-right: 1px solid var(--sidebar-border);
@@ -97,6 +97,23 @@ body {
     text-transform: uppercase;
 }
 
+.panel-heading,
+.playlist-link-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 4px;
+}
+
+.playlist-link-row .app-nav-link {
+    flex: 1;
+    min-width: 0;
+}
+
+.narrow-only {
+    display: none;
+}
+
 .main-content {
     flex: 1;
     min-width: 0;
@@ -106,6 +123,10 @@ body {
 @media (max-width: 960px) {
     .library-panel {
         display: none;
+    }
+
+    .narrow-only {
+        display: inline-flex;
     }
 }
 
@@ -200,7 +221,61 @@ body {
 
 .row-actions {
     display: flex;
+    flex-wrap: wrap;
     gap: 4px;
+}
+
+.tracks-table {
+    max-width: 100%;
+    overflow-x: auto;
+}
+
+.playlist-form {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 16px;
+    min-width: 0;
+}
+
+.playlist-form > *,
+.playlist-links {
+    max-width: 100%;
+    overflow-wrap: anywhere;
+}
+
+.playlist-choice {
+    height: auto;
+    min-height: 2.5rem;
+    white-space: normal;
+    overflow-wrap: anywhere;
+    text-align: left;
+}
+
+.playlist-links {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.playlist-picker {
+    width: min(440px, 100vw);
+    overflow-y: auto;
+}
+
+.playlist-picker .playlist-form {
+    padding: 16px 0;
+}
+
+.playlist-dialog-field {
+    margin: 16px 0;
+}
+
+.playlist-picker [role="combobox"] {
+    height: auto;
+    min-height: 2.5rem;
+    text-align: left;
+    overflow-wrap: anywhere;
 }
 
 /* Ahora suena */
