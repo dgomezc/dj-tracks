@@ -34,7 +34,8 @@ Consultar siempre el estado real de GitHub antes de actuar sobre un PR.
   F3.1 Remember; F2.3 opcional queda para el final.
 - PR #13 mergeado en `develop` el 28/10/2026 a las 12:29:27 UTC, commit `afdc690`
   (comprobado en GitHub); checkout original actualizado por fast-forward.
-- F3.1 Remember en `fase/f3-1-remember`, pendiente de validación. F2.3 opcional
+- F3.1 Remember en `fase/f3-1-remember`, PR [#14](https://github.com/dgomezc/dj-tracks/pull/14)
+  abierto hacia `develop`, pendiente de validación. F2.3 opcional
   sigue aplazada para el final y F4.1 no se ha iniciado.
 - Eliminados ambos `Class1.cs` vacíos por petición expresa del usuario del 28/10/2026, en commit separado de F2.1. No quedan esos cambios locales pendientes.
 - Checkout original actualizado por fast-forward a `develop` después de integrar F1.2; el trabajo de F1.3 se desarrolla en su rama dedicada. La rama del port se conserva como historial; no se han borrado ni reescrito ramas.
