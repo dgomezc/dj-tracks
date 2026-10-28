@@ -9,7 +9,7 @@
 </BbTypographyMuted>
 <div class="playlist-form">
     <div class="button-row">
-        <BbButton OnClick="OpenCreate" Disabled="@_busy">
+        <BbButton OnClick="OpenCreate" Disabled="@_busy" Class="narrow-only">
             <Icon><LucideIcon Name="plus" /></Icon>
             <ChildContent>Nueva playlist</ChildContent>
         </BbButton>
@@ -50,7 +50,7 @@
         <h3 class="section-title">@_playlist.Name · @_playlist.Entries.Length canciones</h3>
         <div class="button-row">
             <BbButton OnClick="LoadQueueAsync" Disabled="@(_busy || _playlist.Entries.Length == 0)">Añadir playlist a la cola</BbButton>
-            <BbButton Variant="ButtonVariant.Outline" OnClick="OpenRename" Disabled="@_busy">
+            <BbButton Variant="ButtonVariant.Outline" OnClick="OpenRename" Disabled="@_busy" Class="narrow-only">
                 <Icon><LucideIcon Name="pencil" /></Icon>
                 <ChildContent>Renombrar playlist</ChildContent>
             </BbButton>
@@ -77,8 +77,14 @@
                                    Property="@(entry => entry.Track.Category ?? $"{entry.Track.Year} / {entry.Track.Style}")" />
                 <BbDataTableColumn TData="PlaylistEntry" TValue="string" Header="Acciones" Id="actions">
                     <CellTemplate Context="entry">
-                        <IconButton Label="Quitar de la playlist" Icon="trash-2" Disabled="@_busy"
-                                    OnClick="() => RemoveAsync(entry.Id)" AriaLabel="@($"Quitar de la playlist {entry.Track.FileName}")" />
+                        <div class="row-actions">
+                            <IconButton Label="Reproducir" Icon="play" Variant="ButtonVariant.Default" Disabled="@_busy"
+                                        OnClick="() => PlayEntryAsync(entry.Id, play: true)" AriaLabel="@($"Reproducir {entry.Track.FileName}")" />
+                            <IconButton Label="Añadir a la cola" Icon="list-plus" Disabled="@_busy"
+                                        OnClick="() => PlayEntryAsync(entry.Id, play: false)" AriaLabel="@($"Añadir a la cola {entry.Track.FileName}")" />
+                            <IconButton Label="Quitar de la playlist" Icon="trash-2" Disabled="@_busy"
+                                        OnClick="() => RemoveAsync(entry.Id)" AriaLabel="@($"Quitar de la playlist {entry.Track.FileName}")" />
+                        </div>
                     </CellTemplate>
                 </BbDataTableColumn>
             </Columns>
@@ -90,28 +96,4 @@
         </BbTypographyMuted>
     }
 </div>
-<BbDialog Open="@_dialogOpen" OpenChanged="OnDialogOpenChanged">
-    <BbDialogContent Class="playlist-dialog" ShowClose="false" CloseOnOverlayClick="false">
-        <form @onsubmit="SaveDialogAsync" @onsubmit:preventDefault>
-            <BbDialogHeader>
-                <BbDialogTitle>@(_renaming ? "Renombrar playlist" : "Nueva playlist")</BbDialogTitle>
-                <BbDialogDescription>
-                    @(_renaming ? "Escribe el nuevo nombre. Cancelar conserva el nombre actual." : "Escribe un nombre único de hasta 120 caracteres.")
-                </BbDialogDescription>
-            </BbDialogHeader>
-            <BbField Class="playlist-dialog-field">
-                <BbFieldLabel For="playlist-dialog-name">Nombre</BbFieldLabel>
-                <BbInput Id="playlist-dialog-name" @bind-Value="_dialogName" Disabled="@_dialogBusy" maxlength="120"
-                         data-autofocus="true" />
-                @if (_dialogError is not null)
-                {
-                    <BbFieldError>@_dialogError</BbFieldError>
-                }
-            </BbField>
-            <BbDialogFooter>
-                <BbButton Variant="ButtonVariant.Outline" OnClick="CloseDialog" Disabled="@_dialogBusy">Cancelar</BbButton>
-                <BbButton Type="ButtonType.Submit" Disabled="@_dialogBusy">@(_dialogBusy ? "Guardando…" : "Aceptar")</BbButton>
-            </BbDialogFooter>
-        </form>
-    </BbDialogContent>
-</BbDialog>
+<PlaylistDialog @bind-Open="_dialogOpen" Playlist="@(_renaming ? _playlist : null)" />

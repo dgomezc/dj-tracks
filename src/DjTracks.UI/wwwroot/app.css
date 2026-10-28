@@ -97,6 +97,23 @@ body {
     text-transform: uppercase;
 }
 
+.panel-heading,
+.playlist-link-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 4px;
+}
+
+.playlist-link-row .app-nav-link {
+    flex: 1;
+    min-width: 0;
+}
+
+.narrow-only {
+    display: none;
+}
+
 .main-content {
     flex: 1;
     min-width: 0;
@@ -106,6 +123,10 @@ body {
 @media (max-width: 960px) {
     .library-panel {
         display: none;
+    }
+
+    .narrow-only {
+        display: inline-flex;
     }
 }
 

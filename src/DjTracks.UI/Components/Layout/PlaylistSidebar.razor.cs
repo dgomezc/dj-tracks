@@ -13,6 +13,8 @@ public partial class PlaylistSidebar
     private string? _error;
     private bool _busy;
     private int _version;
+    private bool _dialogOpen;
+    private ManualPlaylist? _dialogPlaylist;
 
     protected override Task OnInitializedAsync()
     {
@@ -31,6 +33,12 @@ public partial class PlaylistSidebar
         _busy = false;
         _playlists = result.IsSuccess ? result.Value : null;
         _error = result.IsFailed ? result.Errors[0].Message : null;
+    }
+
+    private void OpenDialog(ManualPlaylist? playlist)
+    {
+        _dialogPlaylist = playlist;
+        _dialogOpen = true;
     }
 
     private void OnChanged() => _ = InvokeAsync(async () => { await LoadAsync(); StateHasChanged(); });

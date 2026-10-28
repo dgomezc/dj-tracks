@@ -6,7 +6,7 @@ using Microsoft.AspNetCore.WebUtilities;
 
 namespace DjTracks.UI.Components.Pages;
 
-public partial class Playlists
+public partial class Playlists : IDisposable
 {
     [Parameter] public Guid? Id { get; set; }
     [Inject] private HttpClient Http { get; set; } = default!;
@@ -23,9 +23,8 @@ public partial class Playlists
     private int _version;
     private bool _dialogOpen;
     private bool _renaming;
-    private bool _dialogBusy;
-    private string? _dialogName;
-    private string? _dialogError;
+
+    protected override void OnInitialized() => Changes.Renamed += OnRenamed;
 
     protected override Task OnParametersSetAsync() => LoadAsync();
 
@@ -55,60 +54,31 @@ public partial class Playlists
         _busy = false;
     }
 
-    private void OpenCreate() => OpenDialog(renaming: false, name: null);
+    private void OpenCreate() => OpenDialog(renaming: false);
 
-    private void OpenRename() => OpenDialog(renaming: true, name: _playlist?.Name);
+    private void OpenRename() => OpenDialog(renaming: true);
 
-    private void OpenDialog(bool renaming, string? name)
+    private void OpenDialog(bool renaming)
     {
         _renaming = renaming;
-        _dialogName = name;
-        _dialogError = null;
         _message = null;
         _dialogOpen = true;
     }
 
-    private void OnDialogOpenChanged(bool open)
+    private void OnRenamed(ManualPlaylist playlist) => _ = InvokeAsync(() =>
     {
-        if (!open)
-            CloseDialog();
-    }
-
-    private void CloseDialog()
-    {
-        if (_dialogBusy)
-            return;
-        _dialogOpen = false;
-        _dialogName = _dialogError = null;
-    }
-
-    private async Task SaveDialogAsync()
-    {
-        if (_dialogBusy)
-            return;
-        _dialogBusy = true;
-        _dialogError = null;
-        var renaming = _renaming;
-        var body = new { Name = _dialogName };
-        var result = renaming
-            ? await Http.PutForResultAsync<object, ManualPlaylist>($"api/playlists/{Id}", body, Logger)
-            : await Http.PostForResultAsync<object, ManualPlaylist>("api/playlists", body, Logger);
-        _dialogBusy = false;
-        if (result.IsFailed)
+        if (playlist.Id == Id && _playlist is not null)
         {
-            _dialogError = result.Errors[0].Message;
-            return;
-        }
-        Changes.Notify();
-        CloseDialog();
-        if (renaming)
-        {
-            Update(result.Value);
+            Update(playlist);
             _message = "Playlist renombrada.";
         }
         else
-            Navigation.NavigateTo($"/playlists/{result.Value.Id}");
-    }
+            _catalog = _catalog?.Select(item => item.Id == playlist.Id ? playlist : item)
+                .OrderBy(item => item.Name, StringComparer.OrdinalIgnoreCase).ToArray();
+        StateHasChanged();
+    });
+
+    public void Dispose() => Changes.Renamed -= OnRenamed;
 
     private Task DeleteAsync() => RunAsync(
         () => Http.DeleteForResultAsync<Guid>($"api/playlists/{Id}", Logger),
@@ -124,19 +94,38 @@ public partial class Playlists
         {
             var before = Player.Queue.Count;
             foreach (var track in playback.Tracks)
-            {
-                var reference = track.Reference;
-                var isRemember = reference.Library == "Remember";
-                var query = isRemember
-                    ? new Dictionary<string, string?> { ["category"] = reference.Category, ["fileName"] = reference.FileName }
-                    : new Dictionary<string, string?> { ["year"] = reference.Year, ["style"] = reference.Style, ["fileName"] = reference.FileName };
-                var endpoint = isRemember ? "api/streaming/remember" : "api/streaming/tracks";
-                string Url(string path) => new Uri(Http.BaseAddress!, QueryHelpers.AddQueryString(path, query)).AbsoluteUri;
-                Player.Enqueue(Url(endpoint), Url($"{endpoint}/waveform"), Url($"{endpoint}/artwork"),
-                    track.Details, rememberCategory: reference.Category);
-            }
+                Send(track, play: false);
             _message = $"{Player.Queue.Count - before} canciones añadidas a la cola; {playback.Tracks.Length - (Player.Queue.Count - before)} ya estaban. La reproducción no se ha interrumpido.";
         });
+
+    private Task PlayEntryAsync(Guid entryId, bool play) => RunAsync(
+        () => Http.GetForResultAsync<PlaylistPlayback>($"api/playlists/{Id}/playback?entryId={entryId}", Logger),
+        playback =>
+        {
+            var track = playback.Tracks[0];
+            var queued = Player.Queue.Count;
+            Send(track, play);
+            _message = play ? $"Reproduciendo {track.Reference.FileName}."
+                : Player.Queue.Count > queued ? $"{track.Reference.FileName} añadida a la cola."
+                : $"{track.Reference.FileName} ya estaba en la cola.";
+        });
+
+    private void Send(ResolvedPlaylistTrack track, bool play)
+    {
+        var reference = track.Reference;
+        var isRemember = reference.Library == "Remember";
+        var query = isRemember
+            ? new Dictionary<string, string?> { ["category"] = reference.Category, ["fileName"] = reference.FileName }
+            : new Dictionary<string, string?> { ["year"] = reference.Year, ["style"] = reference.Style, ["fileName"] = reference.FileName };
+        var endpoint = isRemember ? "api/streaming/remember" : "api/streaming/tracks";
+        string Url(string path) => new Uri(Http.BaseAddress!, QueryHelpers.AddQueryString(path, query)).AbsoluteUri;
+        if (play)
+            Player.Play(Url(endpoint), Url($"{endpoint}/waveform"), Url($"{endpoint}/artwork"),
+                track.Details, rememberCategory: reference.Category);
+        else
+            Player.Enqueue(Url(endpoint), Url($"{endpoint}/waveform"), Url($"{endpoint}/artwork"),
+                track.Details, rememberCategory: reference.Category);
+    }
 
     private async Task RunAsync<T>(Func<Task<Result<T>>> request, Action<T> success, bool notify = false)
     {
