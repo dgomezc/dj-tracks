@@ -4,6 +4,9 @@ using DjTracks.Api.Features.Streaming.StreamTrack;
 using DjTracks.Api.Features.Streaming.StreamSession;
 using DjTracks.Api.Features.Streaming.GetSessionArtwork;
 using DjTracks.Api.Features.Streaming.GetSessionWaveform;
+using DjTracks.Api.Features.Streaming.StreamRemember;
+using DjTracks.Api.Features.Streaming.GetRememberArtwork;
+using DjTracks.Api.Features.Streaming.GetRememberWaveform;
 using DjTracks.Infrastructure.Streaming;
 
 namespace DjTracks.Api.Features.Streaming;
@@ -15,6 +18,9 @@ public static class StreamingFeature
             .AddScoped<StreamSessionHandler>()
             .AddScoped<GetSessionArtworkHandler>()
             .AddScoped<GetSessionWaveformHandler>()
+            .AddScoped<StreamRememberHandler>()
+            .AddScoped<GetRememberArtworkHandler>()
+            .AddScoped<GetRememberWaveformHandler>()
             .AddSingleton<IWaveformGenerator>(sp => new FfmpegWaveformGenerator(
                 sp.GetRequiredService<IConfiguration>()["Waveform:BinaryFolder"]))
             .AddSingleton(sp => new TrackWaveformCache(
@@ -31,6 +37,9 @@ public static class StreamingFeature
         api.MapStreamSession();
         api.MapGetSessionArtwork();
         api.MapGetSessionWaveform();
+        api.MapStreamRemember();
+        api.MapGetRememberArtwork();
+        api.MapGetRememberWaveform();
         api.MapGetTrackWaveform();
         api.MapGetTrackArtwork();
         return api;
