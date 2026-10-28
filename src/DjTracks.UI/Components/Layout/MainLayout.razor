@@ -1,75 +1,79 @@
-﻿@inherits LayoutComponentBase
+@inherits LayoutComponentBase
 @implements IDisposable
 @inject DjTracks.UI.Shared.AudioPlayerState AudioPlayer
 
-<MudThemeProvider IsDarkMode="true" />
-<MudPopoverProvider />
-<MudDialogProvider />
-<MudSnackbarProvider />
+<BbPortalHost />
 
-<MudLayout>
-    <MudAppBar Elevation="1" Dense="true">
-        <MudText Typo="Typo.h6">DJ Tracks</MudText>
-        <MudSpacer />
-        <MudNavLink Href="/" Match="NavLinkMatch.All" Style="width:auto">Inicio</MudNavLink>
-        <MudNavLink Href="/tracks" Style="width:auto">Tracks</MudNavLink>
-        <MudNavLink Href="/sessions" Style="width:auto">Sessions</MudNavLink>
-        <MudNavLink Href="/remember" Style="width:auto">Remember</MudNavLink>
-        <MudSpacer />
-        <MudButton OnClick="() => _queueOpen = !_queueOpen" Color="Color.Inherit"
-                   StartIcon="@Icons.Material.Filled.QueueMusic" aria-label="Abrir cola">
-            Cola (@AudioPlayer.Queue.Count)
-        </MudButton>
-        <MudIconButton Icon="@Icons.Material.Filled.Settings" Href="/settings" Color="Color.Inherit" />
-    </MudAppBar>
+<header class="app-bar">
+    <span class="app-title">DJ Tracks</span>
+    <nav class="app-nav" aria-label="Secciones">
+        <NavLink href="/" Match="NavLinkMatch.All" class="app-nav-link">Inicio</NavLink>
+        <NavLink href="/tracks" class="app-nav-link">Tracks</NavLink>
+        <NavLink href="/sessions" class="app-nav-link">Sessions</NavLink>
+        <NavLink href="/remember" class="app-nav-link">Remember</NavLink>
+    </nav>
+    <div class="app-actions">
+        <BbButton Variant="ButtonVariant.Ghost" OnClick="() => _queueOpen = !_queueOpen" AriaLabel="Abrir cola">
+            <Icon><LucideIcon Name="list-music" /></Icon>
+            <ChildContent>Cola (@AudioPlayer.Queue.Count)</ChildContent>
+        </BbButton>
+        <BbDarkModeToggle LightLabel="Modo claro" DarkLabel="Modo oscuro" aria-label="Cambiar entre modo claro y oscuro"
+                          title="Cambiar entre modo claro y oscuro" />
+        <BbButton Variant="ButtonVariant.Ghost" Size="ButtonSize.Icon" Href="/settings" AriaLabel="Configuración">
+            <LucideIcon Name="settings" />
+        </BbButton>
+    </div>
+</header>
 
-    <MudDrawer @bind-Open="_libraryDrawerOpen" Variant="DrawerVariant.Responsive" Elevation="0" ClipMode="DrawerClipMode.Always" Width="260px">
-        <MudNavMenu>
-            <MudText Typo="Typo.overline" Class="px-4 mt-4">Playlists manuales</MudText>
-            <MudText Typo="Typo.body2" Class="px-4 mud-text-secondary">Sin playlists</MudText>
-            <MudDivider Class="my-3" />
-            <MudText Typo="Typo.overline" Class="px-4">Playlists automáticos</MudText>
-            <MudText Typo="Typo.body2" Class="px-4 mud-text-secondary">Sin playlists</MudText>
-        </MudNavMenu>
-    </MudDrawer>
+<div class="app-body">
+    <aside class="library-panel" aria-label="Playlists">
+        <p class="panel-label">Playlists manuales</p>
+        <BbTypographyMuted>Sin playlists</BbTypographyMuted>
+        <BbSeparator />
+        <p class="panel-label">Playlists automáticos</p>
+        <BbTypographyMuted>Sin playlists</BbTypographyMuted>
+    </aside>
 
-    <MudMainContent Class="main-content">
-        <MudContainer MaxWidth="MaxWidth.False" Class="pa-4">
-            <NowPlaying />
-            @Body
-        </MudContainer>
-    </MudMainContent>
-    <PlaybackQueue @bind-Open="_queueOpen" />
-</MudLayout>
+    <main class="main-content">
+        <NowPlaying />
+        @Body
+    </main>
+</div>
+<PlaybackQueue @bind-Open="_queueOpen" />
 
 <footer class="player-bar">
     <div class="queue-controls">
-        <MudIconButton Icon="@Icons.Material.Filled.SkipPrevious" OnClick="AudioPlayer.Previous"
-                       Disabled="@(!AudioPlayer.CanPrevious)" aria-label="Canción anterior" />
-        <MudIconButton Icon="@Icons.Material.Filled.SkipNext" OnClick="AudioPlayer.Next"
-                       Disabled="@(!AudioPlayer.CanNext)" aria-label="Canción siguiente" />
-        <MudIconButton Icon="@Icons.Material.Filled.Shuffle" OnClick="AudioPlayer.ToggleShuffle"
-                       Color="@(AudioPlayer.Shuffle ? Color.Primary : Color.Default)"
-                       aria-label="Reproducción aleatoria" aria-pressed="@AudioPlayer.Shuffle.ToString().ToLowerInvariant()" />
-        <MudButton OnClick="AudioPlayer.CycleRepeat"
-                   Color="@(AudioPlayer.Repeat == DjTracks.UI.Shared.QueueRepeatMode.Off ? Color.Default : Color.Primary)"
-                   aria-label="Cambiar modo de bucle">
+        <BbButton Variant="ButtonVariant.Ghost" Size="ButtonSize.Icon" OnClick="AudioPlayer.Previous"
+                  Disabled="@(!AudioPlayer.CanPrevious)" AriaLabel="Canción anterior">
+            <LucideIcon Name="skip-back" />
+        </BbButton>
+        <BbButton Variant="ButtonVariant.Ghost" Size="ButtonSize.Icon" OnClick="AudioPlayer.Next"
+                  Disabled="@(!AudioPlayer.CanNext)" AriaLabel="Canción siguiente">
+            <LucideIcon Name="skip-forward" />
+        </BbButton>
+        <BbButton Variant="@(AudioPlayer.Shuffle ? ButtonVariant.Secondary : ButtonVariant.Ghost)"
+                  Size="ButtonSize.Icon" OnClick="AudioPlayer.ToggleShuffle"
+                  AriaLabel="Reproducción aleatoria" aria-pressed="@AudioPlayer.Shuffle.ToString().ToLowerInvariant()">
+            <LucideIcon Name="shuffle" />
+        </BbButton>
+        <BbButton Variant="@(AudioPlayer.Repeat == DjTracks.UI.Shared.QueueRepeatMode.Off ? ButtonVariant.Ghost : ButtonVariant.Secondary)"
+                  OnClick="AudioPlayer.CycleRepeat" AriaLabel="Cambiar modo de bucle">
             @RepeatLabel
-        </MudButton>
+        </BbButton>
     </div>
     @if (AudioPlayer.AudioUrl is null)
     {
-        <MudText Typo="Typo.body2" Class="mud-text-secondary">Selecciona una canción para reproducir</MudText>
+        <BbTypographyMuted>Selecciona una canción para reproducir</BbTypographyMuted>
     }
     else
     {
-        <MudStack Spacing="0" Class="player-track">
-            <MudText Typo="Typo.body2" Class="player-track-title">@AudioPlayer.Title</MudText>
+        <div class="player-track">
+            <div class="player-track-title">@AudioPlayer.Title</div>
             @if (!string.IsNullOrWhiteSpace(AudioPlayer.Artist))
             {
-                <MudText Typo="Typo.caption" Class="mud-text-secondary player-track-artist">@AudioPlayer.Artist</MudText>
+                <div class="player-track-artist">@AudioPlayer.Artist</div>
             }
-        </MudStack>
+        </div>
         var playbackVersion = AudioPlayer.PlaybackVersion;
         <div class="player-controls" @key="playbackVersion">
             <WaveformPlayer WaveformUrl="@AudioPlayer.WaveformUrl" />
@@ -87,7 +91,6 @@
 </div>
 
 @code {
-    private bool _libraryDrawerOpen = true;
     private bool _queueOpen;
     private string RepeatLabel => AudioPlayer.Repeat switch
     {

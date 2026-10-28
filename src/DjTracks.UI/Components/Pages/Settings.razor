@@ -2,60 +2,89 @@
 
 <PageTitle>Configuración - DJ Tracks</PageTitle>
 
-<MudText Typo="Typo.h4" Class="mb-2">Configuración</MudText>
-<MudText Class="mud-text-secondary mb-4">
+<BbTypographyH2 Class="page-title">Configuración</BbTypographyH2>
+<BbTypographyMuted Class="page-intro">
     Introduce rutas absolutas de carpetas existentes en el servidor de la API, no en el navegador.
     Las carpetas de música necesitan lectura; playlists necesita también escritura.
-</MudText>
+</BbTypographyMuted>
 
 @if (_busy)
 {
-    <MudProgressLinear Indeterminate="true" Color="Color.Primary" Class="mb-4" aria-label="Procesando ajustes" />
+    <div class="busy-indicator" role="status">
+        <BbSpinner Size="SpinnerSize.Small" AriaLabel="Procesando ajustes" />
+        <span>Procesando ajustes…</span>
+    </div>
 }
 @if (_error is not null)
 {
-    <MudAlert Severity="Severity.Error" Class="mb-4" role="alert">@_error</MudAlert>
+    <BbAlert Variant="AlertVariant.Danger" Class="page-alert">
+        <BbAlertDescription>@_error</BbAlertDescription>
+    </BbAlert>
 }
 @if (_saved)
 {
-    <MudAlert Severity="Severity.Success" Class="mb-4" role="status">
-        Rutas validadas y guardadas en el servidor.
-    </MudAlert>
+    <BbAlert Variant="AlertVariant.Success" Class="page-alert" role="status">
+        <BbAlertDescription>Rutas validadas y guardadas en el servidor.</BbAlertDescription>
+    </BbAlert>
 }
 
-<MudPaper Class="pa-4" Outlined="true">
-    <form @onsubmit="SaveAsync" @onsubmit:preventDefault @oninput="() => _saved = false">
-        <MudStack Spacing="3">
-            <MudTextField T="string" Label="Tracks" @bind-Value="_settings.Tracks"
-                          Disabled="@Disabled" Variant="Variant.Outlined"
-                          HelperText="Carpeta de canciones organizadas por año y estilo."
-                          Error="@HasError(nameof(_settings.Tracks))" ErrorText="@FieldError(nameof(_settings.Tracks))" />
-            <MudTextField T="string" Label="Sessions" @bind-Value="_settings.Sessions"
-                          Disabled="@Disabled" Variant="Variant.Outlined"
-                          HelperText="Carpeta de sesiones organizadas por año, con su audio y tracklist."
-                          Error="@HasError(nameof(_settings.Sessions))" ErrorText="@FieldError(nameof(_settings.Sessions))" />
-            <MudTextField T="string" Label="Remember" @bind-Value="_settings.Remember"
-                          Disabled="@Disabled" Variant="Variant.Outlined"
-                          HelperText="Carpeta de música Remember, dividida en Cortas y Largas."
-                          Error="@HasError(nameof(_settings.Remember))" ErrorText="@FieldError(nameof(_settings.Remember))" />
-            <MudTextField T="string" Label="Playlists" @bind-Value="_settings.Playlists"
-                          Disabled="@Disabled" Variant="Variant.Outlined"
-                          HelperText="Carpeta donde se guardarán los archivos JSON de las playlists; requiere escritura."
-                          Error="@HasError(nameof(_settings.Playlists))" ErrorText="@FieldError(nameof(_settings.Playlists))" />
-            <MudTextField T="string" Label="Raíz M3U" @bind-Value="_settings.M3uRoot"
-                          Disabled="@Disabled" Variant="Variant.Outlined"
-                          HelperText="Las futuras exportaciones M3U usarán rutas relativas a esta carpeta."
-                          Error="@HasError(nameof(_settings.M3uRoot))" ErrorText="@FieldError(nameof(_settings.M3uRoot))" />
-            <MudStack Row="true" Wrap="Wrap.Wrap">
-                <MudButton ButtonType="ButtonType.Submit" Variant="Variant.Filled"
-                           Color="Color.Primary" Disabled="@Disabled">Guardar rutas</MudButton>
-                <MudButton OnClick="LoadAsync" Variant="Variant.Outlined" Disabled="@_busy">
-                    Volver a cargar
-                </MudButton>
-            </MudStack>
-            <MudText Typo="Typo.body2" Class="mud-text-secondary">
-                Volver a cargar descarta los cambios sin guardar. No se crean carpetas de biblioteca.
-            </MudText>
-        </MudStack>
+<BbCard>
+    <BbCardContent Class="settings-card">
+<form class="settings-form" @onsubmit="SaveAsync" @onsubmit:preventDefault @oninput="() => _saved = false">
+        <BbField IsInvalid="@HasError(nameof(_settings.Tracks))">
+            <BbFieldLabel For="settings-tracks">Tracks</BbFieldLabel>
+            <BbFieldContent>
+                <BbInput Id="settings-tracks" @bind-Value="_settings.Tracks" Disabled="@Disabled"
+                         AriaDescribedBy="settings-tracks-help" />
+                <BbFieldDescription Id="settings-tracks-help">Carpeta de canciones organizadas por año y estilo.</BbFieldDescription>
+                <BbFieldError Errors="@FieldErrors(nameof(_settings.Tracks))" />
+            </BbFieldContent>
+        </BbField>
+        <BbField IsInvalid="@HasError(nameof(_settings.Sessions))">
+            <BbFieldLabel For="settings-sessions">Sessions</BbFieldLabel>
+            <BbFieldContent>
+                <BbInput Id="settings-sessions" @bind-Value="_settings.Sessions" Disabled="@Disabled"
+                         AriaDescribedBy="settings-sessions-help" />
+                <BbFieldDescription Id="settings-sessions-help">Carpeta de sesiones organizadas por año, con su audio y tracklist.</BbFieldDescription>
+                <BbFieldError Errors="@FieldErrors(nameof(_settings.Sessions))" />
+            </BbFieldContent>
+        </BbField>
+        <BbField IsInvalid="@HasError(nameof(_settings.Remember))">
+            <BbFieldLabel For="settings-remember">Remember</BbFieldLabel>
+            <BbFieldContent>
+                <BbInput Id="settings-remember" @bind-Value="_settings.Remember" Disabled="@Disabled"
+                         AriaDescribedBy="settings-remember-help" />
+                <BbFieldDescription Id="settings-remember-help">Carpeta de música Remember, dividida en Cortas y Largas.</BbFieldDescription>
+                <BbFieldError Errors="@FieldErrors(nameof(_settings.Remember))" />
+            </BbFieldContent>
+        </BbField>
+        <BbField IsInvalid="@HasError(nameof(_settings.Playlists))">
+            <BbFieldLabel For="settings-playlists">Playlists</BbFieldLabel>
+            <BbFieldContent>
+                <BbInput Id="settings-playlists" @bind-Value="_settings.Playlists" Disabled="@Disabled"
+                         AriaDescribedBy="settings-playlists-help" />
+                <BbFieldDescription Id="settings-playlists-help">Carpeta donde se guardarán los archivos JSON de las playlists; requiere escritura.</BbFieldDescription>
+                <BbFieldError Errors="@FieldErrors(nameof(_settings.Playlists))" />
+            </BbFieldContent>
+        </BbField>
+        <BbField IsInvalid="@HasError(nameof(_settings.M3uRoot))">
+            <BbFieldLabel For="settings-m3uroot">Raíz M3U</BbFieldLabel>
+            <BbFieldContent>
+                <BbInput Id="settings-m3uroot" @bind-Value="_settings.M3uRoot" Disabled="@Disabled"
+                         AriaDescribedBy="settings-m3uroot-help" />
+                <BbFieldDescription Id="settings-m3uroot-help">Las futuras exportaciones M3U usarán rutas relativas a esta carpeta.</BbFieldDescription>
+                <BbFieldError Errors="@FieldErrors(nameof(_settings.M3uRoot))" />
+            </BbFieldContent>
+        </BbField>
+        <div class="button-row">
+            <BbButton Type="ButtonType.Submit" Disabled="@Disabled">Guardar rutas</BbButton>
+            <BbButton Variant="ButtonVariant.Outline" OnClick="LoadAsync" Disabled="@_busy">
+                Volver a cargar
+            </BbButton>
+        </div>
+        <BbTypographyMuted>
+            Volver a cargar descarta los cambios sin guardar. No se crean carpetas de biblioteca.
+        </BbTypographyMuted>
     </form>
-</MudPaper>
+    </BbCardContent>
+</BbCard>

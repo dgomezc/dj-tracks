@@ -52,6 +52,9 @@ export function appendWaveformChunk(canvas, startIndex, newPeaks, peakCount, dur
         audio.addEventListener("pause", instance.draw);
         instance.resize = new ResizeObserver(instance.draw);
         instance.resize.observe(canvas);
+        // Redibuja con los colores del tema al cambiar entre modo claro y oscuro.
+        instance.theme = new MutationObserver(instance.draw);
+        instance.theme.observe(document.documentElement, { attributes: true, attributeFilter: ["class"] });
         instances.set(canvas, instance);
     } else if (instance.peaks.length !== peakCount) {
         instance.peaks = new Array(peakCount).fill(0);
@@ -78,6 +81,7 @@ export function disposeWaveform(canvas) {
     canvas.removeEventListener("click", instance.seek);
     canvas.removeEventListener("keydown", instance.keydown);
     instance.resize.disconnect();
+    instance.theme.disconnect();
     cancelAnimationFrame(instance.frame);
     instances.delete(canvas);
 }
@@ -123,8 +127,8 @@ function draw(instance) {
     context.clearRect(0, 0, width, height);
     if (peaks.length === 0) return;
     const style = getComputedStyle(canvas);
-    const primary = style.getPropertyValue("--mud-palette-primary").trim() || style.color;
-    const muted = style.getPropertyValue("--mud-palette-text-secondary").trim() || style.color;
+    const primary = style.getPropertyValue("--primary").trim() || style.color;
+    const muted = style.getPropertyValue("--muted-foreground").trim() || style.color;
     const duration = Number.isFinite(audio.duration) && audio.duration > 0
         ? audio.duration : instance.duration;
     const progress = duration > 0 ? audio.currentTime / duration : 0;

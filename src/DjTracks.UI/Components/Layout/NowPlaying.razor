@@ -1,7 +1,8 @@
 @implements IDisposable
 
-<MudPaper Class="pa-4 mb-4 now-playing" Outlined="true" role="region" aria-label="Ahora suena">
-    <MudText Typo="Typo.h6" Class="mb-3">Ahora suena</MudText>
+<BbCard Class="now-playing" role="region" aria-label="Ahora suena">
+    <BbCardHeader><BbCardTitle>Ahora suena</BbCardTitle></BbCardHeader>
+    <BbCardContent>
     @if (Player.Current is { } current)
     {
         <div class="now-playing-content">
@@ -14,34 +15,35 @@
                 }
                 else
                 {
-                    <MudIcon Icon="@Icons.Material.Filled.Album" Size="Size.Large" />
-                    <MudText Typo="Typo.caption" role="status">
+                    <LucideIcon Name="disc-3" Size="40" />
+                    <span class="text-small" role="status">
                         @(_loading ? "Cargando carátula…" : _error is null ? "Sin carátula" : "Carátula no disponible")
-                    </MudText>
+                    </span>
                 }
             </div>
-            <MudStack Spacing="1" Class="now-playing-details">
-                <MudText Typo="Typo.h5">@current.Title</MudText>
-                <MudText>Artista: @Display(current.Artist)</MudText>
-                <MudText>Álbum: @Display(current.Details.Album)</MudText>
-                <MudText>Año (carpeta): @Display(current.Details.Year)</MudText>
-                <MudText>Estilo (carpeta): @Display(current.Details.Style)</MudText>
-                <MudText>Duración: @Duration(current.Details.DurationSeconds)</MudText>
-                <MudText Typo="Typo.body2">Fichero: @current.Details.FileName</MudText>
+            <div class="now-playing-details">
+                <h3 class="now-playing-title">@current.Title</h3>
+                <div>Artista: @Display(current.Artist)</div>
+                <div>Álbum: @Display(current.Details.Album)</div>
+                <div>Año (carpeta): @Display(current.Details.Year)</div>
+                <div>Estilo (carpeta): @Display(current.Details.Style)</div>
+                <div>Duración: @Duration(current.Details.DurationSeconds)</div>
+                <div class="text-small">Fichero: @current.Details.FileName</div>
                 @if (current.Details.Warning is not null)
                 {
-                    <MudAlert Severity="Severity.Warning">@current.Details.Warning</MudAlert>
+                    <BbAlert Variant="AlertVariant.Warning"><BbAlertDescription>@current.Details.Warning</BbAlertDescription></BbAlert>
                 }
                 @if (_error is not null)
                 {
-                    <MudAlert Severity="Severity.Warning" role="alert">@_error</MudAlert>
-                    <MudButton OnClick="ReloadAsync">Reintentar carátula</MudButton>
+                    <BbAlert Variant="AlertVariant.Warning"><BbAlertDescription>@_error</BbAlertDescription></BbAlert>
+                    <BbButton Variant="ButtonVariant.Outline" OnClick="ReloadAsync">Reintentar carátula</BbButton>
                 }
-            </MudStack>
+            </div>
         </div>
     }
     else
     {
-        <MudText Class="mud-text-secondary">Selecciona una canción para ver su carátula e información.</MudText>
+        <p class="text-muted">Selecciona una canción para ver su carátula e información.</p>
     }
-</MudPaper>
+    </BbCardContent>
+</BbCard>

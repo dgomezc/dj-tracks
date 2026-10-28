@@ -66,6 +66,6 @@ public partial class Settings
 
     private bool HasError(string field) => _errors.ContainsKey(field);
 
-    private string? FieldError(string field) =>
-        _errors.TryGetValue(field, out var errors) ? string.Join(" ", errors) : null;
+    private IEnumerable<string>? FieldErrors(string field) =>
+        _errors.TryGetValue(field, out var errors) ? errors : null;
 }
