@@ -71,6 +71,9 @@ El estado de entrega y las checklists se mantienen en `VALIDACIONES.md`. Una imp
   automático al terminar, bucle de canción o de cola y recorrido aleatorio.
   *Prueba*: cada control por separado.
 - **F1.6 Ficha de "ahora suena"**: carátula e información en la zona principal.
+  Ficha sincronizada con la cola: título, artista, álbum, duración, fichero y
+  año/estilo de las carpetas. Portada incrustada leída con TagLibSharp; ausencia
+  de portada o tags indicada explícitamente, sin descargas de imágenes externas.
   *Prueba*: carátula y datos correctos.
 
 ### Bloque 2 — Sessions

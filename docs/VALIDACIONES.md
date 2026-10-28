@@ -16,7 +16,8 @@ Consultar siempre el estado real de GitHub antes de actuar sobre un PR.
 - El 27/10/2026 el usuario autorizó integrar el port en el checkout original y mezclar los PRs: "trae los cambios y deja los pr mezclados y las ramas estables". F1.3 quedó pausada en esa entrega y se reanudó tras la instrucción posterior "continúa".
 - F1.3: **validada por el usuario el 27/10/2026** con «Todo ok, continúa». PR [#7](https://github.com/dgomezc/dj-tracks/pull/7) mergeado en `develop` el 27/10/2026 a las 10:34:24 UTC; merge commit `d86e1c4` (comprobado en GitHub).
 - F1.4: **validada globalmente por el usuario el 27/10/2026** con «todo ok, continua», incluida la revisión de carga progresiva. Esta confirmación no amplía las comprobaciones individuales del agente. PR [#8](https://github.com/dgomezc/dj-tracks/pull/8) mergeado en `develop` a las 14:26:25 UTC; merge commit `1d43cc8`.
-- F1.5: **validada globalmente por el usuario el 28/10/2026** con «Todo ok, continúa», incluidas las revisiones sin duplicados, indicador activo y panel fijo al hacer scroll. Autorizado el merge del PR [#9](https://github.com/dgomezc/dj-tracks/pull/9) antes de F1.6. Esta confirmación no amplía las comprobaciones individuales del agente.
+- F1.5: **validada globalmente por el usuario el 28/10/2026** con «Todo ok, continúa», incluidas las revisiones sin duplicados, indicador activo y panel fijo al hacer scroll. PR [#9](https://github.com/dgomezc/dj-tracks/pull/9) mergeado en `develop` a las 06:28:03 UTC, commit `b90f570` (comprobado en GitHub). Esta confirmación no amplía las comprobaciones individuales del agente.
+- F1.6: **validada globalmente por el usuario el 28/10/2026** con «Todo ok. Mezcla el pr y de momento para.». Autorizado el merge del PR [#10](https://github.com/dgomezc/dj-tracks/pull/10) hacia `develop`. Esta aceptación no amplía las comprobaciones individuales del agente. **Trabajo pausado por petición expresa; F2.1 no iniciada.**
 - Checkout original actualizado por fast-forward a `develop` después de integrar F1.2; el trabajo de F1.3 se desarrolla en su rama dedicada. La rama del port se conserva como historial; no se han borrado ni reescrito ramas.
 - Entrega F1.2: PR [#5](https://github.com/dgomezc/dj-tracks/pull/5) **mergeado** en `develop` el 27/10/2026 a las 07:13:41 UTC, commit `8fc21f1` (comprobado en GitHub). Incluye el port y ambos historiales sin force-push. PR #6 también mergeado; no queda PR de F1.2 pendiente.
 - Continuidad confirmada: trabajar directamente en el checkout original, sin nuevos worktrees. Se han preservado los cambios locales preexistentes en los dos `Class1.cs`, sin incluirlos en los commits.
@@ -78,6 +79,82 @@ confirma la entrega F1.3 y autoriza mezclar el PR #7 antes de continuar con F1.4
 - Los controles y los mensajes de formato de audio dependen del navegador. La
   fase no añade una cola, onda, reproducción automática del siguiente track,
   estadísticas, ni soporte para Sessions/Remember.
+
+## F1.6: ficha de «ahora suena» (validada por el usuario)
+
+Confirmación global del 28/10/2026: «Todo ok. Mezcla el pr y de momento para.».
+Se registra la validación y autorización de merge, sin dar por realizadas
+comprobaciones individuales adicionales. No continuar a F2.1 hasta nueva petición.
+
+La zona principal muestra la canción seleccionada sin sustituir el explorador.
+La ficha sigue reproducción directa, anterior/siguiente, cambio automático,
+shuffle, bucle y eliminación desde la cola. Muestra título (o fichero si falta),
+artista, álbum, duración, fichero y año/estilo de las carpetas.
+
+La portada procede únicamente de imágenes incrustadas en el MP3, preferentemente
+la frontal. No hay búsquedas externas, imágenes de carpeta ni modificación de
+tags. JPEG/PNG/GIF/WebP admitidos. Sin imagen se indica «Sin carátula»; un error
+de lectura/formato muestra aviso y permite reintentar sin detener el audio.
+Los tags básicos son la instantánea del listado al añadir la canción; si se
+editan externamente, vaciar la cola y volver a cargar la biblioteca para renovarlos.
+La ficha sigue la selección del reproductor; no indica si el audio está pausado.
+
+### Preparación y checklist del usuario
+
+Visual Studio 2026 (.NET 10), abrir `DjTracks.slnx` en `fase/f1-6-ahora-suena`,
+perfil **DJ Tracks (Api + UI)** y F5. UI `http://localhost:5050/tracks`, API
+`http://localhost:5247`. Mantener la biblioteca ya configurada y FFmpeg por
+`PATH` o `Waveform__BinaryFolder`; no se necesita base de datos. Para comprobar
+todos los estados, usar MP3 con carátula incrustada y otros sin carátula/tags.
+
+- [ ] Antes de reproducir, la ficha invita a seleccionar una canción. Añadir a
+  la cola sin reproducir no debe seleccionar una ni cargar una portada.
+- [ ] Reproducir un MP3 con carátula: imagen correcta, título/artista/álbum,
+  duración y nombre de fichero correctos; año/estilo coinciden con las carpetas.
+  La imagen no se deforma. No se pierde el listado ni los filtros.
+- [ ] Probar un archivo sin portada y otro sin tags: «Sin carátula», «Sin datos»
+  en los campos ausentes y nombre del fichero como título. Nunca queda la imagen
+  de la canción anterior.
+- [ ] Cambiar con anterior/siguiente, desde el panel y por fin automático:
+  ficha, audio, onda e indicador de cola corresponden a la misma canción.
+  Probar cambios rápidos y shuffle/bucles: no aparece una portada atrasada.
+- [ ] Navegar a Inicio y volver: ficha y cola se conservan sin reiniciar audio.
+  Quitar actual selecciona la siguiente ficha; vaciar vuelve al estado sin canción.
+- [ ] Pausa/reanudación, volumen y seek siguen funcionando. Sin duplicados,
+  icono activo actualizado y cola fija al hacer scroll.
+- [ ] Ventana estrecha y títulos largos: carátula/datos legibles y sin tapar
+  contenido ni últimos controles del listado. El panel izquierdo de playlists
+  (todavía vacío) se repliega bajo el breakpoint mediano de MudBlazor y se
+  mantiene visible en escritorio.
+- [ ] Si ocurre un error de carátula, ver aviso y botón «Reintentar carátula»:
+  el audio sigue independiente. Al solucionar el archivo y reintentar, se recupera.
+
+### Comprobaciones del agente
+
+- `dotnet build DjTracks.slnx`: correcto, 0 errores y advertencias.
+- Biblioteca/configuración aisladas con MP3 sintéticos: endpoint de portada PNG
+  y JPEG devuelve 200 con URL de datos de imagen; sin portada devuelve 200 con
+  `dataUrl: null`. MP3 corrupto devuelve 503, formato de imagen BMP no admitido
+  400, identificador con ruta 400 y fichero inexistente 404. Audio Range conserva
+  206 con `Content-Range` correcto y la onda sigue sirviendo NDJSON (200).
+- Navegador: carátulas PNG/JPEG decodificadas y datos correctos; archivo sin tags
+  muestra nombre y «Sin datos», sin conservar la imagen anterior. Añadir a cola
+  no selecciona canción y no duplica. Anterior/siguiente, cambio desde panel,
+  fin real del audio, bucle de cola, shuffle, cambios rápidos, quitar actual y
+  vaciar mantienen la ficha coherente con el audio y el indicador de la cola.
+- Error de lectura visible en la ficha; sustituir la fixture corrupta por un
+  MP3 válido y pulsar Reintentar recupera su imagen. Los tags básicos siguen
+  siendo la instantánea del listado, tal como se describe arriba.
+- Navegar a Inicio conserva el mismo elemento audio y la ficha. Inspección visual
+  a 393 × 768: ficha de 351 px, portada de 180 × 180 sin deformación y datos
+  legibles en columna, con el panel izquierdo replegado. No se ha comprobado
+  hardware de sonido ni biblioteca real. Validación de escritorio pendiente.
+- No se generaron tests unitarios ni se modificaron ajustes/biblioteca privados.
+  Los cambios ajenos en ambos `Class1.cs` se mantienen fuera de los commits.
+  Los servicios y las fixtures temporales de esta comprobación se retiraron.
+
+Validación global del usuario recibida. Merge autorizado; continuación a F2.1
+expresamente pausada.
 
 ## F1.5: cola de reproducción (validada por el usuario)
 

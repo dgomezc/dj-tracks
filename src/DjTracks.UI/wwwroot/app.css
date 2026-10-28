@@ -45,6 +45,36 @@ h1:focus {
     max-width: 100vw;
 }
 
+.now-playing-content {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 24px;
+}
+
+.now-playing-artwork {
+    width: 180px;
+    max-width: 100%;
+    aspect-ratio: 1;
+    flex-shrink: 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    background: var(--mud-palette-background);
+}
+
+.now-playing-artwork img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+}
+
+.now-playing-details {
+    flex: 1 1 240px;
+    min-width: 0;
+    overflow-wrap: anywhere;
+}
+
 .player-track {
     min-width: 0;
     flex: 0 1 240px;

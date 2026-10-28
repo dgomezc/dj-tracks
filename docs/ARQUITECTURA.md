@@ -81,6 +81,19 @@ enlaza controles y eventos de fin del audio. No accede a ficheros ni crea casos 
 uso HTTP: reutiliza las URLs de streaming y onda resueltas desde Tracks. La cola
 no es una playlist persistente; su estado se pierde al recargar la sesión.
 
+La ficha `NowPlaying` se muestra en la zona principal del layout y se suscribe
+al mismo estado para seguir la pista seleccionada, incluso al avanzar desde la
+cola. Cada entrada conserva los tags básicos del listado (sin volver a leerlos
+en la UI) y la URL de carátula. El code-behind obtiene `TrackArtwork` mediante
+`GetForResultAsync`: el slice `Streaming/GetTrackArtwork`, con validación de los
+mismos identificadores que el audio, resuelve el archivo mediante `TrackLibrary`
+y lee la imagen incrustada con TagLibSharp. Prioriza `FrontCover`, o la primera
+imagen si no hay portada frontal. Devuelve JSON con una URL de datos de imagen
+(JPEG, PNG, GIF o WebP), o `dataUrl: null` si no existe ninguna. No carga imágenes
+externas ni añade caché/persistencia. Los errores se presentan en la ficha sin
+detener el audio; las respuestas atrasadas no sustituyen la portada de la pista
+actual. Año/estilo son las carpetas de la biblioteca, no los tags del MP3.
+
 | Elemento | Nombre | Namespace |
 |---|---|---|
 | Caso de uso | Verbo + sustantivo: `GetTracks`, `SaveSettings`, `GetSessions`, `CreatePlaylist` | — |
