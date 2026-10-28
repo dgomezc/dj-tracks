@@ -24,6 +24,10 @@ Consultar siempre el estado real de GitHub antes de actuar sobre un PR.
   incluidas las revisiones de estructura, Play, onda y carátula. Esta aceptación
   no amplía las comprobaciones individuales del agente. Autorizada la integración
   del PR [#12](https://github.com/dgomezc/dj-tracks/pull/12) y continuación con F2.2.
+- PR #12 mergeado en `develop` el 28/10/2026 a las 09:59:32 UTC, commit `8bb2fd1`
+  (comprobado en GitHub); checkout original actualizado por fast-forward.
+- F2.2 en `fase/f2-2-tracklist`: lectura y presentación del tracklist de la sesión
+  activa. Entrega pendiente de validación del usuario; F2.3 no iniciada.
 - Eliminados ambos `Class1.cs` vacíos por petición expresa del usuario del 28/10/2026, en commit separado de F2.1. No quedan esos cambios locales pendientes.
 - Checkout original actualizado por fast-forward a `develop` después de integrar F1.2; el trabajo de F1.3 se desarrolla en su rama dedicada. La rama del port se conserva como historial; no se han borrado ni reescrito ramas.
 - Entrega F1.2: PR [#5](https://github.com/dgomezc/dj-tracks/pull/5) **mergeado** en `develop` el 27/10/2026 a las 07:13:41 UTC, commit `8fc21f1` (comprobado en GitHub). Incluye el port y ambos historiales sin force-push. PR #6 también mergeado; no queda PR de F1.2 pendiente.
@@ -33,6 +37,79 @@ Consultar siempre el estado real de GitHub antes de actuar sobre un PR.
 - **Refactor transversal Vertical Slices: validado por el usuario el 27/10/2026** con "Perfecto, documenta toda la arquitectura actual… Después mezcla el PR y sigue con el siguiente paso". Arquitectura documentada en `ARQUITECTURA.md`. PR [#6](https://github.com/dgomezc/dj-tracks/pull/6) mergeado en `develop` (`c7c1508`). Diseño validado en `arquitectura/flujo-get-tracks.html` ("Cambia todas las llamadas").
 - Port F1.2 recibido de `dgomezc-fase-f1-2-filtros` (`1354305` código, `c38cddb` documentación). Se integra mediante merge en la rama original: se conservan ambos historiales y se resuelven los conflictos de código con la versión adaptada a Result/FluentValidation. Sin PR duplicado ni reescritura de ramas. Cambios preexistentes y JSON privado conservados; no se borran worktrees.
 - Comprobación de integración en checkout original (27/10/2026): `src` coincide con el port recibido; compilación completa con 0 errores y advertencias. API/UI aisladas con MP3 sintéticos: multiaño/multigrupo/multisubestilo, alias, ausencia de duplicados, resultados vacíos, explorador, errores 400/404, opciones, carga de ajustes y página Tracks correctos. No equivale a validación visual de biblioteca real. Servicios y fixtures temporales retirados después de comprobar.
+
+## F2.2: tracklist de la sesión activa (validación manual pendiente)
+
+La ficha «Ahora suena» carga el TXT compatible de la carpeta de la sesión que se
+está reproduciendo, desde Play o Cola. Admite las cuatro variantes de nombre
+documentadas en PLAN, carpetas con/sin fecha y mayúsculas/minúsculas.
+Decisión confirmada en esta fase: si hay varios, leer el primero que se encuentre;
+se usa el orden por nombre del listado, sin concatenar ni selector. El fichero
+elegido se identifica en la ficha. La selección es por carpeta, compartida si hay
+varios MP3 dentro de ella.
+
+Se conservan líneas, números, títulos y texto original, incluidas líneas sin el
+formato `N. Artista - Track`, sin interpretar HTML. Se lee UTF-8 con/sin BOM o
+Unicode con BOM; codificaciones no válidas muestran aviso para guardar como UTF-8.
+No se añaden marcas, edición, seek por canción, escrituras de TXT/JSON ni BD.
+No hay caché: «Volver a cargar tracklist» obtiene cambios sin interrumpir audio.
+Las checklists de F2.1 de abajo son históricas, previas a esta lectura.
+
+### Arranque y checklist del usuario
+
+Visual Studio 2026 (.NET 10), abrir `DjTracks.slnx` en `fase/f2-2-tracklist`,
+perfil **DJ Tracks (Api + UI)** y F5. UI `http://localhost:5050/sessions`, API
+`http://localhost:5247`. Mantener ruta Sessions configurada y accesible, MP3
+válidos bajo `Año\Nombre de sesión\Audio.mp3`, TXT compatibles junto al audio.
+FFmpeg disponible para la API mediante PATH o `Waveform__BinaryFolder`; sin BD.
+Reiniciar Api/UI y recargar completamente la página para renovar la cola en memoria.
+
+- [ ] Reproducir una sesión con cada variante de TXT: `Audio.txt`, `Tracklist.txt`,
+  `Tracklist - Audio.txt`, `Audio - Tracklist.txt` (también `.TXT` y nombres de
+  carpeta). En «Ahora suena» aparecen nombre del TXT y texto con acentos,
+  numeración y saltos de línea correctos; la onda/carátula siguen operativas.
+- [ ] Si hay varios TXT compatibles, solo aparece el primero por nombre; no
+  concatena contenido ni pide elegir. `Notas.txt` y TXT en subcarpetas no se leen.
+- [ ] Sesión sin TXT muestra aviso de ausencia; TXT vacío muestra «El tracklist
+  está vacío». Un TXT con codificación inválida muestra error y permite recargar;
+  audio y onda siguen funcionando.
+- [ ] Editar un TXT de prueba mientras se reproduce y «Volver a cargar tracklist»:
+  muestra la modificación sin reiniciar el audio ni cambiar la cola/posición.
+- [ ] Navegar Sessions/Tracks/Inicio conserva el tracklist de la sesión activa,
+  no el de la carpeta explorada. Cambiar desde Cola, anterior/siguiente y fin
+  automático actualiza el texto; cambios rápidos no dejan texto anterior.
+  Reproducir un Track o vaciar cola retira el panel.
+- [ ] Repetir claro/oscuro con Light Green y otro tema, ventana estrecha y texto
+  largo: ficha legible, líneas ajustadas y scroll del tracklist sin tapar controles.
+
+### Comprobaciones del agente
+
+- `dotnet build DjTracks.slnx`: 0 errores y advertencias. No se generaron tests.
+- API con biblioteca temporal aislada y MP3 sintéticos válidos: cuatro variantes
+  TXT, `.TXT`, UTF-8 con/sin BOM, acentos y saltos de línea exactos, UTF-16 con BOM,
+  ausencia (null/null), vacío y primer candidato entre varios sin concatenar.
+  Edición y recarga sin caché; TXT bloqueado devuelve 503 sin probar otro candidato.
+  Codificación inválida y rutas inválidas/MP3 ausente en request devuelven 400;
+  audio/carpeta ausentes 404; ajustes no creados 409 y JSON de ajustes inválido 500.
+- Navegador: Play inicia audio y muestra contenido/nombre del TXT con onda.
+  HTML incluido en el TXT se muestra como texto, sin crear elementos script.
+  Ausencia, vacío y error de codificación visibles sin parar audio ni quitar onda.
+  Tras corregir el TXT, recargar mantiene el mismo elemento audio y el tiempo
+  avanza de 5 a 5,7 s; navegar a Inicio conserva audio y tracklist.
+- Anterior/siguiente, cinco cambios rápidos de ida/vuelta y fin real del audio
+  con Cola abierta actualizan texto para la entrada activa. Reproducir un Track
+  oculta el panel; volver a sesión lo recupera. Vaciar cola retira audio y panel.
+- Capturas inspeccionadas a 642 px en Light Green y Cyberpunk, claro/oscuro,
+  con 80 líneas largas: texto legible, ajuste de línea, scroll interno y sin
+  desbordamiento horizontal de página. Temas aplicados temporalmente en DOM;
+  modo alternado con el control de cabecera. MCP Blueprint Card y documentación
+  .NET de lectura/codificación consultados.
+- No se ha comprobado biblioteca real ni sonido por hardware ni todos los
+  temas/tamaños/codificaciones. No hay soporte específico de ANSI/Windows-1252:
+  ante bytes no válidos se pide guardar como UTF-8. API/UI y datos temporales
+  retirados; ajustes privados sin tocar.
+
+Validación del usuario pendiente. No mezclar ni avanzar a otra fase.
 
 ## F2.1: navegación de Sessions y cola (validada por el usuario)
 

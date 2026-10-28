@@ -126,6 +126,27 @@ URLs; añadir conserva audio/posición y rechaza duplicados. Esta ampliación se
 incorpora a F2.1 por petición del usuario. La lectura del contenido del `.txt`
 sigue fuera de F2.1. No se añaden playlists ni BD.
 
+F2.2 incorpora `Library/GetSessionTracklist`: recibe año, carpeta y nombre del
+MP3 (no una ruta ni nombre arbitrario de TXT). El handler carga la raíz Sessions
+y delega en `SessionLibrary.ReadTracklistAsync`; primero resuelve el audio con
+las comprobaciones de `TrackLibrary` y usa el mismo detector de candidatos que
+el listado. Lee solo el primer candidato ordenado por nombre, por decisión del
+usuario; sin concatenar ni probar otro si falla el primero. Devuelve
+`SessionTracklist(FileName, Content)`: ambos nulos cuando no hay TXT, contenido
+vacío si el fichero está vacío. Lee UTF-8 estricto por defecto y detecta BOM
+Unicode; no escribe, cachea ni interpreta el contenido.
+
+`QueuedTrack.TracklistUrl` es opcional; Sessions lo proporciona tanto en Play
+como en añadir. `SessionTracklistPanel`, dentro de `NowPlaying`, recibe esa URL
+y llama por HTTP con `GetForResultAsync`. Al cambiar de sesión borra el contenido
+anterior y versiona peticiones para descartar respuestas atrasadas; al pasar a
+Tracks o vaciar la cola deja de mostrarse. Se mantiene al navegar porque depende
+de la cola, no de la carpeta explorada. Recargar obtiene cambios del TXT sin
+recrear audio ni onda. Razor presenta el texto escapado, con saltos de línea,
+scroll y ajuste de líneas largas; no `MarkupString`, parser de canciones ni
+enlaces a posiciones temporales. Ausencia, vacío, carga y errores tienen estado
+visible independiente del audio.
+
 | Elemento | Nombre | Namespace |
 |---|---|---|
 | Caso de uso | Verbo + sustantivo: `GetTracks`, `SaveSettings`, `GetSessions`, `CreatePlaylist` | — |
