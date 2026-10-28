@@ -1,13 +1,14 @@
 using DjTracks.UI.Components;
 using DjTracks.UI.Shared;
-using MudBlazor.Services;
+using BlazorBlueprint.Components;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
-builder.Services.AddMudServices();
+// Radio de 1rem del tema "Light Green" de tweakcn; el ThemeService lo aplica en <html>.
+builder.Services.AddBlazorBlueprintComponents(configureTheme: theme => theme.DefaultRadius = 1.0);
 builder.Services.AddScoped<AudioPlayerState>();
 builder.Services.AddHttpClient("Api", client =>
     client.BaseAddress = new Uri(builder.Configuration["ApiBaseUrl"]!));
