@@ -1,3 +1,4 @@
+using System.Text;
 using DjTracks.Domain;
 using FluentResults;
 
@@ -26,26 +27,7 @@ public sealed class SessionLibrary(TrackLibrary tracks)
                 return new AppError(ErrorKind.NotFound, "Carpeta no encontrada.",
                     "La carpeta seleccionada ya no existe. Vuelve al nivel anterior.");
 
-            HashSet<string> names = new(StringComparer.OrdinalIgnoreCase) { "Tracklist" };
-            foreach (var name in listing.Tracks.Select(file => Path.GetFileNameWithoutExtension(file.FileName))
-                .Append(session))
-            {
-                names.Add(name);
-                names.Add($"Tracklist - {name}");
-                names.Add($"{name} - Tracklist");
-            }
-
-            List<string> candidates = [];
-            foreach (var file in directory.EnumerateFiles())
-            {
-                ct.ThrowIfCancellationRequested();
-                if ((file.Attributes & FileAttributes.ReparsePoint) == 0
-                    && file.Extension.Equals(".txt", StringComparison.OrdinalIgnoreCase)
-                    && names.Contains(Path.GetFileNameWithoutExtension(file.Name)))
-                    candidates.Add(file.Name);
-            }
-            tracklists = candidates.OrderBy(name => name, StringComparer.OrdinalIgnoreCase)
-                .ThenBy(name => name, StringComparer.Ordinal).ToArray();
+            tracklists = FindTracklists(directory, session, ct).Select(file => file.Name).ToArray();
         }
 
         return new SessionListing(year, session, folders,
@@ -60,4 +42,42 @@ public sealed class SessionLibrary(TrackLibrary tracks)
 
     public Result<TrackArtwork> ReadArtwork(string root, string year, string session, string fileName,
         CancellationToken ct) => tracks.ReadArtwork(root, year, session, fileName, ct);
+
+    public async Task<Result<SessionTracklist>> ReadTracklistAsync(string root, string year,
+        string session, string fileName, CancellationToken ct)
+    {
+        var audio = ResolveAudioFile(root, year, session, fileName, ct);
+        if (audio.IsFailed)
+            return audio.ToResult();
+
+        var file = FindTracklists(audio.Value.Directory!, session, ct).FirstOrDefault();
+        if (file is null)
+            return new SessionTracklist(null, null);
+
+        await using var stream = new FileStream(file.FullName, FileMode.Open, FileAccess.Read,
+            FileShare.Read, 4096, FileOptions.Asynchronous | FileOptions.SequentialScan);
+        using var reader = new StreamReader(stream, new UTF8Encoding(false, true),
+            detectEncodingFromByteOrderMarks: true);
+        return new SessionTracklist(file.Name, await reader.ReadToEndAsync(ct));
+    }
+
+    private static FileInfo[] FindTracklists(DirectoryInfo directory, string session, CancellationToken ct)
+    {
+        var files = directory.EnumerateFiles()
+            .Where(file => (file.Attributes & FileAttributes.ReparsePoint) == 0).ToArray();
+        HashSet<string> names = new(StringComparer.OrdinalIgnoreCase) { "Tracklist" };
+        foreach (var name in files.Where(file => file.Extension.Equals(".mp3", StringComparison.OrdinalIgnoreCase))
+            .Select(file => Path.GetFileNameWithoutExtension(file.Name)).Append(session))
+        {
+            ct.ThrowIfCancellationRequested();
+            names.Add(name);
+            names.Add($"Tracklist - {name}");
+            names.Add($"{name} - Tracklist");
+        }
+
+        return files.Where(file => file.Extension.Equals(".txt", StringComparison.OrdinalIgnoreCase)
+                && names.Contains(Path.GetFileNameWithoutExtension(file.Name)))
+            .OrderBy(file => file.Name, StringComparer.OrdinalIgnoreCase)
+            .ThenBy(file => file.Name, StringComparer.Ordinal).ToArray();
+    }
 }

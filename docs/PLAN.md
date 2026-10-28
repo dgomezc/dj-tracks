@@ -30,8 +30,10 @@ Reproductor autoalojado de música electrónica (Tracks, Sessions, Remember). Se
   `Tracklist.txt`, `Tracklist - Nombre.txt` o `Nombre - Tracklist.txt`.
   `Nombre` puede ser el nombre base del MP3 o el nombre completo de la carpeta.
   La detección no distingue mayúsculas/minúsculas, tampoco en `.TXT`, y no busca
-  en subcarpetas. Si coinciden varios TXT se conservan todos como candidatos,
-  sin elegir ni concatenar contenido automáticamente. Otros TXT se ignoran.
+  en subcarpetas. Si coinciden varios TXT, se lee solo el primero del listado
+  ordenado por nombre (ordinal sin distinguir mayúsculas; desempate ordinal).
+  No se concatenan ni se solicita elegir: decisión del usuario del 28/10/2026
+  («lo mejor es leer el primero que encuentre»). Otros TXT se ignoran.
 - **Remember**: `Cortas/…mp3` y `Largas/…mp3`.
 - Filtros y playlists automáticos se basan en nombres de carpeta, no en tags.
 
@@ -112,7 +114,13 @@ El estado de entrega y las checklists se mantienen en `VALIDACIONES.md`. Una imp
   contenido del tracklist sigue pendiente de F2.2.
 - **F2.2 Tracklist** leído del `.txt` junto a la sesión e integrado con la reproducción.
   La reproducción con onda prevista inicialmente aquí se adelantó a F2.1 por
-  petición expresa; no supone que F2.2 esté iniciada ni validada.
+  petición expresa. «Ahora suena» muestra el nombre y texto del primer TXT compatible
+  de la carpeta de la sesión activa, también al avanzar desde la cola y navegar.
+  Conserva líneas, numeración y texto original, sin interpretar HTML ni exigir
+  un formato de línea; no calcula tiempos ni permite saltar por canción (F2.3).
+  Sin TXT, vacío o error se indican explícitamente; recargar tracklist no
+  interrumpe el audio. Lectura UTF-8 (con/sin BOM) o Unicode con BOM, sin caché ni
+  escritura de archivos; un TXT con codificación inválida pide guardarlo como UTF-8.
 - **F2.3 (último, opcional) Marcas de inicio por canción**: marcar posición actual en el tracklist, guardar en JSON junto a la sesión, clic para saltar. Reproductor grande sincronizado en la página principal.
 
 ### Bloque 3 — Remember

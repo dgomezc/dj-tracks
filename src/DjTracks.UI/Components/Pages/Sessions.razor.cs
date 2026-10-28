@@ -68,10 +68,12 @@ public partial class Sessions
             QueryHelpers.AddQueryString("api/streaming/sessions/waveform", query)).AbsoluteUri;
         var artworkUrl = new Uri(Http.BaseAddress!,
             QueryHelpers.AddQueryString("api/streaming/sessions/artwork", query)).AbsoluteUri;
+        var tracklistUrl = new Uri(Http.BaseAddress!,
+            QueryHelpers.AddQueryString("api/library/sessions/tracklist", query)).AbsoluteUri;
         if (enqueue)
-            Player.Enqueue(audioUrl, waveformUrl, artworkUrl, file, _session);
+            Player.Enqueue(audioUrl, waveformUrl, artworkUrl, file, _session, tracklistUrl);
         else
-            Player.Play(audioUrl, waveformUrl, artworkUrl, file, _session);
+            Player.Play(audioUrl, waveformUrl, artworkUrl, file, _session, tracklistUrl);
     }
 
     private static string Display(string? value) => string.IsNullOrWhiteSpace(value) ? "Sin datos" : value;

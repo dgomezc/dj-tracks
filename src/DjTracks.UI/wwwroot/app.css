@@ -204,11 +204,38 @@ body {
 }
 
 /* Ahora suena */
+.now-playing-sections {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-start;
+    gap: 24px;
+}
+
+.session-tracklist {
+    flex: 1 1 320px;
+    min-width: 0;
+}
+
+.tracklist-content {
+    max-height: 24rem;
+    overflow: auto;
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+    padding: 12px;
+    border: 1px solid var(--border);
+    border-radius: calc(var(--radius) - 4px);
+    background: var(--muted);
+    color: var(--foreground);
+    font: inherit;
+}
+
 .now-playing {
     margin-bottom: 16px;
 }
 
 .now-playing-content {
+    flex: 1 1 460px;
+    min-width: 0;
     display: flex;
     flex-wrap: wrap;
     gap: 24px;

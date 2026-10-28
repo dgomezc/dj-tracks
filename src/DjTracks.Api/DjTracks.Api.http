@@ -1,5 +1,11 @@
 @DjTracks.Api_HostAddress = http://localhost:5247
 
+# Lee el primer TXT compatible de la carpeta del MP3; null/null si no hay ninguno.
+GET {{DjTracks.Api_HostAddress}}/api/library/sessions/tracklist?year=2026&session=Nombre%20de%20sesión&fileName=Sesión.mp3
+Accept: application/json
+
+###
+
 GET {{DjTracks.Api_HostAddress}}/api/library/sessions
 Accept: application/json
 

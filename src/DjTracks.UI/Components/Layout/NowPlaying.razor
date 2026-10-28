@@ -5,6 +5,7 @@
     <BbCardContent>
     @if (Player.Current is { } current)
     {
+        <div class="now-playing-sections">
         <div class="now-playing-content">
             <div class="now-playing-artwork">
                 @if (_dataUrl is not null && _error is null)
@@ -29,7 +30,6 @@
                 @if (current.SessionFolder is not null)
                 {
                     <div>Sesión (carpeta): @current.SessionFolder</div>
-                    <p class="text-muted">La lectura del tracklist de sesiones estará disponible en F2.2.</p>
                 }
                 else
                 {
@@ -47,6 +47,8 @@
                     <BbButton Variant="ButtonVariant.Outline" OnClick="ReloadAsync">Reintentar carátula</BbButton>
                 }
             </div>
+        </div>
+        <SessionTracklistPanel Url="@current.TracklistUrl" />
         </div>
     }
     else

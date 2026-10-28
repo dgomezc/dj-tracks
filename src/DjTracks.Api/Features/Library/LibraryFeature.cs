@@ -1,5 +1,6 @@
 using DjTracks.Api.Features.Library.GetTracks;
 using DjTracks.Api.Features.Library.GetSessions;
+using DjTracks.Api.Features.Library.GetSessionTracklist;
 using DjTracks.Api.Features.Library.GetTrackFilters;
 using DjTracks.Api.Features.Library.GetFilteredTracks;
 using DjTracks.Infrastructure.Library;
@@ -12,6 +13,7 @@ public static class LibraryFeature
         .AddSingleton<TrackLibrary>()
         .AddSingleton<SessionLibrary>()
         .AddScoped<GetSessionsHandler>()
+        .AddScoped<GetSessionTracklistHandler>()
         .AddScoped<GetTracksHandler>()
         .AddScoped<GetTrackFiltersHandler>()
         .AddScoped<GetFilteredTracksHandler>();
@@ -20,6 +22,7 @@ public static class LibraryFeature
     {
         api.MapGetTracks();
         api.MapGetSessions();
+        api.MapGetSessionTracklist();
         api.MapGetTrackFilters();
         api.MapGetFilteredTracks();
         return api;
