@@ -94,6 +94,23 @@ externas ni añade caché/persistencia. Los errores se presentan en la ficha sin
 detener el audio; las respuestas atrasadas no sustituyen la portada de la pista
 actual. Año/estilo son las carpetas de la biblioteca, no los tags del MP3.
 
+Sessions usa `Library/GetSessions` para Año → carpeta de sesión → MP3 y
+`Streaming/StreamSession` para el audio con Range. Ambos reciben identificadores
+de carpetas/fichero, nunca rutas del cliente, y validan formato con FluentValidation.
+`SessionLibrary` reutiliza la navegación, lectura de tags y resolución segura de
+`TrackLibrary`: ambas estructuras tienen dos niveles de carpetas. El contrato
+`SessionListing` distingue carpeta de sesión de estilo (el `Style` de sus archivos
+es nulo). Las sesiones se ordenan por nombre descendente; con `yyyy-MM-dd - Nombre`
+las recientes aparecen primero. No se interpreta ni exige una fecha válida.
+
+La página Sessions llama por HTTP desde su code-behind, sin acceso a ficheros.
+Añade un MP3 a la cola mediante su URL de streaming, con `SessionFolder` en
+`QueuedTrack` para identificar su procedencia en la ficha. URLs de carátula/onda
+son opcionales: en F2.1 solo Tracks las proporciona. Al cambiar a una sesión se
+retira la onda anterior y la ficha muestra la carpeta de sesión, no un estilo.
+El streaming básico permite usar la cola mixta sin entradas inoperantes; la onda,
+portada y lectura del `.txt` quedan fuera de F2.1. No se añaden playlists ni BD.
+
 | Elemento | Nombre | Namespace |
 |---|---|---|
 | Caso de uso | Verbo + sustantivo: `GetTracks`, `SaveSettings`, `GetSessions`, `CreatePlaylist` | — |

@@ -78,6 +78,10 @@ El estado de entrega y las checklists se mantienen en `VALIDACIONES.md`. Una imp
 
 ### Bloque 2 — Sessions
 - **F2.1 Listado y navegación de sesiones** (por año), añadir a cola.
+  Navegación Año → carpeta de sesión → MP3 con tags básicos. Cola compartida con
+  Tracks, sin duplicados; añadir no interrumpe el audio. Incluye streaming básico
+  con Range para que las entradas se puedan reproducir desde la cola. La onda y
+  lectura del tracklist se dejan para F2.2; esta fase no añade carátula de sesiones.
 - **F2.2 Reproducción + tracklist** leído del `.txt` junto a la sesión, con onda.
 - **F2.3 (último, opcional) Marcas de inicio por canción**: marcar posición actual en el tracklist, guardar en JSON junto a la sesión, clic para saltar. Reproductor grande sincronizado en la página principal.
 

@@ -17,8 +17,11 @@ Consultar siempre el estado real de GitHub antes de actuar sobre un PR.
 - F1.3: **validada por el usuario el 27/10/2026** con «Todo ok, continúa». PR [#7](https://github.com/dgomezc/dj-tracks/pull/7) mergeado en `develop` el 27/10/2026 a las 10:34:24 UTC; merge commit `d86e1c4` (comprobado en GitHub).
 - F1.4: **validada globalmente por el usuario el 27/10/2026** con «todo ok, continua», incluida la revisión de carga progresiva. Esta confirmación no amplía las comprobaciones individuales del agente. PR [#8](https://github.com/dgomezc/dj-tracks/pull/8) mergeado en `develop` a las 14:26:25 UTC; merge commit `1d43cc8`.
 - F1.5: **validada globalmente por el usuario el 28/10/2026** con «Todo ok, continúa», incluidas las revisiones sin duplicados, indicador activo y panel fijo al hacer scroll. PR [#9](https://github.com/dgomezc/dj-tracks/pull/9) mergeado en `develop` a las 06:28:03 UTC, commit `b90f570` (comprobado en GitHub). Esta confirmación no amplía las comprobaciones individuales del agente.
-- F1.6: **validada globalmente por el usuario el 28/10/2026** con «Todo ok. Mezcla el pr y de momento para.». Autorizado el merge del PR [#10](https://github.com/dgomezc/dj-tracks/pull/10) hacia `develop`. Esta aceptación no amplía las comprobaciones individuales del agente. **Trabajo pausado por petición expresa; F2.1 no iniciada.**
-- **Migración transversal MudBlazor → Blazor Blueprint (28/10/2026): validada por el usuario el 28/10/2026, incluido el selector de temas («Funciona todo Ok. Mezcla el PR»). Merge autorizado.** Rama `dgomezc-analisis-blazor-blueprint`, PR [#11](https://github.com/dgomezc/dj-tracks/pull/11) hacia `develop` (ver sección "Migración a Blazor Blueprint"). Antes de iniciar F2.1, las sesiones deben releer `AGENTS.md` y `docs/ARQUITECTURA.md` (sección 8). F2.1 sigue sin iniciar.
+- F1.6: **validada globalmente por el usuario el 28/10/2026** con «Todo ok. Mezcla el pr y de momento para.». PR [#10](https://github.com/dgomezc/dj-tracks/pull/10) mergeado en `develop` a las 06:39:27 UTC, commit `0d48c5c`. Esta aceptación no amplía las comprobaciones individuales del agente. La pausa posterior se levantó solo para F2.1.
+- **Migración transversal MudBlazor → Blazor Blueprint (28/10/2026): validada por el usuario el 28/10/2026**, incluido el selector de temas («Funciona todo Ok. Mezcla el PR»). PR [#11](https://github.com/dgomezc/dj-tracks/pull/11) mergeado en `develop` (ver sección "Migración a Blazor Blueprint"). Las fases siguientes deben respetar `AGENTS.md` y `docs/ARQUITECTURA.md` (sección 8).
+- PR #11 comprobado mergeado en `develop` (`948ad2a`), checkout original actualizado por fast-forward e instrucciones de Blueprint releídas.
+- F2.1 autorizada el 28/10/2026 con «Puedes continuar con F2.1». Implementación en `fase/f2-1-sesiones`, validación manual pendiente. F2.2 no iniciada.
+- Eliminados ambos `Class1.cs` vacíos por petición expresa del usuario del 28/10/2026, en commit separado de F2.1. No quedan esos cambios locales pendientes.
 - Checkout original actualizado por fast-forward a `develop` después de integrar F1.2; el trabajo de F1.3 se desarrolla en su rama dedicada. La rama del port se conserva como historial; no se han borrado ni reescrito ramas.
 - Entrega F1.2: PR [#5](https://github.com/dgomezc/dj-tracks/pull/5) **mergeado** en `develop` el 27/10/2026 a las 07:13:41 UTC, commit `8fc21f1` (comprobado en GitHub). Incluye el port y ambos historiales sin force-push. PR #6 también mergeado; no queda PR de F1.2 pendiente.
 - Continuidad confirmada: trabajar directamente en el checkout original, sin nuevos worktrees. Se han preservado los cambios locales preexistentes en los dos `Class1.cs`, sin incluirlos en los commits.
@@ -27,6 +30,89 @@ Consultar siempre el estado real de GitHub antes de actuar sobre un PR.
 - **Refactor transversal Vertical Slices: validado por el usuario el 27/10/2026** con "Perfecto, documenta toda la arquitectura actual… Después mezcla el PR y sigue con el siguiente paso". Arquitectura documentada en `ARQUITECTURA.md`. PR [#6](https://github.com/dgomezc/dj-tracks/pull/6) mergeado en `develop` (`c7c1508`). Diseño validado en `arquitectura/flujo-get-tracks.html` ("Cambia todas las llamadas").
 - Port F1.2 recibido de `dgomezc-fase-f1-2-filtros` (`1354305` código, `c38cddb` documentación). Se integra mediante merge en la rama original: se conservan ambos historiales y se resuelven los conflictos de código con la versión adaptada a Result/FluentValidation. Sin PR duplicado ni reescritura de ramas. Cambios preexistentes y JSON privado conservados; no se borran worktrees.
 - Comprobación de integración en checkout original (27/10/2026): `src` coincide con el port recibido; compilación completa con 0 errores y advertencias. API/UI aisladas con MP3 sintéticos: multiaño/multigrupo/multisubestilo, alias, ausencia de duplicados, resultados vacíos, explorador, errores 400/404, opciones, carga de ajustes y página Tracks correctos. No equivale a validación visual de biblioteca real. Servicios y fixtures temporales retirados después de comprobar.
+
+## F2.1: navegación de Sessions y cola (validación manual pendiente)
+
+`/sessions` permite explorar Año → carpeta de sesión → archivos MP3. Años y
+sesiones ordenados por nombre descendente (fechas `yyyy-MM-dd` más recientes
+primero); MP3 por nombre ascendente. Admite varios MP3 en la misma carpeta,
+extensión sin distinguir mayúsculas y nombres con espacios, acentos, `&` y `+`.
+El `.txt` no se muestra ni interpreta todavía. Las carpetas enlazadas y archivos
+enlazados se excluyen igual que en Tracks; no hay exploración recursiva.
+
+El botón por archivo lo añade a la misma cola de Tracks sin iniciar/interrumpir
+el audio; una URL ya presente no se duplica. Archivos homónimos de distinta
+carpeta o biblioteca son entradas distintas. Desde Cola se puede reproducir,
+saltar y quitar; la ficha muestra carpeta de sesión y datos básicos. Se incorpora
+el streaming básico con Range necesario para que la cola funcione; la onda y
+lectura del tracklist se dejan para F2.2. No añade carátula de sesiones ni es una playlist
+persistente ni se guarda en BD. Añadir una carpeta completa no forma parte de F2.1.
+
+### Preparación y checklist del usuario
+
+Visual Studio 2026 (.NET 10), abrir `DjTracks.slnx` en `fase/f2-1-sesiones`,
+perfil **DJ Tracks (Api + UI)** y F5. UI `http://localhost:5050/sessions`, API
+`http://localhost:5247`. Mantener las rutas de Tracks y Sessions configuradas y
+accesibles a la API; sesiones bajo `Año/yyyy-MM-dd - Nombre/Nombre.mp3`.
+No hace falta base de datos. FFmpeg sigue siendo necesario para la onda de
+Tracks, pero no para explorar ni reproducir Sessions en esta fase.
+
+- [ ] Abrir Sessions: años recientes primero; entrar en un año, una carpeta de
+  sesión y ver solo sus MP3. Volver mediante las migas Años/año y «Volver a cargar»
+  mantiene el nivel. Tracks y sus filtros siguen funcionando.
+- [ ] Tags y duración correctos; tags ausentes muestran «Sin datos». Un MP3
+  ilegible muestra aviso en su fila sin impedir ver/añadir los demás.
+  Carpetas vacías muestran mensaje, sin error.
+- [ ] Añadir dos MP3: aumenta contador sin arrancar ni interrumpir audio.
+  Repetir el mismo desde Sessions no lo duplica. Mismo nombre en carpetas distintas
+  o en Tracks y Sessions debe poder coexistir.
+- [ ] Abrir Cola y reproducir una sesión: audio básico, pausa, volumen y seek
+  operativos; título/datos y carpeta de sesión correctos. No permanece una onda
+  o portada de Tracks; Sessions aún no tiene onda/tracklist.
+- [ ] Cola mixta Tracks/Sessions: anterior/siguiente y fin automático cambian
+  correctamente, indicador activo actualizado con panel abierto. Al volver a un
+  Track se recupera su onda/carátula. Probar shuffle/bucle, quitar actual y vaciar.
+- [ ] Navegar entre Sessions, Tracks e Inicio conserva cola y audio. Recarga
+  completa vacía la cola, como hasta ahora.
+- [ ] Probar claro y oscuro en Light Green y al menos un tema distinto (por
+  ejemplo Cyberpunk). Listado, migas, alertas, cola y ficha legibles; desplegar
+  una lista larga, scroll y ventana estrecha sin tapar controles.
+- [ ] Si la carpeta seleccionada desaparece o falla el almacenamiento, «Volver
+  a cargar» muestra error y permite volver a Años/año; Configuración accesible.
+  No cambiar ni borrar datos reales para provocar el error.
+
+### Comprobaciones del agente
+
+- `dotnet build DjTracks.slnx`: correcto, 0 errores y advertencias, incluida la
+  versión final del panel. No se generaron tests unitarios.
+- API con biblioteca sintética: años `2026,2025` y carpetas de sesión en orden
+  descendente, MP3 en orden ascendente, `.MP3` admitido, `.txt` excluido, tags y
+  aviso de archivo corrupto. Vacíos devuelven 200; sesión sin año/identificador
+  con ruta y extensión no MP3 devuelven 400; carpeta/fichero ausentes 404;
+  ajustes aún no creados 409, JSON de ajustes inválido 500, almacenamiento ausente
+  503. Una junction se excluye y no permite abrir audio (404). Range bytes=4-9
+  devuelve 206, Content-Range correcto y seis bytes.
+- Navegador con MP3 sintéticos: navegación/migas/recarga, vacíos, tags y aviso
+  de corrupto; añadir dos archivos sin iniciar audio y repetidos sin duplicar.
+  URL con acento, `&` y `+` reproduce y permite seek. Fin real del audio avanza
+  con la cola abierta y ficha actualizada. Mismo fichero en Tracks y Sessions
+  coexiste; transición mixta anterior/siguiente/shuffle/bucle de cola retira y
+  recupera la onda de Tracks sin errores de circuito. Añadir repetido conserva
+  el mismo elemento audio y posición de 3 segundos.
+- Carpeta sintética renombrada mientras se muestra: recargar presenta el error
+  y Años permite recuperarse. Cierre del panel en español y procedencia
+  `Sessions · año · carpeta` comprobados en la versión final.
+- Capturas inspeccionadas a 642 px de ancho en Light Green y Cyberpunk, claro y
+  oscuro: tabla, migas, textos y reproductor legibles sin desbordamiento de página.
+  Cyberpunk se eligió desde Configuración; para comparar Light Green se cambió
+  temporalmente el atributo de tema en el DOM de la prueba. No se han comprobado
+  todos los temas ni tamaños, sonido por hardware ni biblioteca real.
+- Se usó el MCP de Blueprint para DataTable y Sheet. No se tocaron los ajustes
+  privados ni la biblioteca real; la eliminación de las clases vacías solicitada
+  por el usuario se guarda en commit separado.
+  Servicios y fixtures de comprobación retirados antes de la entrega.
+
+Validación manual del usuario pendiente; no mezclar ni avanzar a F2.2.
 
 ## Migración a Blazor Blueprint (transversal, tras F1.6)
 
