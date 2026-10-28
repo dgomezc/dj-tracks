@@ -16,7 +16,7 @@ Consultar siempre el estado real de GitHub antes de actuar sobre un PR.
 - El 27/10/2026 el usuario autorizó integrar el port en el checkout original y mezclar los PRs: "trae los cambios y deja los pr mezclados y las ramas estables". F1.3 quedó pausada en esa entrega y se reanudó tras la instrucción posterior "continúa".
 - F1.3: **validada por el usuario el 27/10/2026** con «Todo ok, continúa». PR [#7](https://github.com/dgomezc/dj-tracks/pull/7) mergeado en `develop` el 27/10/2026 a las 10:34:24 UTC; merge commit `d86e1c4` (comprobado en GitHub).
 - F1.4: **validada globalmente por el usuario el 27/10/2026** con «todo ok, continua», incluida la revisión de carga progresiva. Esta confirmación no amplía las comprobaciones individuales del agente. PR [#8](https://github.com/dgomezc/dj-tracks/pull/8) mergeado en `develop` a las 14:26:25 UTC; merge commit `1d43cc8`.
-- F1.5: implementada en `fase/f1-5-cola`, PR [#9](https://github.com/dgomezc/dj-tracks/pull/9) abierto hacia `develop`; pendiente de validación manual del usuario. F1.6 no iniciada.
+- F1.5: **validada globalmente por el usuario el 28/10/2026** con «Todo ok, continúa», incluidas las revisiones sin duplicados, indicador activo y panel fijo al hacer scroll. Autorizado el merge del PR [#9](https://github.com/dgomezc/dj-tracks/pull/9) antes de F1.6. Esta confirmación no amplía las comprobaciones individuales del agente.
 - Checkout original actualizado por fast-forward a `develop` después de integrar F1.2; el trabajo de F1.3 se desarrolla en su rama dedicada. La rama del port se conserva como historial; no se han borrado ni reescrito ramas.
 - Entrega F1.2: PR [#5](https://github.com/dgomezc/dj-tracks/pull/5) **mergeado** en `develop` el 27/10/2026 a las 07:13:41 UTC, commit `8fc21f1` (comprobado en GitHub). Incluye el port y ambos historiales sin force-push. PR #6 también mergeado; no queda PR de F1.2 pendiente.
 - Continuidad confirmada: trabajar directamente en el checkout original, sin nuevos worktrees. Se han preservado los cambios locales preexistentes en los dos `Class1.cs`, sin incluirlos en los commits.
@@ -79,7 +79,10 @@ confirma la entrega F1.3 y autoriza mezclar el PR #7 antes de continuar con F1.4
   fase no añade una cola, onda, reproducción automática del siguiente track,
   estadísticas, ni soporte para Sessions/Remember.
 
-## F1.5: cola de reproducción (validación manual pendiente)
+## F1.5: cola de reproducción (validada por el usuario)
+
+Confirmación global del 28/10/2026: «Todo ok, continúa». Acepta la entrega y sus
+revisiones y autoriza mezclar el PR #9 y continuar con F1.6.
 
 La cola reside en `AudioPlayerState`, con alcance de sesión interactiva de la UI:
 se conserva al navegar dentro de la aplicación, no se guarda en disco ni se
@@ -148,7 +151,7 @@ son nuevas las comprobaciones de rechazo de duplicados y del indicador en vivo.
 
 Segunda revisión del 27/10/2026: el usuario informa de que el panel sube con la
 página. `PlaybackQueue` pasa al interior de `MudLayout` para que MudBlazor aplique
-su posicionamiento fijo y desplazamiento interno. Pendiente validación del usuario.
+su posicionamiento fijo y desplazamiento interno. Incluida en la aceptación global.
 
 - Segunda revisión comprobada: compilación en salida aislada, 0 errores y
   advertencias (la salida normal estaba bloqueada por la depuración activa,
