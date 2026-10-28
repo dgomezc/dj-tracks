@@ -8,14 +8,13 @@
     Mezcla Tracks y Remember. Cargar añade al final de la cola sin duplicados ni interrumpir el audio.
 </BbTypographyMuted>
 <div class="playlist-form">
-    <form class="button-row" @onsubmit="CreateAsync" @onsubmit:preventDefault>
-        <BbField>
-            <BbFieldLabel For="playlist-new-name">Nombre de la nueva playlist</BbFieldLabel>
-            <BbInput Id="playlist-new-name" @bind-Value="_newName" Disabled="@_busy" maxlength="120" />
-        </BbField>
-        <BbButton Type="ButtonType.Submit" Disabled="@_busy">Crear playlist</BbButton>
-    </form>
-    <BbButton Variant="ButtonVariant.Outline" OnClick="LoadAsync" Disabled="@_busy">Volver a cargar playlists</BbButton>
+    <div class="button-row">
+        <BbButton OnClick="OpenCreate" Disabled="@_busy">
+            <Icon><LucideIcon Name="plus" /></Icon>
+            <ChildContent>Nueva playlist</ChildContent>
+        </BbButton>
+        <BbButton Variant="ButtonVariant.Outline" OnClick="LoadAsync" Disabled="@_busy">Volver a cargar playlists</BbButton>
+    </div>
     @if (_busy)
     {
         <span role="status">Procesando playlists…</span>
@@ -49,15 +48,12 @@
     @if (_playlist is not null)
     {
         <h3 class="section-title">@_playlist.Name · @_playlist.Entries.Length canciones</h3>
-        <form class="button-row" @onsubmit="RenameAsync" @onsubmit:preventDefault>
-            <BbField>
-                <BbFieldLabel For="playlist-name">Nombre</BbFieldLabel>
-                <BbInput Id="playlist-name" @bind-Value="_name" Disabled="@_busy" maxlength="120" />
-            </BbField>
-            <BbButton Type="ButtonType.Submit" Variant="ButtonVariant.Outline" Disabled="@_busy">Renombrar playlist</BbButton>
-        </form>
         <div class="button-row">
             <BbButton OnClick="LoadQueueAsync" Disabled="@(_busy || _playlist.Entries.Length == 0)">Añadir playlist a la cola</BbButton>
+            <BbButton Variant="ButtonVariant.Outline" OnClick="OpenRename" Disabled="@_busy">
+                <Icon><LucideIcon Name="pencil" /></Icon>
+                <ChildContent>Renombrar playlist</ChildContent>
+            </BbButton>
             <BbButton Variant="ButtonVariant.Outline" OnClick="() => _confirmDelete = true" Disabled="@_busy">Borrar playlist</BbButton>
         </div>
         @if (_confirmDelete)
@@ -81,10 +77,8 @@
                                    Property="@(entry => entry.Track.Category ?? $"{entry.Track.Year} / {entry.Track.Style}")" />
                 <BbDataTableColumn TData="PlaylistEntry" TValue="string" Header="Acciones" Id="actions">
                     <CellTemplate Context="entry">
-                        <BbButton Variant="ButtonVariant.Ghost" Size="ButtonSize.Icon" Disabled="@_busy"
-                                  OnClick="() => RemoveAsync(entry.Id)" AriaLabel="@($"Quitar de la playlist {entry.Track.FileName}")">
-                            <LucideIcon Name="trash-2" />
-                        </BbButton>
+                        <IconButton Label="Quitar de la playlist" Icon="trash-2" Disabled="@_busy"
+                                    OnClick="() => RemoveAsync(entry.Id)" AriaLabel="@($"Quitar de la playlist {entry.Track.FileName}")" />
                     </CellTemplate>
                 </BbDataTableColumn>
             </Columns>
@@ -96,3 +90,28 @@
         </BbTypographyMuted>
     }
 </div>
+<BbDialog Open="@_dialogOpen" OpenChanged="OnDialogOpenChanged">
+    <BbDialogContent Class="playlist-dialog" ShowClose="false" CloseOnOverlayClick="false">
+        <form @onsubmit="SaveDialogAsync" @onsubmit:preventDefault>
+            <BbDialogHeader>
+                <BbDialogTitle>@(_renaming ? "Renombrar playlist" : "Nueva playlist")</BbDialogTitle>
+                <BbDialogDescription>
+                    @(_renaming ? "Escribe el nuevo nombre. Cancelar conserva el nombre actual." : "Escribe un nombre único de hasta 120 caracteres.")
+                </BbDialogDescription>
+            </BbDialogHeader>
+            <BbField Class="playlist-dialog-field">
+                <BbFieldLabel For="playlist-dialog-name">Nombre</BbFieldLabel>
+                <BbInput Id="playlist-dialog-name" @bind-Value="_dialogName" Disabled="@_dialogBusy" maxlength="120"
+                         data-autofocus="true" />
+                @if (_dialogError is not null)
+                {
+                    <BbFieldError>@_dialogError</BbFieldError>
+                }
+            </BbField>
+            <BbDialogFooter>
+                <BbButton Variant="ButtonVariant.Outline" OnClick="CloseDialog" Disabled="@_dialogBusy">Cancelar</BbButton>
+                <BbButton Type="ButtonType.Submit" Disabled="@_dialogBusy">@(_dialogBusy ? "Guardando…" : "Aceptar")</BbButton>
+            </BbDialogFooter>
+        </form>
+    </BbDialogContent>
+</BbDialog>

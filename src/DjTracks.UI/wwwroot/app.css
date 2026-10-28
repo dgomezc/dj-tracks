@@ -246,6 +246,10 @@ body {
     padding: 16px 0;
 }
 
+.playlist-dialog-field {
+    margin: 16px 0;
+}
+
 .playlist-picker [role="combobox"] {
     height: auto;
     min-height: 2.5rem;

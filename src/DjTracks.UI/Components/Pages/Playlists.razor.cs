@@ -16,13 +16,16 @@ public partial class Playlists
     [Inject] private PlaylistChanges Changes { get; set; } = default!;
     private ManualPlaylist[]? _catalog;
     private ManualPlaylist? _playlist;
-    private string? _newName;
-    private string? _name;
     private string? _error;
     private string? _message;
     private bool _busy;
     private bool _confirmDelete;
     private int _version;
+    private bool _dialogOpen;
+    private bool _renaming;
+    private bool _dialogBusy;
+    private string? _dialogName;
+    private string? _dialogError;
 
     protected override Task OnParametersSetAsync() => LoadAsync();
 
@@ -47,21 +50,65 @@ public partial class Playlists
             if (detail.IsFailed)
                 _error = detail.Errors[0].Message;
             else
-            {
                 _playlist = detail.Value;
-                _name = _playlist.Name;
-            }
         }
         _busy = false;
     }
 
-    private Task CreateAsync() => RunAsync(
-        () => Http.PostForResultAsync<object, ManualPlaylist>("api/playlists", new { Name = _newName }, Logger),
-        playlist => { _newName = null; Navigation.NavigateTo($"/playlists/{playlist.Id}"); }, notify: true);
+    private void OpenCreate() => OpenDialog(renaming: false, name: null);
 
-    private Task RenameAsync() => RunAsync(
-        () => Http.PutForResultAsync<object, ManualPlaylist>($"api/playlists/{Id}", new { Name = _name }, Logger),
-        playlist => { Update(playlist); _message = "Playlist renombrada."; }, notify: true);
+    private void OpenRename() => OpenDialog(renaming: true, name: _playlist?.Name);
+
+    private void OpenDialog(bool renaming, string? name)
+    {
+        _renaming = renaming;
+        _dialogName = name;
+        _dialogError = null;
+        _message = null;
+        _dialogOpen = true;
+    }
+
+    private void OnDialogOpenChanged(bool open)
+    {
+        if (!open)
+            CloseDialog();
+    }
+
+    private void CloseDialog()
+    {
+        if (_dialogBusy)
+            return;
+        _dialogOpen = false;
+        _dialogName = _dialogError = null;
+    }
+
+    private async Task SaveDialogAsync()
+    {
+        if (_dialogBusy)
+            return;
+        _dialogBusy = true;
+        _dialogError = null;
+        var renaming = _renaming;
+        var body = new { Name = _dialogName };
+        var result = renaming
+            ? await Http.PutForResultAsync<object, ManualPlaylist>($"api/playlists/{Id}", body, Logger)
+            : await Http.PostForResultAsync<object, ManualPlaylist>("api/playlists", body, Logger);
+        _dialogBusy = false;
+        if (result.IsFailed)
+        {
+            _dialogError = result.Errors[0].Message;
+            return;
+        }
+        Changes.Notify();
+        CloseDialog();
+        if (renaming)
+        {
+            Update(result.Value);
+            _message = "Playlist renombrada.";
+        }
+        else
+            Navigation.NavigateTo($"/playlists/{result.Value.Id}");
+    }
 
     private Task DeleteAsync() => RunAsync(
         () => Http.DeleteForResultAsync<Guid>($"api/playlists/{Id}", Logger),
@@ -113,7 +160,6 @@ public partial class Playlists
     private void Update(ManualPlaylist playlist)
     {
         _playlist = playlist;
-        _name = playlist.Name;
         _catalog = _catalog?.Select(item => item.Id == playlist.Id ? playlist : item)
             .OrderBy(item => item.Name, StringComparer.OrdinalIgnoreCase).ToArray();
     }
