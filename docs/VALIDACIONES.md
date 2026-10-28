@@ -18,6 +18,7 @@ Consultar siempre el estado real de GitHub antes de actuar sobre un PR.
 - F1.4: **validada globalmente por el usuario el 27/10/2026** con «todo ok, continua», incluida la revisión de carga progresiva. Esta confirmación no amplía las comprobaciones individuales del agente. PR [#8](https://github.com/dgomezc/dj-tracks/pull/8) mergeado en `develop` a las 14:26:25 UTC; merge commit `1d43cc8`.
 - F1.5: **validada globalmente por el usuario el 28/10/2026** con «Todo ok, continúa», incluidas las revisiones sin duplicados, indicador activo y panel fijo al hacer scroll. PR [#9](https://github.com/dgomezc/dj-tracks/pull/9) mergeado en `develop` a las 06:28:03 UTC, commit `b90f570` (comprobado en GitHub). Esta confirmación no amplía las comprobaciones individuales del agente.
 - F1.6: **validada globalmente por el usuario el 28/10/2026** con «Todo ok. Mezcla el pr y de momento para.». Autorizado el merge del PR [#10](https://github.com/dgomezc/dj-tracks/pull/10) hacia `develop`. Esta aceptación no amplía las comprobaciones individuales del agente. **Trabajo pausado por petición expresa; F2.1 no iniciada.**
+- **Migración transversal MudBlazor → Blazor Blueprint (28/10/2026): pendiente de validación del usuario.** Rama `dgomezc-analisis-blazor-blueprint`, PR hacia `develop` (ver sección "Migración a Blazor Blueprint"). Antes de iniciar F2.1, las sesiones deben releer `AGENTS.md` y `docs/ARQUITECTURA.md` (sección 8). F2.1 sigue sin iniciar.
 - Checkout original actualizado por fast-forward a `develop` después de integrar F1.2; el trabajo de F1.3 se desarrolla en su rama dedicada. La rama del port se conserva como historial; no se han borrado ni reescrito ramas.
 - Entrega F1.2: PR [#5](https://github.com/dgomezc/dj-tracks/pull/5) **mergeado** en `develop` el 27/10/2026 a las 07:13:41 UTC, commit `8fc21f1` (comprobado en GitHub). Incluye el port y ambos historiales sin force-push. PR #6 también mergeado; no queda PR de F1.2 pendiente.
 - Continuidad confirmada: trabajar directamente en el checkout original, sin nuevos worktrees. Se han preservado los cambios locales preexistentes en los dos `Class1.cs`, sin incluirlos en los commits.
@@ -27,6 +28,66 @@ Consultar siempre el estado real de GitHub antes de actuar sobre un PR.
 - Port F1.2 recibido de `dgomezc-fase-f1-2-filtros` (`1354305` código, `c38cddb` documentación). Se integra mediante merge en la rama original: se conservan ambos historiales y se resuelven los conflictos de código con la versión adaptada a Result/FluentValidation. Sin PR duplicado ni reescritura de ramas. Cambios preexistentes y JSON privado conservados; no se borran worktrees.
 - Comprobación de integración en checkout original (27/10/2026): `src` coincide con el port recibido; compilación completa con 0 errores y advertencias. API/UI aisladas con MP3 sintéticos: multiaño/multigrupo/multisubestilo, alias, ausencia de duplicados, resultados vacíos, explorador, errores 400/404, opciones, carga de ajustes y página Tracks correctos. No equivale a validación visual de biblioteca real. Servicios y fixtures temporales retirados después de comprobar.
 
+## Migración a Blazor Blueprint (transversal, tras F1.6)
+
+Sustituye MudBlazor por los componentes estilados de Blazor Blueprint 4.1 (`Bb*`) en
+`DjTracks.UI`, con el tema "Light Green" de tweakcn en `wwwroot/theme.css` (claro y oscuro)
+y un selector de modo en la cabecera. Sin preferencia guardada se sigue la del sistema.
+No cambia la API ni la lógica: se mantienen textos, `aria-label` y comportamiento de F0.1–F1.6.
+Añade `.mcp.json` con el servidor MCP de Blazor Blueprint (ejecutado en WSL).
+
+Equivalencias principales: barra superior y panel izquierdo con HTML y CSS propios;
+cola → `BbSheet`; Ahora suena → `BbCard`; filtros → `BbCollapsible` + `BbMultiSelect`;
+tabla de Tracks → `BbDataTable` sin buscador ni paginación; Configuración → `BbField`/`BbInput`;
+progreso de onda → `BbProgress`; carga indeterminada → `BbSpinner`; iconos Lucide.
+La forma de onda usa `--primary` y `--muted-foreground` y se redibuja al cambiar de modo.
+
+### Comprobaciones del agente
+
+- `dotnet build DjTracks.slnx`: correcto, 0 errores y 0 advertencias.
+- API y UI arrancadas con los perfiles `http`: `/`, `/tracks`, `/settings`, `theme.css`,
+  `blazorblueprint.css` y `theme-init.js` devuelven 200.
+- Navegador integrado (sin biblioteca configurada en el worktree): navegación, botón de cola,
+  selector de modo con etiqueta en español, filtros plegados por defecto, mensaje de error y
+  enlace a Configuración en `/tracks`. En `/settings`, guardar vacío muestra la alerta y
+  "Introduce una ruta." bajo los cinco campos (`aria-invalid`).
+- Modo: sin `bb-theme` guardado se aplica el del sistema (oscuro en la prueba); al pulsar el selector
+  cambia la clase `dark` de `<html>` y se guarda en `localStorage`. Radio del tema: 1rem.
+- Servidor MCP probado desde WSL (Node 24 con nvm): responde y devuelve documentación de componentes.
+- **No** se han podido tomar capturas: el aspecto visual, la reproducción real, la onda, la cola
+  con canciones y los multiselect abiertos quedan pendientes del usuario.
+
+### Preparación y checklist del usuario
+
+En Visual Studio 2026, abre `DjTracks.slnx`, selecciona el perfil **DJ Tracks (Api + UI)** y
+pulsa F5. Abre `http://localhost:5050`. Usa la biblioteca y los ajustes reales ya configurados.
+
+1. **Tema por defecto**: en una ventana privada, el modo coincide con el del sistema operativo.
+2. **Selector**: el botón sol/luna de la cabecera alterna claro/oscuro sin recargar; al recargar
+   se conserva la elección. Colores verde lima de "Light Green" en botones primarios y bordes redondeados.
+3. **Cabecera y layout** (F0.1): enlaces Inicio, Tracks, Sessions y Remember con el activo resaltado;
+   panel izquierdo de playlists (se oculta por debajo de 960 px); barra inferior fija.
+4. **Configuración** (F0.2): carga las rutas guardadas; un error de ruta aparece bajo su campo;
+   "Guardar rutas" muestra el aviso verde; escribir de nuevo lo oculta; "Volver a cargar" funciona.
+5. **Tracks** (F1.1/F1.2): navegación Años → Estilo → tabla con Fichero, Título, Artista, Álbum,
+   Duración y acciones; avisos de tags en la columna Fichero. Despliega "Filtros": se cargan las
+   opciones y los tres multiselect permiten elegir varios valores; "Aplicar filtros" añade las
+   columnas Año y Estilo; "Limpiar filtros y volver a años" restablece todo.
+6. **Reproductor y onda** (F1.3/F1.4): reproduce una canción; se ve la barra de progreso mientras
+   se genera la onda; la onda se pinta en verde (reproducido) y gris (pendiente), se puede buscar
+   con clic y flechas, y cambia de color al alternar el modo.
+7. **Cola** (F1.5): "Cola (n)" abre un panel lateral derecho; añadir, reproducir, quitar, vaciar,
+   aleatorio y bucle funcionan; el panel cubre la barra inferior y se cierra con X, Escape o fuera.
+8. **Ahora suena** (F1.6): tarjeta con carátula o icono de disco, datos y aviso en ambos modos.
+9. **Contraste**: textos legibles en ambos modos (cabecera, tabla, barra inferior, alertas).
+
+### Limitaciones conocidas
+
+- El servidor MCP necesita WSL con Ubuntu y Node instalado con nvm; con Node en Windows basta
+  cambiar el comando de `.mcp.json` (ver `ARQUITECTURA.md`, sección 8).
+- Algunos componentes de Blueprint traen textos internos en inglés; se han pasado en español los
+  visibles y los `aria-label` usados.
+- La fuente Inter se carga desde Google Fonts; sin conexión se usa la fuente del sistema.
 ## F1.3: reproductor básico
 
 La tabla de Tracks permite iniciar una canción desde su fila. La barra inferior

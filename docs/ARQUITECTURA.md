@@ -15,7 +15,7 @@ genéricos, sin clientes HTTP intermedios ni clases de errores por feature.
 | `DjTracks.Domain` | Contratos compartidos API ↔ UI (records), `AppError`/`ErrorKind` | — | FluentResults |
 | `DjTracks.Infrastructure` | Ficheros, tags, ajustes, onda y EF Core | Domain | TagLibSharp, FFMpegCore, Logging.Abstractions |
 | `DjTracks.Api` | Minimal API en vertical slices | Domain, Infrastructure | FluentValidation (+ DependencyInjectionExtensions) |
-| `DjTracks.UI` | Blazor Server + MudBlazor; llama a la API por HTTP | Domain | MudBlazor |
+| `DjTracks.UI` | Blazor Server + Blazor Blueprint; llama a la API por HTTP | Domain | BlazorBlueprint.Components, BlazorBlueprint.Icons.Lucide |
 
 La UI **nunca** referencia Infrastructure ni la API: solo se comunica por HTTP.
 
@@ -173,3 +173,26 @@ handler/Infrastructure con `Result` · **imprevisto** → manejador integrado.
   handlers → `Scoped`; validadores → `Singleton` (escaneo con `AddValidatorsFromAssemblyContaining<Program>`).
 - UI: `AddHttpClient("Api")` + `AddScoped(sp => factory.CreateClient("Api"))` para inyectar `HttpClient`.
 - Sin escaneo por reflexión para handlers ni endpoints: todo explícito y navegable.
+
+## 8. Interfaz: Blazor Blueprint y tema
+
+- Componentes estilados de Blazor Blueprint (`Bb*`, paquete `BlazorBlueprint.Components`) directamente
+  en `DjTracks.UI`; sin proyecto de componentes propio ni primitivas salvo necesidad real.
+  Iconos con `<LucideIcon Name="..." />` (`BlazorBlueprint.Icons.Lucide`).
+- Registro en `Program.cs` con `AddBlazorBlueprintComponents` (radio por defecto de 1rem del tema).
+  `MainLayout` contiene `<BbPortalHost />`, necesario para popovers, selects y paneles (`BbSheet`).
+- Tema: `wwwroot/theme.css` contiene las variables shadcn del tema "Light Green" de tweakcn
+  (`:root` claro y `.dark` oscuro). Orden en `App.razor`: `theme.css` → `blazorblueprint.css` →
+  `app.css`, y el script `theme-init.js` de Blueprint en `<head>` para aplicar el modo antes de pintar.
+- Modo claro/oscuro: `BbDarkModeToggle` en la cabecera. Se guarda en `localStorage` (`bb-theme`);
+  sin preferencia guardada se sigue la del sistema.
+- Para cambiar de tema basta con regenerar `theme.css` desde otro tema de tweakcn
+  (`https://tweakcn.com/r/themes/<id>`), sin tocar componentes.
+- Estilos propios en `wwwroot/app.css` usando solo variables del tema (`--primary`, `--muted-foreground`,
+  `--border`, `--card`…). Las utilidades de Blueprint llevan prefijo `bb:` y no hay Tailwind en el
+  proyecto: no uses clases de Tailwind en el marcado propio; crea clases en `app.css`.
+- Textos y `aria-label` en español: pasa las etiquetas de los componentes (`AriaLabel`, `Placeholder`,
+  `ClearLabel`, `LightLabel`…) cuando su valor por defecto esté en inglés.
+- Documentación: servidor MCP de Blazor Blueprint configurado en `.mcp.json` (Visual Studio y Copilot).
+  Se ejecuta con `npx` dentro de WSL (Ubuntu con Node mediante nvm). Con Node instalado en Windows
+  se puede usar `"command": "npx", "args": ["-y", "@blazorblueprint/mcp@latest"]`.
