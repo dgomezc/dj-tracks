@@ -16,8 +16,40 @@ public sealed class SessionLibrary(TrackLibrary tracks)
         var folders = listing.Folders;
         if (year is not null && session is null)
             Array.Reverse(folders);
+
+        string[] tracklists = [];
+        if (year is not null && session is not null)
+        {
+            var yearDirectory = TrackLibrary.FindChild(new DirectoryInfo(root), year);
+            var directory = yearDirectory is null ? null : TrackLibrary.FindChild(yearDirectory, session);
+            if (directory is null)
+                return new AppError(ErrorKind.NotFound, "Carpeta no encontrada.",
+                    "La carpeta seleccionada ya no existe. Vuelve al nivel anterior.");
+
+            HashSet<string> names = new(StringComparer.OrdinalIgnoreCase) { "Tracklist" };
+            foreach (var name in listing.Tracks.Select(file => Path.GetFileNameWithoutExtension(file.FileName))
+                .Append(session))
+            {
+                names.Add(name);
+                names.Add($"Tracklist - {name}");
+                names.Add($"{name} - Tracklist");
+            }
+
+            List<string> candidates = [];
+            foreach (var file in directory.EnumerateFiles())
+            {
+                ct.ThrowIfCancellationRequested();
+                if ((file.Attributes & FileAttributes.ReparsePoint) == 0
+                    && file.Extension.Equals(".txt", StringComparison.OrdinalIgnoreCase)
+                    && names.Contains(Path.GetFileNameWithoutExtension(file.Name)))
+                    candidates.Add(file.Name);
+            }
+            tracklists = candidates.OrderBy(name => name, StringComparer.OrdinalIgnoreCase)
+                .ThenBy(name => name, StringComparer.Ordinal).ToArray();
+        }
+
         return new SessionListing(year, session, folders,
-            listing.Tracks.Select(file => file with { Style = null }).ToArray());
+            listing.Tracks.Select(file => file with { Style = null }).ToArray(), tracklists);
     }
 
     public Result<FileStream> OpenAudio(string root, string year, string session, string fileName,
