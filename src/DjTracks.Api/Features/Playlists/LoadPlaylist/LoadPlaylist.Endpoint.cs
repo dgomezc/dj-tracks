@@ -2,7 +2,7 @@ using DjTracks.Api.Shared;
 
 namespace DjTracks.Api.Features.Playlists.LoadPlaylist;
 
-public sealed record LoadPlaylistRequest(Guid Id);
+public sealed record LoadPlaylistRequest(Guid Id, Guid? EntryId);
 
 public static class LoadPlaylistEndpoint
 {
