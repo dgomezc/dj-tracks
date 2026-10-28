@@ -1,4 +1,5 @@
 using DjTracks.Api.Features.Streaming.GetTrackWaveform;
+using DjTracks.Api.Features.Streaming.GetTrackArtwork;
 using DjTracks.Api.Features.Streaming.StreamTrack;
 using DjTracks.Infrastructure.Streaming;
 
@@ -15,12 +16,14 @@ public static class StreamingFeature
                     "App_Data", "Waveforms"),
                 sp.GetRequiredService<IWaveformGenerator>(),
                 sp.GetRequiredService<ILogger<TrackWaveformCache>>()))
-            .AddScoped<GetTrackWaveformHandler>();
+            .AddScoped<GetTrackWaveformHandler>()
+            .AddScoped<GetTrackArtworkHandler>();
 
     public static RouteGroupBuilder MapStreamingFeature(this RouteGroupBuilder api)
     {
         api.MapStreamTrack();
         api.MapGetTrackWaveform();
+        api.MapGetTrackArtwork();
         return api;
     }
 }

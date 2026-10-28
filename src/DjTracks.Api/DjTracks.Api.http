@@ -29,3 +29,9 @@ GET {{DjTracks.Api_HostAddress}}/api/settings
 Accept: application/json
 
 ###
+
+# Devuelve dataUrl null si el MP3 no contiene ninguna imagen incrustada.
+GET {{DjTracks.Api_HostAddress}}/api/streaming/tracks/artwork?year=2025&style=Day%20Instrumental&fileName=Artist%20-%20Track.mp3
+Accept: application/json
+
+###

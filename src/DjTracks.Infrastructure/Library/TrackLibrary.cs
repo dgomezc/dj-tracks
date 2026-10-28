@@ -44,6 +44,27 @@ public sealed class TrackLibrary
             64 * 1024, FileOptions.Asynchronous | FileOptions.SequentialScan);
     }
 
+    public Result<TrackArtwork> ReadArtwork(string root, string year, string style, string fileName,
+        CancellationToken ct)
+    {
+        var result = ResolveTrackFile(root, year, style, fileName, ct);
+        if (result.IsFailed)
+            return result.ToResult();
+
+        using var audio = TagLib.File.Create(result.Value.FullName);
+        ct.ThrowIfCancellationRequested();
+        var picture = audio.Tag.Pictures.FirstOrDefault(item => item.Type == TagLib.PictureType.FrontCover)
+            ?? audio.Tag.Pictures.FirstOrDefault();
+        if (picture is null)
+            return new TrackArtwork(null);
+
+        if (picture.MimeType is not ("image/jpeg" or "image/png" or "image/gif" or "image/webp"))
+            return new AppError(ErrorKind.Validation, "Formato de carátula no compatible.",
+                "La carátula incrustada debe ser JPEG, PNG, GIF o WebP.");
+
+        return new TrackArtwork($"data:{picture.MimeType};base64,{Convert.ToBase64String(picture.Data.Data)}");
+    }
+
     public Result<FileInfo> ResolveTrackFile(string root, string year, string style, string fileName,
         CancellationToken ct)
     {

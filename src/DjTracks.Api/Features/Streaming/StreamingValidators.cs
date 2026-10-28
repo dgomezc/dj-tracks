@@ -1,4 +1,5 @@
 using DjTracks.Api.Features.Streaming.GetTrackWaveform;
+using DjTracks.Api.Features.Streaming.GetTrackArtwork;
 using DjTracks.Api.Features.Streaming.StreamTrack;
 using FluentValidation;
 
@@ -20,6 +21,19 @@ public sealed class StreamTrackRequestValidator : AbstractValidator<StreamTrackR
 public sealed class GetTrackWaveformRequestValidator : AbstractValidator<GetTrackWaveformRequest>
 {
     public GetTrackWaveformRequestValidator()
+    {
+        RuleFor(request => request.Year).Must(StreamingRequestRules.BeFolderName)
+            .WithMessage("El año debe ser un nombre de carpeta, no una ruta.");
+        RuleFor(request => request.Style).Must(StreamingRequestRules.BeFolderName)
+            .WithMessage("El estilo debe ser un nombre de carpeta, no una ruta.");
+        RuleFor(request => request.FileName).Must(StreamingRequestRules.BeAudioFileName)
+            .WithMessage("El fichero debe ser un nombre de archivo MP3, no una ruta.");
+    }
+}
+
+public sealed class GetTrackArtworkRequestValidator : AbstractValidator<GetTrackArtworkRequest>
+{
+    public GetTrackArtworkRequestValidator()
     {
         RuleFor(request => request.Year).Must(StreamingRequestRules.BeFolderName)
             .WithMessage("El año debe ser un nombre de carpeta, no una ruta.");
