@@ -42,12 +42,13 @@ El `.txt` no se muestra ni interpreta todavía; la API identifica sus nombres
 compatibles en `tracklists`. Las carpetas enlazadas y archivos
 enlazados se excluyen igual que en Tracks; no hay exploración recursiva.
 
-El botón por archivo lo añade a la misma cola de Tracks sin iniciar/interrumpir
+El botón añadir por archivo lo añade a la misma cola de Tracks sin iniciar/interrumpir
 el audio; una URL ya presente no se duplica. Archivos homónimos de distinta
 carpeta o biblioteca son entradas distintas. Desde Cola se puede reproducir,
 saltar y quitar; la ficha muestra carpeta de sesión y datos básicos. Se incorpora
-el streaming básico con Range necesario para que la cola funcione; la onda y
-lectura del tracklist se dejan para F2.2. No añade carátula de sesiones ni es una playlist
+el streaming con Range, Play directo, onda progresiva y carátula incrustada
+(ampliación expresa del 28/10/2026). La lectura del tracklist se deja para F2.2.
+No busca carátulas externas ni es una playlist
 persistente ni se guarda en BD. Añadir una carpeta completa no forma parte de F2.1.
 
 ### Preparación y checklist del usuario
@@ -57,8 +58,10 @@ perfil **DJ Tracks (Api + UI)** y F5. UI `http://localhost:5050/sessions`, API
 `http://localhost:5247`. Mantener las rutas de Tracks y Sessions configuradas y
 accesibles a la API; sesiones bajo `Año\Nombre de sesión\Nombre.mp3`
 (fecha opcional en la carpeta).
-No hace falta base de datos. FFmpeg sigue siendo necesario para la onda de
-Tracks, pero no para explorar ni reproducir Sessions en esta fase.
+No hace falta base de datos. FFmpeg debe estar disponible para la API también
+para la onda de Sessions (PATH o `Waveform__BinaryFolder`); no es necesario
+para explorar ni para el audio básico. Si cambia la variable de usuario,
+reiniciar Visual Studio para heredarla.
 
 - [ ] Abrir Sessions: años recientes primero; entrar en un año, una carpeta de
   sesión y ver solo sus MP3. Volver mediante las migas Años/año y «Volver a cargar»
@@ -70,8 +73,8 @@ Tracks, pero no para explorar ni reproducir Sessions en esta fase.
   Repetir el mismo desde Sessions no lo duplica. Mismo nombre en carpetas distintas
   o en Tracks y Sessions debe poder coexistir.
 - [ ] Abrir Cola y reproducir una sesión: audio básico, pausa, volumen y seek
-  operativos; título/datos y carpeta de sesión correctos. No permanece una onda
-  o portada de Tracks; Sessions aún no tiene onda/tracklist.
+  operativos; título/datos y carpeta de sesión correctos. Onda y portada propias
+  de la sesión, sin conservar las de Tracks; el tracklist aún no se muestra.
 - [ ] Cola mixta Tracks/Sessions: anterior/siguiente y fin automático cambian
   correctamente, indicador activo actualizado con panel abierto. Al volver a un
   Track se recupera su onda/carátula. Probar shuffle/bucle, quitar actual y vaciar.
@@ -84,7 +87,7 @@ Tracks, pero no para explorar ni reproducir Sessions en esta fase.
   a cargar» muestra error y permite volver a Años/año; Configuración accesible.
   No cambiar ni borrar datos reales para provocar el error.
 
-### Comprobaciones del agente
+### Comprobaciones del agente en la entrega inicial (antes de ampliar onda/portada)
 
 - `dotnet build DjTracks.slnx`: correcto, 0 errores y advertencias, incluida la
   versión final del panel. No se generaron tests unitarios.
@@ -154,6 +157,55 @@ Comprobado por el agente en esta revisión:
 - Consultada documentación .NET mediante context7 para enumeración y comparación
   ordinal de nombres. Sin ajustes privados modificados; API temporal detenida
   y biblioteca temporal retirada después de comprobar.
+
+### Revisión: Play, onda y carátula de Sessions (28/10/2026)
+
+El usuario reporta ausencia de Play y onda y carátulas incorrectas. Se amplía
+expresamente F2.1: botón Play directo junto a añadir, endpoints de onda progresiva
+y carátula incrustada del MP3, conectados tanto al reproducir como al añadir.
+Se reutilizan generador/caché y lectura de carátula de Tracks. Ausencia de imagen
+muestra «Sin carátula», carga/error y reintento funcionan también para sesiones.
+No se buscan JPG/PNG externos ni se modifica el audio. F2.2 conserva el tracklist.
+
+Comprobaciones del agente:
+
+- Compilación completa: 0 errores/advertencias. Sin tests nuevos.
+- Biblioteca aislada con MP3 sintéticos de dos minutos: portada PNG extraída
+  idéntica a la incrustada, ausencia de portada devuelve null, corrupto 503,
+  rutas inválidas 400 y ausentes 404 en audio/onda/portada.
+  Primera onda: 65 bloques NDJSON, 1024 picos y finalización; caché posterior:
+  un bloque completo. La portada de Tracks sigue devolviendo la misma imagen.
+- Navegador: Play inicia audio real (`paused=false`, tiempo avanza), imagen
+  cargada y canvas con onda dibujada. Añadir repetido conserva elemento audio y
+  contador; añadir otra sesión no interrumpe. Anterior/siguiente actualizan onda
+  y portada; sesión sin imagen elimina portada anterior y muestra «Sin carátula».
+  Seek desde onda a 25 % sitúa audio en unos 30 s de 120 s. Transición a Tracks y
+  vuelta a Sessions conserva onda propia y portada/ausencia correspondiente.
+- Capturas inspeccionadas de Cyberpunk en oscuro y claro: Play/añadir, portada,
+  ficha y onda legibles. Tema cambiado temporalmente en DOM y modo con botón.
+  No se valida sonido por hardware, biblioteca real ni imágenes externas.
+  Servicios y biblioteca temporal retirados después de comprobar, sin tocar ajustes privados.
+
+Checklist nueva y a repetir (pendiente del usuario):
+
+- [ ] Detener y arrancar de nuevo **DJ Tracks (Api + UI)** en Visual Studio 2026,
+  F5; recargar completamente `http://localhost:5050/sessions` para renovar también
+  las URLs de la cola en memoria (se vacía). API `http://localhost:5247`.
+  Ruta Sessions accesible, MP3 válidos y FFmpeg disponible para la API.
+- [ ] Abrir año/carpeta y pulsar Play: inicia esa sesión sin abrir Cola; añadir
+  sigue sin interrumpir. Play tras añadir no crea duplicados.
+- [ ] Con una sesión larga sin caché, la onda se dibuja progresivamente y permite
+  seek con clic/flechas; al volver a reproducir carga desde caché.
+- [ ] Sesión con portada incrustada muestra su imagen; otra sin portada muestra
+  «Sin carátula» y no la anterior. Cambiar rápidamente entre sesiones y Tracks
+  no intercambia imágenes/ondas. Si falla la imagen, aparece aviso/reintento sin
+  parar el audio. Las imágenes externas no se leen.
+- [ ] Repetir cola mixta, anterior/siguiente y fin automático con el panel abierto:
+  entrada activa, onda y carátula se actualizan juntas.
+- [ ] Repetir claro/oscuro en Light Green y otro tema: ambos botones, onda y ficha
+  visibles/legibles, incluida ventana estrecha.
+
+PR #12 permanece abierto, sin validación del usuario ni autorización de merge.
 
 ## Migración a Blazor Blueprint (transversal, tras F1.6)
 

@@ -114,10 +114,17 @@ no se elige uno ni se interpreta su contenido en F2.1.
 La página Sessions llama por HTTP desde su code-behind, sin acceso a ficheros.
 Añade un MP3 a la cola mediante su URL de streaming, con `SessionFolder` en
 `QueuedTrack` para identificar su procedencia en la ficha. URLs de carátula/onda
-son opcionales: en F2.1 solo Tracks las proporciona. Al cambiar a una sesión se
-retira la onda anterior y la ficha muestra la carpeta de sesión, no un estilo.
-El streaming básico permite usar la cola mixta sin entradas inoperantes; la onda,
-portada y lectura del contenido del `.txt` quedan fuera de F2.1. No se añaden playlists ni BD.
+son opcionales en el contrato, pero tanto Tracks como Sessions las proporcionan.
+`Streaming/GetSessionWaveform` resuelve el MP3 desde la raíz Sessions y reutiliza
+`TrackWaveformCache` y el generador progresivo existentes (misma invalidación por
+ruta completa, tamaño y modificación). `Streaming/GetSessionArtwork` reutiliza
+la lectura de imagen incrustada de `TrackLibrary` a través de `SessionLibrary`.
+Ambos tienen sus requests/validadores/handlers y errores relativos a Sessions.
+Al cambiar de entrada se sustituyen onda y portada, sin conservar datos atrasados;
+la ficha muestra la carpeta de sesión, no un estilo. Play y añadir usan las mismas
+URLs; añadir conserva audio/posición y rechaza duplicados. Esta ampliación se
+incorpora a F2.1 por petición del usuario. La lectura del contenido del `.txt`
+sigue fuera de F2.1. No se añaden playlists ni BD.
 
 | Elemento | Nombre | Namespace |
 |---|---|---|

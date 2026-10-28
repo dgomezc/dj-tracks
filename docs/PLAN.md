@@ -105,10 +105,14 @@ El estado de entrega y las checklists se mantienen en `VALIDACIONES.md`. Una imp
 - **F2.1 Listado y navegación de sesiones** (por año), añadir a cola.
   Navegación Año → carpeta de sesión → MP3 con tags básicos. Cola compartida con
   Tracks, sin duplicados; añadir no interrumpe el audio. Incluye streaming básico
-  con Range para que las entradas se puedan reproducir desde la cola. La onda y
-  lectura del contenido del tracklist se deja para F2.2; el listado ya identifica
-  los TXT compatibles. Esta fase no añade carátula de sesiones.
-- **F2.2 Reproducción + tracklist** leído del `.txt` junto a la sesión, con onda.
+  con Range para que las entradas se puedan reproducir desde la cola. Por petición
+  expresa del usuario del 28/10/2026, incluye Play en el listado, onda progresiva
+  con la misma caché de Tracks y carátula incrustada del MP3. No busca imágenes
+  externas. El listado identifica los TXT compatibles, pero la lectura del
+  contenido del tracklist sigue pendiente de F2.2.
+- **F2.2 Tracklist** leído del `.txt` junto a la sesión e integrado con la reproducción.
+  La reproducción con onda prevista inicialmente aquí se adelantó a F2.1 por
+  petición expresa; no supone que F2.2 esté iniciada ni validada.
 - **F2.3 (último, opcional) Marcas de inicio por canción**: marcar posición actual en el tracklist, guardar en JSON junto a la sesión, clic para saltar. Reproductor grande sincronizado en la página principal.
 
 ### Bloque 3 — Remember
