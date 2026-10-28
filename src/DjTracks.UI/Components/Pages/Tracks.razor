@@ -142,19 +142,13 @@ else if (_listing is not null)
                 <BbDataTableColumn TData="TrackFile" TValue="string" Header="Reproducción / cola" Id="actions">
                     <CellTemplate Context="track">
                         <div class="row-actions">
-                            <BbButton Size="ButtonSize.Icon" AriaLabel="@($"Reproducir {track.FileName}")"
-                                      OnClick="() => PlayTrack(track)">
-                                <LucideIcon Name="play" />
-                            </BbButton>
-                            <BbButton Variant="ButtonVariant.Ghost" Size="ButtonSize.Icon"
-                                      AriaLabel="@($"Añadir a la cola {track.FileName}")"
-                                      OnClick="() => PlayTrack(track, enqueue: true)">
-                                <LucideIcon Name="list-plus" />
-                            </BbButton>
-                            <BbButton Variant="ButtonVariant.Ghost" Size="ButtonSize.Icon"
-                                      AriaLabel="@($"Añadir a playlist {track.FileName}")" OnClick="() => AddToPlaylistAsync(track)">
-                                <LucideIcon Name="list-music" />
-                            </BbButton>
+                            <IconButton Label="Reproducir" Icon="play" Variant="ButtonVariant.Default"
+                                        AriaLabel="@($"Reproducir {track.FileName}")" OnClick="() => PlayTrack(track)" />
+                            <IconButton Label="Añadir a la cola" Icon="list-plus"
+                                        AriaLabel="@($"Añadir a la cola {track.FileName}")"
+                                        OnClick="() => PlayTrack(track, enqueue: true)" />
+                            <IconButton Label="Añadir a playlist" Icon="list-music"
+                                        AriaLabel="@($"Añadir a playlist {track.FileName}")" OnClick="() => AddToPlaylistAsync(track)" />
                         </div>
                     </CellTemplate>
                 </BbDataTableColumn>

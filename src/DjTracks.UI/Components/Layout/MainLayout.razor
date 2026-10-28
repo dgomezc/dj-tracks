@@ -18,11 +18,13 @@
             <Icon><LucideIcon Name="list-music" /></Icon>
             <ChildContent>Cola (@AudioPlayer.Queue.Count)</ChildContent>
         </BbButton>
-        <BbDarkModeToggle LightLabel="Modo claro" DarkLabel="Modo oscuro" aria-label="Cambiar entre modo claro y oscuro"
-                          title="Cambiar entre modo claro y oscuro" />
-        <BbButton Variant="ButtonVariant.Ghost" Size="ButtonSize.Icon" Href="/settings" AriaLabel="Configuración">
-            <LucideIcon Name="settings" />
-        </BbButton>
+        <BbTooltip DelayDuration="300">
+            <BbTooltipTrigger AsChild="true">
+                <BbDarkModeToggle LightLabel="Modo claro" DarkLabel="Modo oscuro" aria-label="Cambiar entre modo claro y oscuro" />
+            </BbTooltipTrigger>
+            <BbTooltipContent>Cambiar entre modo claro y oscuro</BbTooltipContent>
+        </BbTooltip>
+        <IconButton Label="Configuración" Icon="settings" Href="/settings" />
     </div>
 </header>
 
@@ -40,19 +42,14 @@
 
 <footer class="player-bar">
     <div class="queue-controls">
-        <BbButton Variant="ButtonVariant.Ghost" Size="ButtonSize.Icon" OnClick="AudioPlayer.Previous"
-                  Disabled="@(!AudioPlayer.CanPrevious)" AriaLabel="Canción anterior">
-            <LucideIcon Name="skip-back" />
-        </BbButton>
-        <BbButton Variant="ButtonVariant.Ghost" Size="ButtonSize.Icon" OnClick="AudioPlayer.Next"
-                  Disabled="@(!AudioPlayer.CanNext)" AriaLabel="Canción siguiente">
-            <LucideIcon Name="skip-forward" />
-        </BbButton>
-        <BbButton Variant="@(AudioPlayer.Shuffle ? ButtonVariant.Secondary : ButtonVariant.Ghost)"
-                  Size="ButtonSize.Icon" OnClick="AudioPlayer.ToggleShuffle"
-                  AriaLabel="Reproducción aleatoria" aria-pressed="@AudioPlayer.Shuffle.ToString().ToLowerInvariant()">
-            <LucideIcon Name="shuffle" />
-        </BbButton>
+        <IconButton Label="Canción anterior" Icon="skip-back" OnClick="AudioPlayer.Previous"
+                    Disabled="@(!AudioPlayer.CanPrevious)" />
+        <IconButton Label="Canción siguiente" Icon="skip-forward" OnClick="AudioPlayer.Next"
+                    Disabled="@(!AudioPlayer.CanNext)" />
+        <IconButton Label="@(AudioPlayer.Shuffle ? "Desactivar reproducción aleatoria" : "Activar reproducción aleatoria")"
+                    AriaLabel="Reproducción aleatoria" Icon="shuffle" OnClick="AudioPlayer.ToggleShuffle"
+                    Variant="@(AudioPlayer.Shuffle ? ButtonVariant.Secondary : ButtonVariant.Ghost)"
+                    aria-pressed="@AudioPlayer.Shuffle.ToString().ToLowerInvariant()" />
         <BbButton Variant="@(AudioPlayer.Repeat == DjTracks.UI.Shared.QueueRepeatMode.Off ? ButtonVariant.Ghost : ButtonVariant.Secondary)"
                   OnClick="AudioPlayer.CycleRepeat" AriaLabel="Cambiar modo de bucle">
             @RepeatLabel

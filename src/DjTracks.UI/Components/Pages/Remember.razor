@@ -51,18 +51,12 @@ else if (_listing is not null)
             <BbDataTableColumn TData="TrackFile" TValue="string" Header="Reproducción / cola" Id="actions">
                 <CellTemplate Context="file">
                     <div class="row-actions">
-                        <BbButton Size="ButtonSize.Icon" AriaLabel="@($"Reproducir {file.FileName}")" OnClick="() => PlayRemember(file)">
-                            <LucideIcon Name="play" />
-                        </BbButton>
-                        <BbButton Variant="ButtonVariant.Ghost" Size="ButtonSize.Icon"
-                                  AriaLabel="@($"Añadir a la cola {file.FileName}")" OnClick="() => PlayRemember(file, enqueue: true)">
-                            <LucideIcon Name="list-plus" />
-                        </BbButton>
-                        <BbButton Variant="ButtonVariant.Ghost" Size="ButtonSize.Icon"
-                                  AriaLabel="@($"Añadir a playlist {file.FileName}")"
-                                  OnClick="() => AddToPlaylistAsync(file)">
-                            <LucideIcon Name="list-music" />
-                        </BbButton>
+                        <IconButton Label="Reproducir" Icon="play" Variant="ButtonVariant.Default"
+                                    AriaLabel="@($"Reproducir {file.FileName}")" OnClick="() => PlayRemember(file)" />
+                        <IconButton Label="Añadir a la cola" Icon="list-plus"
+                                    AriaLabel="@($"Añadir a la cola {file.FileName}")" OnClick="() => PlayRemember(file, enqueue: true)" />
+                        <IconButton Label="Añadir a playlist" Icon="list-music"
+                                    AriaLabel="@($"Añadir a playlist {file.FileName}")" OnClick="() => AddToPlaylistAsync(file)" />
                     </div>
                 </CellTemplate>
             </BbDataTableColumn>
