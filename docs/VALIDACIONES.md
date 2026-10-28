@@ -20,7 +20,10 @@ Consultar siempre el estado real de GitHub antes de actuar sobre un PR.
 - F1.6: **validada globalmente por el usuario el 28/10/2026** con «Todo ok. Mezcla el pr y de momento para.». PR [#10](https://github.com/dgomezc/dj-tracks/pull/10) mergeado en `develop` a las 06:39:27 UTC, commit `0d48c5c`. Esta aceptación no amplía las comprobaciones individuales del agente. La pausa posterior se levantó solo para F2.1.
 - **Migración transversal MudBlazor → Blazor Blueprint (28/10/2026): validada por el usuario el 28/10/2026**, incluido el selector de temas («Funciona todo Ok. Mezcla el PR»). PR [#11](https://github.com/dgomezc/dj-tracks/pull/11) mergeado en `develop` (ver sección "Migración a Blazor Blueprint"). Las fases siguientes deben respetar `AGENTS.md` y `docs/ARQUITECTURA.md` (sección 8).
 - PR #11 comprobado mergeado en `develop` (`948ad2a`), checkout original actualizado por fast-forward e instrucciones de Blueprint releídas.
-- F2.1 autorizada el 28/10/2026 con «Puedes continuar con F2.1». Implementada en `fase/f2-1-sesiones`, PR [#12](https://github.com/dgomezc/dj-tracks/pull/12) abierto hacia `develop`; validación manual pendiente. F2.2 no iniciada.
+- F2.1 **validada globalmente por el usuario el 28/10/2026** con «todo ok, continua»,
+  incluidas las revisiones de estructura, Play, onda y carátula. Esta aceptación
+  no amplía las comprobaciones individuales del agente. Autorizada la integración
+  del PR [#12](https://github.com/dgomezc/dj-tracks/pull/12) y continuación con F2.2.
 - Eliminados ambos `Class1.cs` vacíos por petición expresa del usuario del 28/10/2026, en commit separado de F2.1. No quedan esos cambios locales pendientes.
 - Checkout original actualizado por fast-forward a `develop` después de integrar F1.2; el trabajo de F1.3 se desarrolla en su rama dedicada. La rama del port se conserva como historial; no se han borrado ni reescrito ramas.
 - Entrega F1.2: PR [#5](https://github.com/dgomezc/dj-tracks/pull/5) **mergeado** en `develop` el 27/10/2026 a las 07:13:41 UTC, commit `8fc21f1` (comprobado en GitHub). Incluye el port y ambos historiales sin force-push. PR #6 también mergeado; no queda PR de F1.2 pendiente.
@@ -31,7 +34,7 @@ Consultar siempre el estado real de GitHub antes de actuar sobre un PR.
 - Port F1.2 recibido de `dgomezc-fase-f1-2-filtros` (`1354305` código, `c38cddb` documentación). Se integra mediante merge en la rama original: se conservan ambos historiales y se resuelven los conflictos de código con la versión adaptada a Result/FluentValidation. Sin PR duplicado ni reescritura de ramas. Cambios preexistentes y JSON privado conservados; no se borran worktrees.
 - Comprobación de integración en checkout original (27/10/2026): `src` coincide con el port recibido; compilación completa con 0 errores y advertencias. API/UI aisladas con MP3 sintéticos: multiaño/multigrupo/multisubestilo, alias, ausencia de duplicados, resultados vacíos, explorador, errores 400/404, opciones, carga de ajustes y página Tracks correctos. No equivale a validación visual de biblioteca real. Servicios y fixtures temporales retirados después de comprobar.
 
-## F2.1: navegación de Sessions y cola (validación manual pendiente)
+## F2.1: navegación de Sessions y cola (validada por el usuario)
 
 `/sessions` permite explorar Año → carpeta de sesión → archivos MP3. Años y
 sesiones ordenados por nombre descendente (con fecha `yyyy-MM-dd`, las más recientes
@@ -118,7 +121,9 @@ reiniciar Visual Studio para heredarla.
   por el usuario se guarda en commit separado.
   Servicios y fixtures de comprobación retirados antes de la entrega.
 
-Validación manual del usuario pendiente; no mezclar ni avanzar a F2.2.
+Aceptación global del usuario registrada el 28/10/2026 con «todo ok, continua».
+Las listas siguientes conservan el detalle de las entregas previas, no acreditan
+comprobaciones individuales adicionales.
 
 ### Revisión: carpetas sin fecha y variantes de tracklist (28/10/2026)
 
@@ -205,7 +210,7 @@ Checklist nueva y a repetir (pendiente del usuario):
 - [ ] Repetir claro/oscuro en Light Green y otro tema: ambos botones, onda y ficha
   visibles/legibles, incluida ventana estrecha.
 
-PR #12 permanece abierto, sin validación del usuario ni autorización de merge.
+Revisión aceptada globalmente por el usuario el 28/10/2026 con «todo ok, continua».
 
 ## Migración a Blazor Blueprint (transversal, tras F1.6)
 
