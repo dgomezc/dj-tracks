@@ -1,0 +1,40 @@
+@implements IDisposable
+
+@if (Url is not null)
+{
+    <section class="session-tracklist" aria-label="Tracklist de la sesión">
+        <div class="button-row">
+            <h4 class="section-title">Tracklist</h4>
+            <BbButton Variant="ButtonVariant.Ghost" OnClick="ReloadAsync" Disabled="@_loading">Volver a cargar tracklist</BbButton>
+        </div>
+        @if (_loading)
+        {
+            <div class="busy-indicator" role="status">
+                <BbSpinner Size="SpinnerSize.Small" AriaLabel="Cargando tracklist" />
+                <span>Cargando tracklist…</span>
+            </div>
+        }
+        else if (_error is not null)
+        {
+            <BbAlert Variant="AlertVariant.Warning">
+                <BbAlertDescription>@_error</BbAlertDescription>
+            </BbAlert>
+        }
+        else if (_tracklist?.FileName is null)
+        {
+            <p class="text-muted" role="status">No hay un TXT de tracklist compatible junto a esta sesión.</p>
+        }
+        else
+        {
+            <p class="file-name text-muted">Fichero: @_tracklist.FileName</p>
+            @if (string.IsNullOrWhiteSpace(_tracklist.Content))
+            {
+                <p class="text-muted" role="status">El tracklist está vacío.</p>
+            }
+            else
+            {
+                <pre class="tracklist-content" tabindex="0" aria-label="Contenido del tracklist">@_tracklist.Content</pre>
+            }
+        }
+    </section>
+}

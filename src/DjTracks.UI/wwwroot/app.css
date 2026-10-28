@@ -204,6 +204,24 @@ body {
 }
 
 /* Ahora suena */
+.session-tracklist {
+    margin-top: 24px;
+    min-width: 0;
+}
+
+.tracklist-content {
+    max-height: 24rem;
+    overflow: auto;
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+    padding: 12px;
+    border: 1px solid var(--border);
+    border-radius: calc(var(--radius) - 4px);
+    background: var(--muted);
+    color: var(--foreground);
+    font: inherit;
+}
+
 .now-playing {
     margin-bottom: 16px;
 }

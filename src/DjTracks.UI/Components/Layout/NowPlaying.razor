@@ -29,7 +29,6 @@
                 @if (current.SessionFolder is not null)
                 {
                     <div>Sesión (carpeta): @current.SessionFolder</div>
-                    <p class="text-muted">La lectura del tracklist de sesiones estará disponible en F2.2.</p>
                 }
                 else
                 {
@@ -48,6 +47,7 @@
                 }
             </div>
         </div>
+        <SessionTracklistPanel Url="@current.TracklistUrl" />
     }
     else
     {
