@@ -52,9 +52,9 @@ export function appendWaveformChunk(canvas, startIndex, newPeaks, peakCount, dur
         audio.addEventListener("pause", instance.draw);
         instance.resize = new ResizeObserver(instance.draw);
         instance.resize.observe(canvas);
-        // Redibuja con los colores del tema al cambiar entre modo claro y oscuro.
+        // Redibuja con los colores del tema al cambiar de modo (claro/oscuro) o de tema.
         instance.theme = new MutationObserver(instance.draw);
-        instance.theme.observe(document.documentElement, { attributes: true, attributeFilter: ["class"] });
+        instance.theme.observe(document.documentElement, { attributes: true, attributeFilter: ["class", "data-app-theme"] });
         instances.set(canvas, instance);
     } else if (instance.peaks.length !== peakCount) {
         instance.peaks = new Array(peakCount).fill(0);

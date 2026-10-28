@@ -88,3 +88,18 @@
     </form>
     </BbCardContent>
 </BbCard>
+
+<BbCard Class="settings-theme-card">
+    <BbCardContent Class="settings-card">
+        <BbField>
+            <BbFieldLabel>Tema de la interfaz</BbFieldLabel>
+            <BbFieldContent>
+                <BbSelect TValue="string" Value="@_theme" ValueChanged="ChangeThemeAsync" Options="@ThemeOptions"
+                          Disabled="@(_theme is null)" AriaLabel="Tema de la interfaz" />
+                <BbFieldDescription>
+                    Se aplica al momento y se recuerda en este navegador. El modo claro u oscuro se elige con el botón de la cabecera.
+                </BbFieldDescription>
+            </BbFieldContent>
+        </BbField>
+    </BbCardContent>
+</BbCard>

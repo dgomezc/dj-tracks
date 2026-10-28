@@ -157,6 +157,10 @@ body {
     padding-top: 24px;
 }
 
+.settings-theme-card {
+    margin-top: 24px;
+}
+
 .filters-panel {
     margin-bottom: 16px;
     border: 1px solid var(--border);
