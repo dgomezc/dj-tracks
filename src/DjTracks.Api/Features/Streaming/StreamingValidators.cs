@@ -2,6 +2,8 @@ using DjTracks.Api.Features.Streaming.GetTrackWaveform;
 using DjTracks.Api.Features.Streaming.GetTrackArtwork;
 using DjTracks.Api.Features.Streaming.StreamTrack;
 using DjTracks.Api.Features.Streaming.StreamSession;
+using DjTracks.Api.Features.Streaming.GetSessionArtwork;
+using DjTracks.Api.Features.Streaming.GetSessionWaveform;
 using FluentValidation;
 
 namespace DjTracks.Api.Features.Streaming;
@@ -48,6 +50,32 @@ public sealed class GetTrackArtworkRequestValidator : AbstractValidator<GetTrack
 public sealed class StreamSessionRequestValidator : AbstractValidator<StreamSessionRequest>
 {
     public StreamSessionRequestValidator()
+    {
+        RuleFor(request => request.Year).Must(StreamingRequestRules.BeFolderName)
+            .WithMessage("El año debe ser un nombre de carpeta, no una ruta.");
+        RuleFor(request => request.Session).Must(StreamingRequestRules.BeFolderName)
+            .WithMessage("La sesión debe ser un nombre de carpeta, no una ruta.");
+        RuleFor(request => request.FileName).Must(StreamingRequestRules.BeAudioFileName)
+            .WithMessage("El fichero debe ser un nombre de archivo MP3, no una ruta.");
+    }
+}
+
+public sealed class GetSessionArtworkRequestValidator : AbstractValidator<GetSessionArtworkRequest>
+{
+    public GetSessionArtworkRequestValidator()
+    {
+        RuleFor(request => request.Year).Must(StreamingRequestRules.BeFolderName)
+            .WithMessage("El año debe ser un nombre de carpeta, no una ruta.");
+        RuleFor(request => request.Session).Must(StreamingRequestRules.BeFolderName)
+            .WithMessage("La sesión debe ser un nombre de carpeta, no una ruta.");
+        RuleFor(request => request.FileName).Must(StreamingRequestRules.BeAudioFileName)
+            .WithMessage("El fichero debe ser un nombre de archivo MP3, no una ruta.");
+    }
+}
+
+public sealed class GetSessionWaveformRequestValidator : AbstractValidator<GetSessionWaveformRequest>
+{
+    public GetSessionWaveformRequestValidator()
     {
         RuleFor(request => request.Year).Must(StreamingRequestRules.BeFolderName)
             .WithMessage("El año debe ser un nombre de carpeta, no una ruta.");

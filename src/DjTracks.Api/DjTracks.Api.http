@@ -20,6 +20,16 @@ Accept: application/json
 
 ###
 
+GET {{DjTracks.Api_HostAddress}}/api/streaming/sessions/waveform?year=2026&session=Nombre%20de%20sesión&fileName=Sesión.mp3
+Accept: application/x-ndjson
+
+###
+
+GET {{DjTracks.Api_HostAddress}}/api/streaming/sessions/artwork?year=2026&session=Nombre%20de%20sesión&fileName=Sesión.mp3
+Accept: application/json
+
+###
+
 GET {{DjTracks.Api_HostAddress}}/api/library/tracks/filter-options
 Accept: application/json
 

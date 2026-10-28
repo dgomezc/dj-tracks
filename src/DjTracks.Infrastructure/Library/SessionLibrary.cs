@@ -54,4 +54,10 @@ public sealed class SessionLibrary(TrackLibrary tracks)
 
     public Result<FileStream> OpenAudio(string root, string year, string session, string fileName,
         CancellationToken ct) => tracks.OpenTrack(root, year, session, fileName, ct);
+
+    public Result<FileInfo> ResolveAudioFile(string root, string year, string session, string fileName,
+        CancellationToken ct) => tracks.ResolveTrackFile(root, year, session, fileName, ct);
+
+    public Result<TrackArtwork> ReadArtwork(string root, string year, string session, string fileName,
+        CancellationToken ct) => tracks.ReadArtwork(root, year, session, fileName, ct);
 }
