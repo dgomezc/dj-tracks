@@ -39,6 +39,11 @@ Consultar siempre el estado real de GitHub antes de actuar sobre un PR.
   Esta aceptación no amplía las comprobaciones individuales del agente.
   Autorizadas su integración y la continuación con F4.1; F2.3 opcional
   sigue aplazada para el final.
+- PR #14 mergeado en `develop` el 28/10/2026 a las 13:23:10 UTC, commit `9441862`
+  (comprobado en GitHub); checkout original actualizado por fast-forward.
+- F4.1 playlists manuales en `fase/f4-1-playlists-manuales`, pendiente de
+  validación. F4.2 y F2.3 no iniciadas. Decisión confirmada: cargar añade al final,
+  sin duplicados ni interrumpir audio; no sustituye la cola.
 - Eliminados ambos `Class1.cs` vacíos por petición expresa del usuario del 28/10/2026, en commit separado de F2.1. No quedan esos cambios locales pendientes.
 - Checkout original actualizado por fast-forward a `develop` después de integrar F1.2; el trabajo de F1.3 se desarrolla en su rama dedicada. La rama del port se conserva como historial; no se han borrado ni reescrito ramas.
 - Entrega F1.2: PR [#5](https://github.com/dgomezc/dj-tracks/pull/5) **mergeado** en `develop` el 27/10/2026 a las 07:13:41 UTC, commit `8fc21f1` (comprobado en GitHub). Incluye el port y ambos historiales sin force-push. PR #6 también mergeado; no queda PR de F1.2 pendiente.
@@ -48,6 +53,103 @@ Consultar siempre el estado real de GitHub antes de actuar sobre un PR.
 - **Refactor transversal Vertical Slices: validado por el usuario el 27/10/2026** con "Perfecto, documenta toda la arquitectura actual… Después mezcla el PR y sigue con el siguiente paso". Arquitectura documentada en `ARQUITECTURA.md`. PR [#6](https://github.com/dgomezc/dj-tracks/pull/6) mergeado en `develop` (`c7c1508`). Diseño validado en `arquitectura/flujo-get-tracks.html` ("Cambia todas las llamadas").
 - Port F1.2 recibido de `dgomezc-fase-f1-2-filtros` (`1354305` código, `c38cddb` documentación). Se integra mediante merge en la rama original: se conservan ambos historiales y se resuelven los conflictos de código con la versión adaptada a Result/FluentValidation. Sin PR duplicado ni reescritura de ramas. Cambios preexistentes y JSON privado conservados; no se borran worktrees.
 - Comprobación de integración en checkout original (27/10/2026): `src` coincide con el port recibido; compilación completa con 0 errores y advertencias. API/UI aisladas con MP3 sintéticos: multiaño/multigrupo/multisubestilo, alias, ausencia de duplicados, resultados vacíos, explorador, errores 400/404, opciones, carga de ajustes y página Tracks correctos. No equivale a validación visual de biblioteca real. Servicios y fixtures temporales retirados después de comprobar.
+
+## F4.1: playlists manuales (validación manual pendiente)
+
+Gestión en `/playlists` y panel izquierdo (cuando el ancho lo permite).
+Crear/renombrar/borrar con confirmación; añadir canciones desde Tracks y Remember
+con el botón «Añadir a playlist»; quitar entradas desde la gestión.
+Sessions excluidas. Nombre de 1–120 caracteres sin controles, espacios exteriores
+recortados, único sin distinguir mayúsculas. Orden de incorporación y referencias
+sin repetidos; homónimos de distinta biblioteca/carpeta son diferentes.
+
+Un JSON `<id N minúsculo>.json` por playlist en la ruta configurada, con
+identificadores relativos de biblioteca/carpeta/MP3, sin rutas absolutas, URLs
+ni tags guardados. Cambiar nombre conserva ID/entradas; borrar solo elimina ese
+JSON, nunca audio. Guardado atómico por temporal; errores visibles y JSON corrupto
+protegido. Solo una API por carpeta: sin coordinación con editores externos.
+
+Cargar resuelve tags actuales y añade al final de la cola sin iniciar/interrumpir
+audio ni duplicar entradas. Si falta un MP3, no cambia nada de la cola y avisa;
+su referencia se puede quitar de la playlist. Editar/borrar una playlist no cambia
+la cola ya cargada. Recarga del navegador vacía la cola, no las playlists.
+Sin export M3U, automáticas, watcher, reordenación, BD ni tests nuevos.
+
+### Arranque y checklist del usuario
+
+Visual Studio 2026 (.NET 10), `DjTracks.slnx`, perfil **DJ Tracks (Api + UI)** y F5.
+UI `http://localhost:5050/playlists`, API `http://localhost:5247`.
+Reiniciar API/UI y recargar completamente tras cambiar de rama. Las cinco rutas
+de Configuración deben existir; Playlists requiere lectura/escritura para la API.
+Usar MP3 de Tracks (`Año\Estilo`) y Remember (`Cortas`/`Largas`); FFmpeg en PATH
+o `Waveform__BinaryFolder` para la onda. No requiere BD ni modificar los MP3.
+
+- [ ] Crear dos playlists con nombres distintos: aparecen ordenadas en gestión y
+  lateral; nombres vacíos, largos o repetidos avisan sin alterar las existentes.
+- [ ] Desde Tracks (también resultados filtrados) y Remember Cortas/Largas,
+  «Añadir a playlist» permite elegir y guardar. Repetir no duplica; homónimos de
+  carpetas/bibliotecas diferentes coexisten. Sessions no ofrece el botón.
+- [ ] Abrir la playlist: referencias en orden de incorporación. Renombrar conserva
+  canciones y actualiza lateral; quitar una solo cambia la playlist, no audio/cola.
+- [ ] Con audio sonando y una cola existente, «Añadir playlist a la cola» agrega
+  solo las canciones que falten, sin reiniciar audio/posición. Repetir agrega cero;
+  cargar sobre cola vacía no inicia audio. Siguiente o Play en Cola sí reproduce.
+- [ ] Reproducir la mezcla cargada y avanzar (también fin automático con Cola
+  abierta): indicador/ficha/onda/portada y procedencia correctos, sin tracklist
+  residual de Sessions. Navegar conserva la cola y el audio.
+- [ ] Recargar completamente y reiniciar API/UI: las playlists y nombres/entradas
+  persisten; la cola se vacía. Borrar pide confirmación; cancelar conserva todo;
+  confirmar elimina solo esa playlist y no los MP3 ni la cola ya cargada.
+- [ ] Modo claro/oscuro con Light Green y otro tema, ventana ancha/estrecha y
+  nombres largos: lateral o enlace Playlists accesibles, selector/tabla/formularios
+  legibles; scroll sin controles tapados.
+- [ ] Solo con datos de prueba y copia de seguridad: MP3 ausente muestra error al
+  cargar sin modificar cola y permite quitar su referencia; ruta inaccesible o
+  JSON inválido avisan sin aparentar éxito ni sobrescribir datos. Restaurar y
+  recargar recupera. No borrar/modificar datos reales para provocar estos casos.
+
+### Comprobaciones del agente
+
+- `dotnet build DjTracks.slnx`: correcto, 0 errores/advertencias, sin tests nuevos.
+  Consultados context7 (binding Minimal API) y MCP Blueprint (Sheet/Select).
+- API aislada: listado vacío, crear/recortar nombre Unicode, renombrar conservando
+  ID/entradas, quitar y borrar, referencias homónimas Tracks/Cortas/Largas y orden,
+  deduplicación, tags actuales y Year/Style nulos en Remember. Datos JSON sin
+  rutas absolutas ni URLs; persistencia y resolución tras reiniciar API/UI.
+- Validación 400 para nombres vacíos/>120/con controles, Sessions, categoría
+  incorrecta, traversal/rutas, archivo no MP3 y combinación de campos incoherente.
+  Duplicar nombre sin distinguir mayúsculas: 409; MP3/playlist ausentes: 404.
+- Concurrencia en una API: doce altas simultáneas del mismo archivo dejan una
+  entrada; tres archivos distintos simultáneos se conservan todos; ocho creaciones
+  con el mismo nombre dan un éxito y siete conflictos.
+- Destino bloqueado durante renombrado: 503, JSON anterior idéntico y sin
+  temporales residuales. JSON gestionado corrupto: leer/listar/crear/renombrar/borrar
+  dan 500 sin sobrescribir/eliminar el archivo. JSON ajeno al patrón se conserva.
+  Ajustes corruptos 500, ajustes ausentes 409, raíz Playlists ausente 503.
+- Navegador: crear, añadir desde Remember Cortas/Largas y Tracks, repetir sin
+  duplicar, renombrar, quitar conservando cola, cancelar/confirmar borrado sin
+  tocar audio/cola. Cargar mezcla sobre audio activo: añade dos/falta una ya
+  en cola; repetir añade cero, mismo elemento audio y tiempo avanzando.
+- Tras recarga/reinicio: nombre/entradas persistentes y cola vacía. Cargar sobre
+  cola vacía no inicia audio; Play en Cola sí. MP3 ausente muestra error sin
+  alterar cola y permite editar; restaurar y volver a cargar recupera.
+- Sessions no ofrece botón de playlist. Con una sesión reproduciéndose, cargar
+  playlist conserva audio y tracklist; fin real con Cola abierta pasa a Remember,
+  actualiza procedencia/ficha y retira tracklist. Onda y ficha de Tracks/Remember
+  siguen funcionando; navegación conserva audio. Sin error Blazor no controlado.
+- Lateral comprobado en iframe real a 1280 px: crear/renombrar/borrar actualizan
+  enlaces y contadores del mismo circuito. A 642 px gestión accesible desde
+  cabecera. Capturas inspeccionadas Light Green/Cyberpunk claro/oscuro.
+  Nombre de 120 caracteres comprobado en gestión y selector a 320 px: sin
+  solapamientos ni desbordamiento de página. Tabla de música con scroll horizontal
+  interno para acceder a las acciones; estilos definitivos comprobados tras
+  compilar/reiniciar, sin depender de CSS inyectado en las pruebas.
+- No comprobados biblioteca real, sonido por hardware, todos los temas/tamaños
+  ni varias APIs sobre el mismo directorio (no soportado). No hay watcher entre
+  ventanas: usar Recargar. Los servicios/fixtures aislados se retiraron al acabar;
+  ajustes privados y datos reales sin tocar.
+
+Validación del usuario pendiente. No mezclar ni avanzar a F4.2.
 
 ## F3.1: Remember (validada por el usuario)
 

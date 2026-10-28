@@ -166,7 +166,43 @@ La página Remember llama por HTTP desde su code-behind, selector Cortas/Largas
 con Cortas inicial, tabla Blueprint y Play/añadir. `QueuedTrack.RememberCategory`
 opcional se conserva en ambos caminos para ficha y cola, sin TracklistUrl;
 NowPlaying distingue categoría de año/estilo y no mantiene el tracklist de una
-sesión anterior. No hay playlists persistentes, filtrado de Tracks ni BD nuevos.
+sesión anterior. F3.1 no añadió playlists persistentes, filtrado de Tracks ni BD.
+
+F4.1 añade `Features/Playlists` con slices explícitos GetPlaylists, GetPlaylist,
+CreatePlaylist, RenamePlaylist, DeletePlaylist, AddPlaylistTrack, RemovePlaylistTrack
+y LoadPlaylist. Cada endpoint delega en su handler; requests validados por
+FluentValidation, respuestas `Result<T>` y traducción estándar de AppError.
+`JsonPlaylistStore` (singleton) carga la ruta desde `JsonSettingsStore` y guarda
+un JSON `<id:N>.json` por playlist manual. Nombre visible independiente del archivo;
+`ManualPlaylist(Id, Name, Entries)` y `PlaylistEntry(Id, Track)` usan referencias
+`PlaylistTrackReference` con biblioteca/identificadores relativos, nunca rutas
+absolutas ni URLs de la API. Su validación de formato compartida también comprueba
+el contenido persistido. Solo Tracks/Remember, sin Sessions. No se repiten referencias
+idénticas y se conserva el orden de incorporación.
+
+El store serializa lectura/modificación/escritura mediante un semáforo por proceso;
+guarda primero un temporal, hace flush a disco y lo mueve sobre el destino.
+No crea raíces de almacenamiento ausentes ni sobrescribe/elimina JSON inválido.
+Ignora archivos ajenos al patrón de ID, rechaza enlaces de archivos gestionados
+y expone fallos de JSON/E/S con log. Un proceso de API por carpeta de playlists;
+no se coordina con editores externos ni otras instancias.
+`PlaylistTrackResolver` resuelve las referencias con las bibliotecas existentes
+y reutiliza `TrackLibrary.ReadTrack` para tags actuales, sin escanear toda la
+carpeta por canción. Cualquier referencia ausente cancela la carga completa
+antes de cambiar la cola; la edición del JSON sigue disponible para quitarla.
+
+`Playlists.razor.cs` gestiona por HTTP nombres, entradas y carga. Construye URLs
+de streaming/onda/portada con los mismos identificadores y orden de query que
+Tracks/Remember; `AudioPlayerState.Enqueue` conserva audio/posición y rechaza
+duplicados también entre un listado y una playlist. No guarda tags/URLs en JSON.
+`AddToPlaylist` es un selector Sheet reutilizado por Tracks/Remember;
+`PlaylistSidebar` muestra nombres/contadores/enlaces de gestión. Ambos hacen HTTP
+en code-behind con `HttpClientResultExtensions` (GET/POST/PUT/DELETE).
+`PlaylistChanges`, scoped y sin HTTP ni datos, notifica cambios al panel lateral
+del mismo circuito. Recargar actualiza cambios de otras ventanas; no hay watcher
+ni sincronización automática entre circuitos en esta fase. `/playlists` en la
+cabecera mantiene la gestión accesible cuando el lateral se oculta en móvil.
+La cola sigue en memoria: editar/borrar una playlist no modifica la cola ya cargada.
 
 | Elemento | Nombre | Namespace |
 |---|---|---|

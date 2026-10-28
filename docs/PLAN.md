@@ -135,6 +135,18 @@ El estado de entrega y las checklists se mantienen en `VALIDACIONES.md`. Una imp
 
 ### Bloque 4 — Playlists
 - **F4.1 Manuales**: crear/borrar/renombrar, añadir y quitar canciones (botón en listados de Tracks y Remember), cargar en cola. Panel izquierdo.
+  Gestión también en `/playlists` para pantallas sin panel lateral. Un JSON por
+  playlist (`<id N minúsculo>.json`) en la ruta configurada, con nombre visible y
+  referencias relativas a Tracks (año/estilo/fichero) o Remember (categoría/fichero),
+  nunca Sessions, rutas absolutas ni URLs. Orden de incorporación y sin repetidos.
+  Nombres de 1–120 caracteres, recortados y únicos sin distinguir mayúsculas;
+  renombrar conserva ID y entradas. Borrar pide confirmación y solo elimina el JSON.
+  Decisión del usuario del 28/10/2026: cargar **añade al final** de la cola, sin
+  duplicados ni iniciar/interrumpir audio; no sustituye la cola. Resuelve tags
+  actuales y reutiliza onda/portada de cada biblioteca. Si falta un MP3, muestra
+  error sin modificar la cola; se puede quitar la referencia desde la playlist.
+  Persisten tras recargar/reiniciar, a diferencia de la cola. Sin reordenación,
+  exportación M3U ni playlists automáticos todavía.
 - **F4.2 Export m3u** con la ruta raíz configurada.
 - **F4.3 Automáticos**: modal "Generar playlist automático" con filtros Año (multi), Estilo (multi), Incluir Remember; guardado de filtros y generación; export m3u.
 - **F4.4 Playlists vivos**: índice de biblioteca con watcher + reescaneo horario; los automáticos reflejan altas/bajas.
@@ -156,3 +168,5 @@ El estado de entrega y las checklists se mantienen en `VALIDACIONES.md`. Una imp
 4. Las sesiones no se pueden añadir a playlists manuales.
 5. Las rutas se introducen mediante campos de texto, sin botón Examinar ni selector de carpetas (decisión del usuario del 26/10/2026, que revoca la propuesta del selector).
 6. Los filtros de Tracks son multiselección en los tres campos: por ejemplo, 2025 y 2026 simultáneamente. Se aplica OR dentro de cada campo y AND entre campos; sin selección en un campo se incluyen todos (aclaración del usuario del 26/10/2026).
+7. Cargar una playlist manual añade sus canciones al final de la cola sin duplicados
+   ni interrumpir el audio (decisión del usuario del 28/10/2026).
