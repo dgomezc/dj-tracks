@@ -41,8 +41,9 @@ Consultar siempre el estado real de GitHub antes de actuar sobre un PR.
   sigue aplazada para el final.
 - PR #14 mergeado en `develop` el 28/10/2026 a las 13:23:10 UTC, commit `9441862`
   (comprobado en GitHub); checkout original actualizado por fast-forward.
-- F4.1 playlists manuales en `fase/f4-1-playlists-manuales`, pendiente de
-  validación. F4.2 y F2.3 no iniciadas. Decisión confirmada: cargar añade al final,
+- F4.1 playlists manuales en `fase/f4-1-playlists-manuales`, PR
+  [#15](https://github.com/dgomezc/dj-tracks/pull/15) abierto hacia `develop`,
+  pendiente de validación. F4.2 y F2.3 no iniciadas. Decisión confirmada: cargar añade al final,
   sin duplicados ni interrumpir audio; no sustituye la cola.
 - Eliminados ambos `Class1.cs` vacíos por petición expresa del usuario del 28/10/2026, en commit separado de F2.1. No quedan esos cambios locales pendientes.
 - Checkout original actualizado por fast-forward a `develop` después de integrar F1.2; el trabajo de F1.3 se desarrolla en su rama dedicada. La rama del port se conserva como historial; no se han borrado ni reescrito ramas.
