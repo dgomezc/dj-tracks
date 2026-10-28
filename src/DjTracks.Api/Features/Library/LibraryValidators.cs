@@ -1,5 +1,6 @@
 using DjTracks.Api.Features.Library.GetTracks;
 using DjTracks.Api.Features.Library.GetSessions;
+using DjTracks.Api.Features.Library.GetSessionTracklist;
 using DjTracks.Api.Features.Library.GetFilteredTracks;
 using FluentValidation;
 
@@ -37,6 +38,24 @@ public sealed class GetSessionsRequestValidator : AbstractValidator<GetSessionsR
     }
 
     private static bool BeFolderName(string? name) =>
+        !string.IsNullOrWhiteSpace(name) && name is not ("." or "..")
+        && name.IndexOfAny(['/', '\\', ':']) < 0 && !Path.IsPathRooted(name);
+}
+
+public sealed class GetSessionTracklistRequestValidator : AbstractValidator<GetSessionTracklistRequest>
+{
+    public GetSessionTracklistRequestValidator()
+    {
+        RuleFor(request => request.Year).Must(BeName)
+            .WithMessage("El año debe ser un nombre de carpeta, no una ruta.");
+        RuleFor(request => request.Session).Must(BeName)
+            .WithMessage("La sesión debe ser un nombre de carpeta, no una ruta.");
+        RuleFor(request => request.FileName).Must(name => BeName(name)
+                && string.Equals(Path.GetExtension(name), ".mp3", StringComparison.OrdinalIgnoreCase))
+            .WithMessage("El fichero debe ser un nombre de archivo MP3, no una ruta.");
+    }
+
+    private static bool BeName(string? name) =>
         !string.IsNullOrWhiteSpace(name) && name is not ("." or "..")
         && name.IndexOfAny(['/', '\\', ':']) < 0 && !Path.IsPathRooted(name);
 }
