@@ -1,0 +1,47 @@
+@implements IDisposable
+
+<MudPaper Class="pa-4 mb-4 now-playing" Outlined="true" role="region" aria-label="Ahora suena">
+    <MudText Typo="Typo.h6" Class="mb-3">Ahora suena</MudText>
+    @if (Player.Current is { } current)
+    {
+        <div class="now-playing-content">
+            <div class="now-playing-artwork">
+                @if (_dataUrl is not null && _error is null)
+                {
+                    var dataUrl = _dataUrl;
+                    <img @key="dataUrl" src="@dataUrl" alt="@($"Carátula de {current.Title}")"
+                         @onerror="() => OnImageError(dataUrl)" />
+                }
+                else
+                {
+                    <MudIcon Icon="@Icons.Material.Filled.Album" Size="Size.Large" />
+                    <MudText Typo="Typo.caption" role="status">
+                        @(_loading ? "Cargando carátula…" : _error is null ? "Sin carátula" : "Carátula no disponible")
+                    </MudText>
+                }
+            </div>
+            <MudStack Spacing="1" Class="now-playing-details">
+                <MudText Typo="Typo.h5">@current.Title</MudText>
+                <MudText>Artista: @Display(current.Artist)</MudText>
+                <MudText>Álbum: @Display(current.Details.Album)</MudText>
+                <MudText>Año (carpeta): @Display(current.Details.Year)</MudText>
+                <MudText>Estilo (carpeta): @Display(current.Details.Style)</MudText>
+                <MudText>Duración: @Duration(current.Details.DurationSeconds)</MudText>
+                <MudText Typo="Typo.body2">Fichero: @current.Details.FileName</MudText>
+                @if (current.Details.Warning is not null)
+                {
+                    <MudAlert Severity="Severity.Warning">@current.Details.Warning</MudAlert>
+                }
+                @if (_error is not null)
+                {
+                    <MudAlert Severity="Severity.Warning" role="alert">@_error</MudAlert>
+                    <MudButton OnClick="ReloadAsync">Reintentar carátula</MudButton>
+                }
+            </MudStack>
+        </div>
+    }
+    else
+    {
+        <MudText Class="mud-text-secondary">Selecciona una canción para ver su carátula e información.</MudText>
+    }
+</MudPaper>

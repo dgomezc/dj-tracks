@@ -99,12 +99,13 @@ public partial class Tracks
             QueryHelpers.AddQueryString("api/streaming/tracks", query)).AbsoluteUri;
         var waveformUrl = new Uri(Http.BaseAddress!,
             QueryHelpers.AddQueryString("api/streaming/tracks/waveform", query)).AbsoluteUri;
+        var artworkUrl = new Uri(Http.BaseAddress!,
+            QueryHelpers.AddQueryString("api/streaming/tracks/artwork", query)).AbsoluteUri;
+        var details = track with { Year = year, Style = style };
         if (enqueue)
-            AudioPlayer.Enqueue(audioUrl, waveformUrl, track.Title ?? track.FileName,
-                string.Join(", ", track.Artists));
+            AudioPlayer.Enqueue(audioUrl, waveformUrl, artworkUrl, details);
         else
-            AudioPlayer.Play(audioUrl, waveformUrl, track.Title ?? track.FileName,
-                string.Join(", ", track.Artists));
+            AudioPlayer.Play(audioUrl, waveformUrl, artworkUrl, details);
     }
 
     private async Task RequestAsync()

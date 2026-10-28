@@ -23,7 +23,7 @@
         <MudIconButton Icon="@Icons.Material.Filled.Settings" Href="/settings" Color="Color.Inherit" />
     </MudAppBar>
 
-    <MudDrawer Open="true" Variant="DrawerVariant.Persistent" Elevation="0" ClipMode="DrawerClipMode.Always" Width="260px">
+    <MudDrawer @bind-Open="_libraryDrawerOpen" Variant="DrawerVariant.Responsive" Elevation="0" ClipMode="DrawerClipMode.Always" Width="260px">
         <MudNavMenu>
             <MudText Typo="Typo.overline" Class="px-4 mt-4">Playlists manuales</MudText>
             <MudText Typo="Typo.body2" Class="px-4 mud-text-secondary">Sin playlists</MudText>
@@ -35,6 +35,7 @@
 
     <MudMainContent Class="main-content">
         <MudContainer MaxWidth="MaxWidth.False" Class="pa-4">
+            <NowPlaying />
             @Body
         </MudContainer>
     </MudMainContent>
@@ -86,6 +87,7 @@
 </div>
 
 @code {
+    private bool _libraryDrawerOpen = true;
     private bool _queueOpen;
     private string RepeatLabel => AudioPlayer.Repeat switch
     {

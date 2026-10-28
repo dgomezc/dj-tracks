@@ -1,3 +1,5 @@
+using DjTracks.Domain;
+
 namespace DjTracks.UI.Shared;
 
 public sealed class AudioPlayerState
@@ -19,19 +21,19 @@ public sealed class AudioPlayerState
 
     public event Action? Changed;
 
-    public void Play(string audioUrl, string waveformUrl, string title, string? artist)
+    public void Play(string audioUrl, string waveformUrl, string artworkUrl, TrackFile details)
     {
         var track = _queue.FirstOrDefault(item => item.AudioUrl == audioUrl)
-            ?? AddTrack(audioUrl, waveformUrl, title, artist);
+            ?? AddTrack(audioUrl, waveformUrl, artworkUrl, details);
         Select(track);
     }
 
-    public void Enqueue(string audioUrl, string waveformUrl, string title, string? artist)
+    public void Enqueue(string audioUrl, string waveformUrl, string artworkUrl, TrackFile details)
     {
         if (_queue.Any(item => item.AudioUrl == audioUrl))
             return;
 
-        AddTrack(audioUrl, waveformUrl, title, artist);
+        AddTrack(audioUrl, waveformUrl, artworkUrl, details);
         Changed?.Invoke();
     }
 
@@ -111,9 +113,9 @@ public sealed class AudioPlayerState
         Changed?.Invoke();
     }
 
-    private QueuedTrack AddTrack(string audioUrl, string waveformUrl, string title, string? artist)
+    private QueuedTrack AddTrack(string audioUrl, string waveformUrl, string artworkUrl, TrackFile details)
     {
-        var track = new QueuedTrack(Guid.NewGuid(), audioUrl, waveformUrl, title, artist);
+        var track = new QueuedTrack(Guid.NewGuid(), audioUrl, waveformUrl, artworkUrl, details);
         _queue.Add(track);
         _order.Add(track.Id);
         return track;
