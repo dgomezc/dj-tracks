@@ -34,7 +34,9 @@ Reproductor autoalojado de música electrónica (Tracks, Sessions, Remember). Se
   ordenado por nombre (ordinal sin distinguir mayúsculas; desempate ordinal).
   No se concatenan ni se solicita elegir: decisión del usuario del 28/10/2026
   («lo mejor es leer el primero que encuentre»). Otros TXT se ignoran.
-- **Remember**: `Cortas/…mp3` y `Largas/…mp3`.
+- **Remember**: MP3 directamente bajo `Cortas\` y `Largas\` dentro de la raíz
+  configurada de Remember, con esos nombres exactos. No hay año/estilo ni
+  exploración recursiva. Se ignoran otros archivos, subcarpetas y enlaces.
 - Filtros y playlists automáticos se basan en nombres de carpeta, no en tags.
 
 Ejemplo válido de Sessions (los nombres de TXT son alternativas, no obligatorios):
@@ -125,6 +127,11 @@ El estado de entrega y las checklists se mantienen en `VALIDACIONES.md`. Una imp
 
 ### Bloque 3 — Remember
 - **F3.1 Remember**: selector Cortas/Largas, listado, reproducción y ficha del track.
+  Cortas se abre inicialmente; ambas categorías muestran MP3 por nombre ascendente,
+  tags y avisos individuales. Play y añadir a la cola compartida sin duplicados;
+  streaming Range, onda progresiva/cacheada y portada incrustada como Tracks.
+  Ficha y cola identifican Remember y su categoría, sin año/estilo ni tracklist.
+  Vacíos y errores explícitos; sin playlists todavía.
 
 ### Bloque 4 — Playlists
 - **F4.1 Manuales**: crear/borrar/renombrar, añadir y quitar canciones (botón en listados de Tracks y Remember), cargar en cola. Panel izquierdo.
