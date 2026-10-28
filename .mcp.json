@@ -1,0 +1,16 @@
+{
+  "servers": {
+    "blazorblueprint": {
+      "type": "stdio",
+      "command": "wsl",
+      "args": [
+        "-d",
+        "Ubuntu",
+        "-e",
+        "bash",
+        "-c",
+        "source ~/.nvm/nvm.sh && exec npx -y @blazorblueprint/mcp@latest"
+      ]
+    }
+  }
+}

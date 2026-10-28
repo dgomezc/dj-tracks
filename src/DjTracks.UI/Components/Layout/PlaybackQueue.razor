@@ -2,39 +2,45 @@
 @implements IDisposable
 @inject AudioPlayerState Player
 
-<MudDrawer Open="@Open" OpenChanged="@OpenChanged" Anchor="Anchor.Right" Variant="DrawerVariant.Temporary"
-           Width="340px" Class="playback-queue">
-    <MudStack Row="true" AlignItems="AlignItems.Center" Class="pa-3">
-        <MudText Typo="Typo.h6">Cola (@Player.Queue.Count)</MudText>
-        <MudSpacer />
-        <MudIconButton Icon="@Icons.Material.Filled.Close" OnClick="CloseAsync"
-                       aria-label="Cerrar cola" />
-    </MudStack>
-    <MudButton OnClick="Player.Clear" Disabled="@(Player.Queue.Count == 0)" Class="ma-3">
-        Vaciar cola
-    </MudButton>
-    @if (Player.Queue.Count == 0)
-    {
-        <MudText Class="pa-4" role="status">La cola está vacía. Añade canciones desde Tracks.</MudText>
-    }
-    @foreach (var track in Player.Queue)
-    {
-        <div @key="track.Id" class="queue-entry">
-            <MudIconButton Icon="@(Player.Current?.Id == track.Id
-                                    ? Icons.Material.Filled.GraphicEq : Icons.Material.Filled.PlayArrow)"
-                           Color="@(Player.Current?.Id == track.Id ? Color.Primary : Color.Default)"
-                           OnClick="() => Player.PlayQueued(track.Id)"
-                           aria-label="@($"Reproducir de la cola {track.Title}")" />
-            <div class="queue-entry-text">
-                <MudText Typo="Typo.body2">@track.Title</MudText>
-                <MudText Typo="Typo.caption">@track.Artist</MudText>
-            </div>
-            <MudIconButton Icon="@Icons.Material.Filled.DeleteOutline"
-                           OnClick="() => Player.Remove(track.Id)"
-                           aria-label="@($"Quitar de la cola {track.Title}")" />
+<BbSheet Open="@Open" OpenChanged="@OpenChanged">
+    <BbSheetContent Side="SheetSide.Right" Class="playback-queue">
+        <BbSheetHeader>
+            <BbSheetTitle>Cola (@Player.Queue.Count)</BbSheetTitle>
+            <BbSheetDescription>Canciones pendientes de reproducir.</BbSheetDescription>
+        </BbSheetHeader>
+        <div class="queue-actions">
+            <BbButton Variant="ButtonVariant.Outline" OnClick="Player.Clear" Disabled="@(Player.Queue.Count == 0)">
+                Vaciar cola
+            </BbButton>
         </div>
-    }
-</MudDrawer>
+        @if (Player.Queue.Count == 0)
+        {
+            <p class="queue-empty" role="status">La cola está vacía. Añade canciones desde Tracks.</p>
+        }
+        <div class="queue-list">
+            @foreach (var track in Player.Queue)
+            {
+                var isCurrent = Player.Current?.Id == track.Id;
+                <div @key="track.Id" class="queue-entry">
+                    <BbButton Variant="@(isCurrent ? ButtonVariant.Secondary : ButtonVariant.Ghost)" Size="ButtonSize.Icon"
+                              OnClick="() => Player.PlayQueued(track.Id)"
+                              AriaLabel="@($"Reproducir de la cola {track.Title}")">
+                        <LucideIcon Name="@(isCurrent ? "audio-lines" : "play")" />
+                    </BbButton>
+                    <div class="queue-entry-text">
+                        <div class="queue-entry-title">@track.Title</div>
+                        <div class="text-muted text-small">@track.Artist</div>
+                    </div>
+                    <BbButton Variant="ButtonVariant.Ghost" Size="ButtonSize.Icon"
+                              OnClick="() => Player.Remove(track.Id)"
+                              AriaLabel="@($"Quitar de la cola {track.Title}")">
+                        <LucideIcon Name="trash-2" />
+                    </BbButton>
+                </div>
+            }
+        </div>
+    </BbSheetContent>
+</BbSheet>
 
 @code {
     [Parameter] public bool Open { get; set; }
@@ -45,6 +51,4 @@
     private void OnPlayerChanged() => _ = InvokeAsync(StateHasChanged);
 
     public void Dispose() => Player.Changed -= OnPlayerChanged;
-
-    private Task CloseAsync() => OpenChanged.InvokeAsync(false);
 }

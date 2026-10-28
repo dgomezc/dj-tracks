@@ -13,7 +13,7 @@ Reproductor autoalojado de música electrónica. Plan completo en `docs/PLAN.md`
 - Respeta las convenciones existentes; no refactorices salvo que sea necesario.
 - No generes tests salvo petición explícita. Valida compilando (`dotnet build DjTracks.slnx`) y con comprobaciones manuales.
 - Trabaja una fase del plan cada vez; al terminar, indica cómo probarla en el navegador.
-- Consulta la documentación actualizada con context7 (MudBlazor, ASP.NET Core, EF Core, TagLibSharp, FFMpegCore, NAudio).
+- Consulta la documentación actualizada con context7 (ASP.NET Core, EF Core, TagLibSharp, FFMpegCore, NAudio). Para Blazor Blueprint usa su servidor MCP (`.mcp.json`).
 - El código debe ejecutarse y depurarse desde Visual Studio 2026 (.NET 10). No tocar Docker hasta la fase F6.1.
 
 ## Flujo de Git
@@ -35,7 +35,7 @@ Reproductor autoalojado de música electrónica. Plan completo en `docs/PLAN.md`
 ## Arquitectura
 - **Obligatorio**: sigue `docs/ARQUITECTURA.md` (estructura, nomenclatura, flujo UI → HTTP → endpoint → validador → handler → `Result`, errores con `AppError`). Todo caso de uso nuevo debe seguir su receta.
 - `src/DjTracks.Api`: Minimal API con vertical slices en `Features/<Feature>/<Caso>` (Endpoint + Handler), validación con FluentValidation y patrón Result con FluentResults.
-- `src/DjTracks.UI`: Blazor Server interactivo + MudBlazor. Llama a la API por HTTP desde el code-behind con `HttpClientResultExtensions`.
+- `src/DjTracks.UI`: Blazor Server interactivo + Blazor Blueprint (componentes `Bb*` con temas de tweakcn seleccionables, modos claro y oscuro; ver `docs/ARQUITECTURA.md`, sección 8). Llama a la API por HTTP desde el code-behind con `HttpClientResultExtensions`.
 - `src/DjTracks.Domain`: entidades y enums. `src/DjTracks.Infrastructure`: ficheros, tags, onda, EF Core.
 - Biblioteca y playlists en ficheros; PostgreSQL solo para estadísticas.
 - No commitear secretos (usar user-secrets para la conexión a BD).

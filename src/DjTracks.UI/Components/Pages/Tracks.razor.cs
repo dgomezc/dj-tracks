@@ -2,6 +2,7 @@ using DjTracks.Domain;
 using DjTracks.UI.Shared;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.WebUtilities;
+using BlazorBlueprint.Primitives;
 
 namespace DjTracks.UI.Components.Pages;
 
@@ -18,10 +19,13 @@ public partial class Tracks
     private bool _busy;
     private bool _filtersOpen;
     private TrackFilterOptions? _filterOptions;
-    private IReadOnlyCollection<string> _filterYears = [];
-    private IReadOnlyCollection<string> _filterGroups = [];
-    private IReadOnlyCollection<string> _filterSubstyles = [];
+    private IEnumerable<string>? _filterYears;
+    private IEnumerable<string>? _filterGroups;
+    private IEnumerable<string>? _filterSubstyles;
     private TrackFilter? _appliedFilter;
+
+    private static readonly SelectOption<string>[] SubstyleOptions =
+        [new("Instrumental", "Instrumental"), new("Vocal", "Vocal")];
 
     protected override Task OnInitializedAsync() => LoadAsync(null, null);
 
@@ -42,8 +46,8 @@ public partial class Tracks
     {
         if (_busy)
             return Task.CompletedTask;
-        _appliedFilter = new(_filterYears.ToArray(), _filterGroups.ToArray(),
-            _filterSubstyles.ToArray());
+        _appliedFilter = new(_filterYears?.ToArray() ?? [], _filterGroups?.ToArray() ?? [],
+            _filterSubstyles?.ToArray() ?? []);
         _year = null;
         _style = null;
         return RequestAsync();
@@ -53,7 +57,7 @@ public partial class Tracks
     {
         if (_busy)
             return Task.CompletedTask;
-        _filterYears = _filterGroups = _filterSubstyles = [];
+        _filterYears = _filterGroups = _filterSubstyles = null;
         return LoadAsync(null, null);
     }
 
@@ -190,4 +194,7 @@ public partial class Tracks
             ? $"{(int)duration.TotalHours}:{duration.Minutes:00}:{duration.Seconds:00}"
             : $"{(int)duration.TotalMinutes}:{duration.Seconds:00}";
     }
+
+    private static IEnumerable<SelectOption<string>> ToOptions(IEnumerable<string>? values) =>
+        values?.Select(value => new SelectOption<string>(value, value)) ?? [];
 }

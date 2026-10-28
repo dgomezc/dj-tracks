@@ -1,155 +1,166 @@
 @page "/tracks"
+@using DjTracks.Domain
 
 <PageTitle>Tracks - DJ Tracks</PageTitle>
 
-<MudText Typo="Typo.h4" Class="mb-2">Tracks</MudText>
-<MudText Class="mud-text-secondary mb-4">Explora tu biblioteca por año y estilo.</MudText>
+<BbTypographyH2 Class="page-title">Tracks</BbTypographyH2>
+<BbTypographyMuted Class="page-intro">Explora tu biblioteca por año y estilo.</BbTypographyMuted>
 
-<MudExpansionPanels Class="mb-4">
-    <MudExpansionPanel Text="Filtros" Expanded="@_filtersOpen" ExpandedChanged="OnFiltersExpandedAsync">
-        <MudGrid Spacing="2">
-            <MudItem xs="12" sm="4">
-                <MudSelect T="string" Label="Años" @bind-SelectedValues="_filterYears" MultiSelection="true"
-                           Clearable="true" Placeholder="Todos los años" Dense="true" Margin="Margin.Dense"
-                           Variant="Variant.Outlined" Disabled="@(_busy || _filterOptions is null)">
-                    @foreach (var year in _filterOptions?.Years ?? [])
-                    {
-                        <MudSelectItem Value="@year">@year</MudSelectItem>
-                    }
-                </MudSelect>
-            </MudItem>
-            <MudItem xs="12" sm="4">
-                <MudSelect T="string" Label="Estilos / grupos" @bind-SelectedValues="_filterGroups" MultiSelection="true"
-                           Clearable="true" Placeholder="Todos los estilos" Dense="true" Margin="Margin.Dense"
-                           Variant="Variant.Outlined" Disabled="@(_busy || _filterOptions is null)">
-                    @foreach (var group in _filterOptions?.Groups ?? [])
-                    {
-                        <MudSelectItem Value="@group">@group</MudSelectItem>
-                    }
-                </MudSelect>
-            </MudItem>
-            <MudItem xs="12" sm="4">
-                <MudSelect T="string" Label="Subestilos" @bind-SelectedValues="_filterSubstyles" MultiSelection="true"
-                           Clearable="true" Placeholder="Todos los subestilos" Dense="true" Margin="Margin.Dense"
-                           Variant="Variant.Outlined" Disabled="@(_busy || _filterOptions is null)">
-                    <MudSelectItem T="string" Value="@("Instrumental")">Instrumental</MudSelectItem>
-                    <MudSelectItem T="string" Value="@("Vocal")">Vocal</MudSelectItem>
-                </MudSelect>
-            </MudItem>
-        </MudGrid>
-        <MudText Typo="Typo.body2" Class="mud-text-secondary my-2">
-            Selecciona uno o varios valores por filtro; sin selección se incluyen todos.
-            «Aplicar filtros» combina alternativas del mismo campo y cruza los campos.
-            Instrumental o Vocal sin grupo incluye Day y Night.
-        </MudText>
-        <MudStack Row="true" Wrap="Wrap.Wrap">
-            <MudButton OnClick="ApplyFiltersAsync" Disabled="@(_busy || _filterOptions is null)"
-                       Variant="Variant.Filled" Color="Color.Primary">Aplicar filtros</MudButton>
-            <MudButton OnClick="ClearFiltersAsync" Disabled="@_busy">Limpiar filtros y volver a años</MudButton>
-        </MudStack>
-    </MudExpansionPanel>
-</MudExpansionPanels>
+<BbCollapsible Open="@_filtersOpen" OpenChanged="OnFiltersExpandedAsync" Class="filters-panel">
+    <BbCollapsibleTrigger>
+        <BbButton Variant="ButtonVariant.Ghost" Class="filters-trigger">
+            <Icon><LucideIcon Name="@(_filtersOpen ? "chevron-up" : "chevron-down")" /></Icon>
+            <ChildContent>Filtros</ChildContent>
+        </BbButton>
+    </BbCollapsibleTrigger>
+    <BbCollapsibleContent>
+        <div class="filters-body">
+            <div class="filters-grid">
+                <BbField>
+                    <BbFieldLabel>Años</BbFieldLabel>
+                    <BbMultiSelect TValue="string" @bind-Values="_filterYears" AriaLabel="Años"
+                                   Options="@(ToOptions(_filterOptions?.Years))" Placeholder="Todos los años"
+                                   Disabled="@(_busy || _filterOptions is null)" MatchTriggerWidth="true"
+                                   SearchPlaceholder="Buscar…" EmptyMessage="Sin resultados" SelectAllLabel="Seleccionar todo"
+                                   ClearLabel="Limpiar" CloseLabel="Cerrar" />
+                </BbField>
+                <BbField>
+                    <BbFieldLabel>Estilos / grupos</BbFieldLabel>
+                    <BbMultiSelect TValue="string" @bind-Values="_filterGroups" AriaLabel="Estilos / grupos"
+                                   Options="@(ToOptions(_filterOptions?.Groups))" Placeholder="Todos los estilos"
+                                   Disabled="@(_busy || _filterOptions is null)" MatchTriggerWidth="true"
+                                   SearchPlaceholder="Buscar…" EmptyMessage="Sin resultados" SelectAllLabel="Seleccionar todo"
+                                   ClearLabel="Limpiar" CloseLabel="Cerrar" />
+                </BbField>
+                <BbField>
+                    <BbFieldLabel>Subestilos</BbFieldLabel>
+                    <BbMultiSelect TValue="string" @bind-Values="_filterSubstyles" AriaLabel="Subestilos"
+                                   Options="@SubstyleOptions" Placeholder="Todos los subestilos"
+                                   Disabled="@(_busy || _filterOptions is null)" MatchTriggerWidth="true"
+                                   SearchPlaceholder="Buscar…" EmptyMessage="Sin resultados" SelectAllLabel="Seleccionar todo"
+                                   ClearLabel="Limpiar" CloseLabel="Cerrar" />
+                </BbField>
+            </div>
+            <BbTypographyMuted>
+                Selecciona uno o varios valores por filtro; sin selección se incluyen todos.
+                «Aplicar filtros» combina alternativas del mismo campo y cruza los campos.
+                Instrumental o Vocal sin grupo incluye Day y Night.
+            </BbTypographyMuted>
+            <div class="button-row">
+                <BbButton OnClick="ApplyFiltersAsync" Disabled="@(_busy || _filterOptions is null)">Aplicar filtros</BbButton>
+                <BbButton Variant="ButtonVariant.Outline" OnClick="ClearFiltersAsync" Disabled="@_busy">
+                    Limpiar filtros y volver a años
+                </BbButton>
+            </div>
+        </div>
+    </BbCollapsibleContent>
+</BbCollapsible>
 
-<MudStack Row="true" Wrap="Wrap.Wrap" Class="mb-4">
-    <MudButton OnClick="() => LoadAsync(null, null)" Disabled="@_busy">Años</MudButton>
+<nav class="button-row breadcrumb-row" aria-label="Ruta de la biblioteca">
+    <BbButton Variant="ButtonVariant.Ghost" OnClick="() => LoadAsync(null, null)" Disabled="@_busy">Años</BbButton>
     @if (_year is not null)
     {
-        <MudText Class="align-self-center">/</MudText>
-        <MudButton OnClick="() => LoadAsync(_year, null)" Disabled="@_busy">@_year</MudButton>
+        <span>/</span>
+        <BbButton Variant="ButtonVariant.Ghost" OnClick="() => LoadAsync(_year, null)" Disabled="@_busy">@_year</BbButton>
     }
     @if (_style is not null)
     {
-        <MudText Class="align-self-center">/ @_style</MudText>
+        <span>/ @_style</span>
     }
-    <MudButton OnClick="ReloadAsync" Disabled="@_busy" Variant="Variant.Outlined">
+    <BbButton Variant="ButtonVariant.Outline" OnClick="ReloadAsync" Disabled="@_busy">
         Volver a cargar
-    </MudButton>
-</MudStack>
+    </BbButton>
+</nav>
 
 @if (_appliedFilter is not null)
 {
-    <MudText Class="mb-3" role="status">Filtros aplicados: @FilterSummary</MudText>
+    <p class="filter-summary" role="status">Filtros aplicados: @FilterSummary</p>
 }
 
 @if (_busy)
 {
-    <MudProgressLinear Indeterminate="true" Color="Color.Primary" Class="mb-4" aria-label="Cargando biblioteca" />
+    <div class="busy-indicator" role="status">
+        <BbSpinner Size="SpinnerSize.Small" AriaLabel="Cargando biblioteca" />
+        <span>Cargando biblioteca…</span>
+    </div>
 }
 @if (_error is not null)
 {
-    <MudAlert Severity="Severity.Error" Class="mb-4" role="alert">@_error</MudAlert>
-    <MudLink Href="/settings">Abrir Configuración</MudLink>
+    <BbAlert Variant="AlertVariant.Danger" Class="page-alert">
+        <BbAlertDescription>@_error</BbAlertDescription>
+    </BbAlert>
+    <BbLink Href="/settings">Abrir Configuración</BbLink>
 }
 else if (_listing is not null)
 {
     @if (_style is null && _appliedFilter is null)
     {
-        <MudText Typo="Typo.h6" Class="mb-2">@(_year is null ? "Años" : $"Estilos de {_year}")</MudText>
+        <h3 class="section-title">@(_year is null ? "Años" : $"Estilos de {_year}")</h3>
         @if (_listing.Folders.Length == 0)
         {
-            <MudAlert Severity="Severity.Info">No hay @(_year is null ? "carpetas de años" : "carpetas de estilos") en este nivel.</MudAlert>
+            <BbAlert Variant="AlertVariant.Info">
+                <BbAlertDescription>No hay @(_year is null ? "carpetas de años" : "carpetas de estilos") en este nivel.</BbAlertDescription>
+            </BbAlert>
         }
-        <MudStack Row="true" Wrap="Wrap.Wrap">
+        <div class="button-row">
             @foreach (var folder in _listing.Folders)
             {
-                <MudButton Variant="Variant.Outlined" StartIcon="@Icons.Material.Filled.Folder"
-                           Disabled="@_busy" OnClick="() => OpenFolderAsync(folder)">@folder</MudButton>
+                <BbButton Variant="ButtonVariant.Outline" Disabled="@_busy" OnClick="() => OpenFolderAsync(folder)">
+                    <Icon><LucideIcon Name="folder" /></Icon>
+                    <ChildContent>@folder</ChildContent>
+                </BbButton>
             }
-        </MudStack>
+        </div>
     }
     else
     {
-        <MudText Typo="Typo.h6" Class="mb-2">
+        <h3 class="section-title">
             @(_appliedFilter is null ? $"{_year} / {_style}" : "Resultados filtrados") · @_listing.Tracks.Length canciones
-        </MudText>
-        <MudTable Items="@_listing.Tracks" Dense="true" Hover="true" Breakpoint="Breakpoint.Sm">
-            <HeaderContent>
-                @if (_appliedFilter is not null)
-                {
-                    <MudTh>Año</MudTh>
-                    <MudTh>Estilo</MudTh>
-                }
-                <MudTh>Fichero</MudTh>
-                <MudTh>Título</MudTh>
-                <MudTh>Artista</MudTh>
-                <MudTh>Álbum</MudTh>
-                <MudTh>Duración</MudTh>
-                <MudTh>Reproducción / cola</MudTh>
-            </HeaderContent>
-            <RowTemplate>
-                @if (_appliedFilter is not null)
-                {
-                    <MudTd DataLabel="Año">@context.Year</MudTd>
-                    <MudTd DataLabel="Estilo">@context.Style</MudTd>
-                }
-                <MudTd DataLabel="Fichero">
-                    <MudStack Spacing="1">
-                        <MudText Style="overflow-wrap: anywhere">@context.FileName</MudText>
-                        @if (context.Warning is not null)
+        </h3>
+        <BbDataTable TData="TrackFile" Data="@_listing.Tracks" ShowToolbar="false" ShowPagination="false"
+                     AriaLabel="Canciones" Class="tracks-table">
+            <Columns>
+                <BbDataTableColumn TData="TrackFile" TValue="string" Header="Año" Property="@(t => t.Year)"
+                                   Visible="@(_appliedFilter is not null)" />
+                <BbDataTableColumn TData="TrackFile" TValue="string" Header="Estilo" Property="@(t => t.Style)"
+                                   Visible="@(_appliedFilter is not null)" />
+                <BbDataTableColumn TData="TrackFile" TValue="string" Header="Fichero" Property="@(t => t.FileName)">
+                    <CellTemplate Context="track">
+                        <div class="file-name">@track.FileName</div>
+                        @if (track.Warning is not null)
                         {
-                            <MudText Typo="Typo.caption" Color="Color.Warning" role="status">@context.Warning</MudText>
+                            <div class="text-warning text-small" role="status">@track.Warning</div>
                         }
-                    </MudStack>
-                </MudTd>
-                <MudTd DataLabel="Título">@Display(context.Title)</MudTd>
-                <MudTd DataLabel="Artista">@Display(string.Join(", ", context.Artists))</MudTd>
-                <MudTd DataLabel="Álbum">@Display(context.Album)</MudTd>
-                <MudTd DataLabel="Duración">@Duration(context.DurationSeconds)</MudTd>
-                <MudTd DataLabel="Reproducir">
-                    <MudIconButton Icon="@Icons.Material.Filled.PlayArrow" Color="Color.Primary"
-                                   aria-label="@($"Reproducir {context.FileName}")"
-                                   OnClick="() => PlayTrack(context)" />
-                    <MudIconButton Icon="@Icons.Material.Filled.PlaylistAdd"
-                                   aria-label="@($"Añadir a la cola {context.FileName}")"
-                                   OnClick="() => PlayTrack(context, enqueue: true)" />
-                </MudTd>
-            </RowTemplate>
-            <NoRecordsContent>
-                <MudText>@(_appliedFilter is null ? "No hay ficheros MP3 en este estilo." : "No hay canciones que coincidan con los filtros.")</MudText>
-            </NoRecordsContent>
-        </MudTable>
-        <MudText Typo="Typo.body2" Class="mud-text-secondary mt-3">
+                    </CellTemplate>
+                </BbDataTableColumn>
+                <BbDataTableColumn TData="TrackFile" TValue="string" Header="Título" Property="@(t => Display(t.Title))" />
+                <BbDataTableColumn TData="TrackFile" TValue="string" Header="Artista"
+                                   Property="@(t => Display(string.Join(", ", t.Artists)))" />
+                <BbDataTableColumn TData="TrackFile" TValue="string" Header="Álbum" Property="@(t => Display(t.Album))" />
+                <BbDataTableColumn TData="TrackFile" TValue="string" Header="Duración"
+                                   Property="@(t => Duration(t.DurationSeconds))" />
+                <BbDataTableColumn TData="TrackFile" TValue="string" Header="Reproducción / cola" Id="actions">
+                    <CellTemplate Context="track">
+                        <div class="row-actions">
+                            <BbButton Size="ButtonSize.Icon" AriaLabel="@($"Reproducir {track.FileName}")"
+                                      OnClick="() => PlayTrack(track)">
+                                <LucideIcon Name="play" />
+                            </BbButton>
+                            <BbButton Variant="ButtonVariant.Ghost" Size="ButtonSize.Icon"
+                                      AriaLabel="@($"Añadir a la cola {track.FileName}")"
+                                      OnClick="() => PlayTrack(track, enqueue: true)">
+                                <LucideIcon Name="list-plus" />
+                            </BbButton>
+                        </div>
+                    </CellTemplate>
+                </BbDataTableColumn>
+            </Columns>
+            <EmptyTemplate>
+                @(_appliedFilter is null ? "No hay ficheros MP3 en este estilo." : "No hay canciones que coincidan con los filtros.")
+            </EmptyTemplate>
+        </BbDataTable>
+        <BbTypographyMuted Class="page-note">
             Los tags ausentes se muestran como «Sin datos». Pulsa el icono de reproducción para escuchar una canción.
-        </MudText>
+        </BbTypographyMuted>
     }
 }

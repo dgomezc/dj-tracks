@@ -11,13 +11,13 @@
             aria-valuemin="0" aria-valuemax="100" tabindex="0"></canvas>
     @if (_loading)
     {
-        <MudProgressLinear Value="@_progress" Color="Color.Primary" Class="waveform-loading"
-                           aria-label="Generando forma de onda" />
+        <BbProgress Value="@_progress" Max="100" Class="waveform-loading"
+                    aria-label="Generando forma de onda" />
     }
 </div>
 @if (_error is not null)
 {
-    <MudText Typo="Typo.caption" Color="Color.Warning" role="status">@_error</MudText>
+    <span class="waveform-error" role="status">@_error</span>
 }
 
 @code {
