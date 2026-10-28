@@ -34,10 +34,12 @@ Consultar siempre el estado real de GitHub antes de actuar sobre un PR.
 ## F2.1: navegación de Sessions y cola (validación manual pendiente)
 
 `/sessions` permite explorar Año → carpeta de sesión → archivos MP3. Años y
-sesiones ordenados por nombre descendente (fechas `yyyy-MM-dd` más recientes
-primero); MP3 por nombre ascendente. Admite varios MP3 en la misma carpeta,
+sesiones ordenados por nombre descendente (con fecha `yyyy-MM-dd`, las más recientes
+primero; sin fecha, por nombre, sin inferir cronología); MP3 por nombre ascendente.
+La fecha en la carpeta es opcional. Admite varios MP3 en la misma carpeta,
 extensión sin distinguir mayúsculas y nombres con espacios, acentos, `&` y `+`.
-El `.txt` no se muestra ni interpreta todavía. Las carpetas enlazadas y archivos
+El `.txt` no se muestra ni interpreta todavía; la API identifica sus nombres
+compatibles en `tracklists`. Las carpetas enlazadas y archivos
 enlazados se excluyen igual que en Tracks; no hay exploración recursiva.
 
 El botón por archivo lo añade a la misma cola de Tracks sin iniciar/interrumpir
@@ -53,7 +55,8 @@ persistente ni se guarda en BD. Añadir una carpeta completa no forma parte de F
 Visual Studio 2026 (.NET 10), abrir `DjTracks.slnx` en `fase/f2-1-sesiones`,
 perfil **DJ Tracks (Api + UI)** y F5. UI `http://localhost:5050/sessions`, API
 `http://localhost:5247`. Mantener las rutas de Tracks y Sessions configuradas y
-accesibles a la API; sesiones bajo `Año/yyyy-MM-dd - Nombre/Nombre.mp3`.
+accesibles a la API; sesiones bajo `Año\Nombre de sesión\Nombre.mp3`
+(fecha opcional en la carpeta).
 No hace falta base de datos. FFmpeg sigue siendo necesario para la onda de
 Tracks, pero no para explorar ni reproducir Sessions en esta fase.
 
@@ -113,6 +116,44 @@ Tracks, pero no para explorar ni reproducir Sessions en esta fase.
   Servicios y fixtures de comprobación retirados antes de la entrega.
 
 Validación manual del usuario pendiente; no mezclar ni avanzar a F2.2.
+
+### Revisión: carpetas sin fecha y variantes de tracklist (28/10/2026)
+
+Petición del usuario: admitir carpetas con y sin fecha, y tracklists llamados
+`Nombre.txt`, `Tracklist.txt`, `Tracklist - Nombre.txt` o `Nombre - Tracklist.txt`.
+`Nombre` puede coincidir con el MP3 sin extensión o con la carpeta completa.
+Se admiten mayúsculas/minúsculas y varios candidatos simultáneos; no se selecciona
+ni concatena ninguno automáticamente. Otros TXT y enlaces se excluyen. La detección
+es por carpeta, no una asociación exclusiva por audio cuando hay varios MP3.
+No se cambia el orden por nombre ni se implementa todavía la lectura de F2.2.
+
+Comprobaciones nuevas (pendientes del usuario):
+
+- [ ] En el arranque indicado arriba, abrir un año con carpetas `Nombre de la sesión`,
+  `Otra sesión` y `2025-12-31 - Fin de año`: todas se pueden abrir, listar sus MP3,
+  añadir a cola y reproducir. Repetir añadir no duplica.
+- [ ] Con cada variante de TXT junto a un MP3, abrir
+  `http://localhost:5247/api/library/sessions?year=2026&session=Nombre%20de%20la%20sesión`
+  (adaptar año/nombre). `tracklists` incluye el nombre real de cada TXT compatible,
+  también `.TXT`; varios simultáneos se conservan. `Notas.txt` y TXT en subcarpetas
+  no aparecen. En la UI solo siguen apareciendo los MP3, sin tracklist visible.
+
+Repetir navegación y reproducción con los nuevos nombres. La checklist anterior
+de cola mixta y temas sigue pendiente; esta revisión no modifica componentes ni estilos.
+
+Comprobado por el agente en esta revisión:
+
+- `dotnet build DjTracks.slnx`: 0 errores y advertencias.
+- API con biblioteca temporal aislada: carpetas con y sin fecha, orden por nombre,
+  las cuatro variantes de TXT individualmente y coexistiendo, extensión `.TXT`,
+  coincidencia por nombre completo de carpeta y por nombre de MP3 distinto al
+  de la carpeta. `Notas.txt` y TXT en subcarpetas excluidos; `tracklists` vacío
+  en los niveles de años/carpetas. Streaming Range 206 con seis bytes en las
+  tres carpetas comprobadas. Los MP3 sintéticos de esta revisión son bytes de
+  prueba: no se atribuye reproducción sonora ni validación visual nueva.
+- Consultada documentación .NET mediante context7 para enumeración y comparación
+  ordinal de nombres. Sin ajustes privados modificados; API temporal detenida
+  y biblioteca temporal retirada después de comprobar.
 
 ## Migración a Blazor Blueprint (transversal, tras F1.6)
 

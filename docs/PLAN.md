@@ -23,9 +23,34 @@ Reproductor autoalojado de música electrónica (Tracks, Sessions, Remember). Se
 ## Convenciones de la biblioteca
 
 - **Tracks**: `Año/Estilo/Artista - Título.mp3`. Estilos: `Day Instrumental`, `Day Vocal`, `Night Instrumental`, `Night Vocal`, `Technohouse`, `Tribal`. Estilo compuesto: grupo `Day`/`Night` + subestilo `Instrumental`/`Vocal`. (Se aceptará la errata `Night Intrumental` como alias.)
-- **Sessions**: `Año/yyyy-MM-dd - Nombre/Nombre.mp3` + `.txt` con líneas `N. Artista - Track`.
+- **Sessions**: `Año\Nombre de sesión\Nombre.mp3`; la carpeta puede incluir fecha
+  (`yyyy-MM-dd - Nombre`), pero no es obligatoria. Se ordenan por nombre descendente,
+  sin inferir fechas para las carpetas sin fecha. Se admiten varios MP3 por carpeta.
+  Tracklist junto al audio, con líneas `N. Artista - Track`: `Nombre.txt`,
+  `Tracklist.txt`, `Tracklist - Nombre.txt` o `Nombre - Tracklist.txt`.
+  `Nombre` puede ser el nombre base del MP3 o el nombre completo de la carpeta.
+  La detección no distingue mayúsculas/minúsculas, tampoco en `.TXT`, y no busca
+  en subcarpetas. Si coinciden varios TXT se conservan todos como candidatos,
+  sin elegir ni concatenar contenido automáticamente. Otros TXT se ignoran.
 - **Remember**: `Cortas/…mp3` y `Largas/…mp3`.
 - Filtros y playlists automáticos se basan en nombres de carpeta, no en tags.
+
+Ejemplo válido de Sessions (los nombres de TXT son alternativas, no obligatorios):
+
+```text
+Sessions\
+├── 2026\
+│   ├── Nombre de la sesión\
+│   │   ├── Nombre de la sesión.mp3
+│   │   └── Nombre de la sesión.txt
+│   └── Otra sesión\
+│       ├── Otra sesión.mp3
+│       └── Tracklist.txt
+└── 2025\
+    └── 2025-12-31 - Fin de año\
+        ├── Fin de año.mp3
+        └── Tracklist - Fin de año.txt
+```
 
 ## Estructura de la API (vertical slices)
 
@@ -81,7 +106,8 @@ El estado de entrega y las checklists se mantienen en `VALIDACIONES.md`. Una imp
   Navegación Año → carpeta de sesión → MP3 con tags básicos. Cola compartida con
   Tracks, sin duplicados; añadir no interrumpe el audio. Incluye streaming básico
   con Range para que las entradas se puedan reproducir desde la cola. La onda y
-  lectura del tracklist se dejan para F2.2; esta fase no añade carátula de sesiones.
+  lectura del contenido del tracklist se deja para F2.2; el listado ya identifica
+  los TXT compatibles. Esta fase no añade carátula de sesiones.
 - **F2.2 Reproducción + tracklist** leído del `.txt` junto a la sesión, con onda.
 - **F2.3 (último, opcional) Marcas de inicio por canción**: marcar posición actual en el tracklist, guardar en JSON junto a la sesión, clic para saltar. Reproductor grande sincronizado en la página principal.
 

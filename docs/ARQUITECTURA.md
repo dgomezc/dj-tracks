@@ -102,6 +102,14 @@ de carpetas/fichero, nunca rutas del cliente, y validan formato con FluentValida
 `SessionListing` distingue carpeta de sesión de estilo (el `Style` de sus archivos
 es nulo). Las sesiones se ordenan por nombre descendente; con `yyyy-MM-dd - Nombre`
 las recientes aparecen primero. No se interpreta ni exige una fecha válida.
+Las carpetas sin fecha se admiten al mismo nivel y siguen el mismo orden por nombre.
+`SessionListing.Tracklists` devuelve nombres de TXT candidatos de la carpeta actual
+(vacío en los niveles de años/carpetas). `SessionLibrary` reconoce `Tracklist.txt`,
+el nombre base de un MP3 o el nombre completo de la carpeta con `.txt`, y estos
+dos últimos precedidos por `Tracklist - ` o seguidos por ` - Tracklist`.
+La comparación es ordinal sin distinguir mayúsculas, se excluyen enlaces y no
+se recorren subcarpetas. Se conservan todos los candidatos ordenados por nombre:
+no se elige uno ni se interpreta su contenido en F2.1.
 
 La página Sessions llama por HTTP desde su code-behind, sin acceso a ficheros.
 Añade un MP3 a la cola mediante su URL de streaming, con `SessionFolder` en
@@ -109,7 +117,7 @@ Añade un MP3 a la cola mediante su URL de streaming, con `SessionFolder` en
 son opcionales: en F2.1 solo Tracks las proporciona. Al cambiar a una sesión se
 retira la onda anterior y la ficha muestra la carpeta de sesión, no un estilo.
 El streaming básico permite usar la cola mixta sin entradas inoperantes; la onda,
-portada y lectura del `.txt` quedan fuera de F2.1. No se añaden playlists ni BD.
+portada y lectura del contenido del `.txt` quedan fuera de F2.1. No se añaden playlists ni BD.
 
 | Elemento | Nombre | Namespace |
 |---|---|---|
