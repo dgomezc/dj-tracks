@@ -27,8 +27,11 @@ Consultar siempre el estado real de GitHub antes de actuar sobre un PR.
 - PR #12 mergeado en `develop` el 28/10/2026 a las 09:59:32 UTC, commit `8bb2fd1`
   (comprobado en GitHub); checkout original actualizado por fast-forward.
 - F2.2 en `fase/f2-2-tracklist`: lectura y presentación del tracklist de la sesión
-  activa. PR [#13](https://github.com/dgomezc/dj-tracks/pull/13) abierto hacia
-  `develop`, pendiente de validación del usuario; F2.3 no iniciada.
+  activa. **Validada globalmente por el usuario el 28/10/2026** con «Ok, sigue a
+  la siguiente fase», incluida la revisión responsive. Esta aceptación no amplía
+  las comprobaciones individuales del agente. Autorizada la integración del
+  PR [#13](https://github.com/dgomezc/dj-tracks/pull/13). Continuación confirmada:
+  F3.1 Remember; F2.3 opcional queda para el final.
 - Eliminados ambos `Class1.cs` vacíos por petición expresa del usuario del 28/10/2026, en commit separado de F2.1. No quedan esos cambios locales pendientes.
 - Checkout original actualizado por fast-forward a `develop` después de integrar F1.2; el trabajo de F1.3 se desarrolla en su rama dedicada. La rama del port se conserva como historial; no se han borrado ni reescrito ramas.
 - Entrega F1.2: PR [#5](https://github.com/dgomezc/dj-tracks/pull/5) **mergeado** en `develop` el 27/10/2026 a las 07:13:41 UTC, commit `8fc21f1` (comprobado en GitHub). Incluye el port y ambos historiales sin force-push. PR #6 también mergeado; no queda PR de F1.2 pendiente.
@@ -39,7 +42,7 @@ Consultar siempre el estado real de GitHub antes de actuar sobre un PR.
 - Port F1.2 recibido de `dgomezc-fase-f1-2-filtros` (`1354305` código, `c38cddb` documentación). Se integra mediante merge en la rama original: se conservan ambos historiales y se resuelven los conflictos de código con la versión adaptada a Result/FluentValidation. Sin PR duplicado ni reescritura de ramas. Cambios preexistentes y JSON privado conservados; no se borran worktrees.
 - Comprobación de integración en checkout original (27/10/2026): `src` coincide con el port recibido; compilación completa con 0 errores y advertencias. API/UI aisladas con MP3 sintéticos: multiaño/multigrupo/multisubestilo, alias, ausencia de duplicados, resultados vacíos, explorador, errores 400/404, opciones, carga de ajustes y página Tracks correctos. No equivale a validación visual de biblioteca real. Servicios y fixtures temporales retirados después de comprobar.
 
-## F2.2: tracklist de la sesión activa (validación manual pendiente)
+## F2.2: tracklist de la sesión activa (validada por el usuario)
 
 La ficha «Ahora suena» carga el TXT compatible de la carpeta de la sesión que se
 está reproduciendo, desde Play o Cola. Admite las cuatro variantes de nombre
@@ -110,7 +113,9 @@ Reiniciar Api/UI y recargar completamente la página para renovar la cola en mem
   ante bytes no válidos se pide guardar como UTF-8. API/UI y datos temporales
   retirados; ajustes privados sin tocar.
 
-Validación del usuario pendiente. No mezclar ni avanzar a otra fase.
+Aceptación global del usuario registrada el 28/10/2026, incluida la revisión
+responsive. Las checklists se conservan como detalle histórico de la entrega,
+sin atribuir comprobaciones individuales adicionales.
 
 ### Revisión responsive del tracklist (28/10/2026)
 
