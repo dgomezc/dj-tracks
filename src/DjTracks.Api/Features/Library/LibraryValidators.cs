@@ -1,4 +1,5 @@
 using DjTracks.Api.Features.Library.GetTracks;
+using DjTracks.Api.Features.Library.GetSessions;
 using DjTracks.Api.Features.Library.GetFilteredTracks;
 using FluentValidation;
 
@@ -16,6 +17,23 @@ public sealed class GetTracksRequestValidator : AbstractValidator<GetTracksReque
             .WithMessage(FolderNameMessage);
         RuleFor(request => request.Style).Must(BeFolderName).When(request => request.Style is not null)
             .WithMessage(FolderNameMessage);
+    }
+
+    private static bool BeFolderName(string? name) =>
+        !string.IsNullOrWhiteSpace(name) && name is not ("." or "..")
+        && name.IndexOfAny(['/', '\\', ':']) < 0 && !Path.IsPathRooted(name);
+}
+
+public sealed class GetSessionsRequestValidator : AbstractValidator<GetSessionsRequest>
+{
+    public GetSessionsRequestValidator()
+    {
+        RuleFor(request => request.Year).NotNull().When(request => request.Session is not null)
+            .WithMessage("Selecciona un año antes de la sesión.");
+        RuleFor(request => request.Year).Must(BeFolderName).When(request => request.Year is not null)
+            .WithMessage("El año debe ser un nombre de carpeta, no una ruta.");
+        RuleFor(request => request.Session).Must(BeFolderName).When(request => request.Session is not null)
+            .WithMessage("La sesión debe ser un nombre de carpeta, no una ruta.");
     }
 
     private static bool BeFolderName(string? name) =>

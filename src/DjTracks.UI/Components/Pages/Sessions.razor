@@ -1,6 +1,99 @@
 @page "/sessions"
+@using DjTracks.Domain
 
 <PageTitle>Sessions - DJ Tracks</PageTitle>
 
 <BbTypographyH2 Class="page-title">Sessions</BbTypographyH2>
-<BbTypographyMuted>Listado de sesiones (fase F2.1).</BbTypographyMuted>
+<BbTypographyMuted Class="page-intro">Explora las sesiones por año y carpeta. Añade sus MP3 a la cola.</BbTypographyMuted>
+
+<nav class="button-row breadcrumb-row" aria-label="Ruta de las sesiones">
+    <BbButton Variant="ButtonVariant.Ghost" OnClick="() => LoadAsync(null, null)" Disabled="@_busy">Años</BbButton>
+    @if (_year is not null)
+    {
+        <span>/</span>
+        <BbButton Variant="ButtonVariant.Ghost" OnClick="() => LoadAsync(_year, null)" Disabled="@_busy">@_year</BbButton>
+    }
+    @if (_session is not null)
+    {
+        <span class="file-name">/ @_session</span>
+    }
+    <BbButton Variant="ButtonVariant.Outline" OnClick="ReloadAsync" Disabled="@_busy">Volver a cargar</BbButton>
+</nav>
+@if (_busy)
+{
+    <div class="busy-indicator" role="status">
+        <BbSpinner Size="SpinnerSize.Small" AriaLabel="Cargando sesiones" />
+        <span>Cargando sesiones…</span>
+    </div>
+}
+@if (_error is not null)
+{
+    <BbAlert Variant="AlertVariant.Danger" Class="page-alert">
+        <BbAlertDescription>@_error</BbAlertDescription>
+    </BbAlert>
+    <BbLink Href="/settings">Abrir Configuración</BbLink>
+}
+else if (_listing is not null)
+{
+    @if (_session is null)
+    {
+        <h3 class="section-title">@(_year is null ? "Años" : $"Sesiones de {_year}")</h3>
+        @if (_listing.Folders.Length == 0)
+        {
+            <BbAlert Variant="AlertVariant.Info">
+                <BbAlertDescription>No hay @(_year is null ? "carpetas de años" : "carpetas de sesiones") en este nivel.</BbAlertDescription>
+            </BbAlert>
+        }
+        <div class="button-row">
+            @foreach (var folder in _listing.Folders)
+            {
+                <BbButton Variant="ButtonVariant.Outline" OnClick="() => OpenFolderAsync(folder)" Disabled="@_busy">
+                    <Icon><LucideIcon Name="folder" /></Icon>
+                    <ChildContent>@folder</ChildContent>
+                </BbButton>
+            }
+        </div>
+    }
+    else
+    {
+        <h3 class="section-title">@_session · @_listing.Files.Length archivos MP3</h3>
+        <BbDataTable TData="TrackFile" Data="@_listing.Files" ShowToolbar="false" ShowPagination="false"
+                     AriaLabel="Archivos de la sesión" Class="tracks-table">
+            <Columns>
+                <BbDataTableColumn TData="TrackFile" TValue="string" Header="Fichero" Property="@(file => file.FileName)">
+                    <CellTemplate Context="file">
+                        <div class="file-name">@file.FileName</div>
+                        @if (file.Warning is not null)
+                        {
+                            <div class="text-warning text-small" role="status">@file.Warning</div>
+                        }
+                    </CellTemplate>
+                </BbDataTableColumn>
+                <BbDataTableColumn TData="TrackFile" TValue="string" Header="Título" Property="@(file => Display(file.Title))" />
+                <BbDataTableColumn TData="TrackFile" TValue="string" Header="Artista" Property="@(file => Display(string.Join(", ", file.Artists)))" />
+                <BbDataTableColumn TData="TrackFile" TValue="string" Header="Álbum" Property="@(file => Display(file.Album))" />
+                <BbDataTableColumn TData="TrackFile" TValue="string" Header="Duración" Property="@(file => Duration(file.DurationSeconds))" />
+                <BbDataTableColumn TData="TrackFile" TValue="string" Header="Reproducción / cola" Id="actions">
+                    <CellTemplate Context="file">
+                        <div class="row-actions">
+                            <BbButton Size="ButtonSize.Icon" AriaLabel="@($"Reproducir {file.FileName}")"
+                                      OnClick="() => PlaySession(file)">
+                                <LucideIcon Name="play" />
+                            </BbButton>
+                            <BbButton Variant="ButtonVariant.Ghost" Size="ButtonSize.Icon"
+                                      AriaLabel="@($"Añadir a la cola {file.FileName}")" OnClick="() => PlaySession(file, enqueue: true)">
+                                <LucideIcon Name="list-plus" />
+                            </BbButton>
+                        </div>
+                    </CellTemplate>
+                </BbDataTableColumn>
+            </Columns>
+            <EmptyTemplate>No hay ficheros MP3 en esta sesión.</EmptyTemplate>
+        </BbDataTable>
+        <BbTypographyMuted Class="page-note">
+            Pulsa reproducir para escuchar una sesión o añádela sin interrumpir el audio.
+            La onda se carga progresivamente; la carátula se lee del MP3.
+            La lectura del tracklist se incorporará en F2.2.
+        </BbTypographyMuted>
+    }
+}

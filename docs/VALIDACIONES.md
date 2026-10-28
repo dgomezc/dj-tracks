@@ -17,8 +17,14 @@ Consultar siempre el estado real de GitHub antes de actuar sobre un PR.
 - F1.3: **validada por el usuario el 27/10/2026** con «Todo ok, continúa». PR [#7](https://github.com/dgomezc/dj-tracks/pull/7) mergeado en `develop` el 27/10/2026 a las 10:34:24 UTC; merge commit `d86e1c4` (comprobado en GitHub).
 - F1.4: **validada globalmente por el usuario el 27/10/2026** con «todo ok, continua», incluida la revisión de carga progresiva. Esta confirmación no amplía las comprobaciones individuales del agente. PR [#8](https://github.com/dgomezc/dj-tracks/pull/8) mergeado en `develop` a las 14:26:25 UTC; merge commit `1d43cc8`.
 - F1.5: **validada globalmente por el usuario el 28/10/2026** con «Todo ok, continúa», incluidas las revisiones sin duplicados, indicador activo y panel fijo al hacer scroll. PR [#9](https://github.com/dgomezc/dj-tracks/pull/9) mergeado en `develop` a las 06:28:03 UTC, commit `b90f570` (comprobado en GitHub). Esta confirmación no amplía las comprobaciones individuales del agente.
-- F1.6: **validada globalmente por el usuario el 28/10/2026** con «Todo ok. Mezcla el pr y de momento para.». Autorizado el merge del PR [#10](https://github.com/dgomezc/dj-tracks/pull/10) hacia `develop`. Esta aceptación no amplía las comprobaciones individuales del agente. **Trabajo pausado por petición expresa; F2.1 no iniciada.**
-- **Migración transversal MudBlazor → Blazor Blueprint (28/10/2026): validada por el usuario el 28/10/2026, incluido el selector de temas («Funciona todo Ok. Mezcla el PR»). Merge autorizado.** Rama `dgomezc-analisis-blazor-blueprint`, PR [#11](https://github.com/dgomezc/dj-tracks/pull/11) hacia `develop` (ver sección "Migración a Blazor Blueprint"). Antes de iniciar F2.1, las sesiones deben releer `AGENTS.md` y `docs/ARQUITECTURA.md` (sección 8). F2.1 sigue sin iniciar.
+- F1.6: **validada globalmente por el usuario el 28/10/2026** con «Todo ok. Mezcla el pr y de momento para.». PR [#10](https://github.com/dgomezc/dj-tracks/pull/10) mergeado en `develop` a las 06:39:27 UTC, commit `0d48c5c`. Esta aceptación no amplía las comprobaciones individuales del agente. La pausa posterior se levantó solo para F2.1.
+- **Migración transversal MudBlazor → Blazor Blueprint (28/10/2026): validada por el usuario el 28/10/2026**, incluido el selector de temas («Funciona todo Ok. Mezcla el PR»). PR [#11](https://github.com/dgomezc/dj-tracks/pull/11) mergeado en `develop` (ver sección "Migración a Blazor Blueprint"). Las fases siguientes deben respetar `AGENTS.md` y `docs/ARQUITECTURA.md` (sección 8).
+- PR #11 comprobado mergeado en `develop` (`948ad2a`), checkout original actualizado por fast-forward e instrucciones de Blueprint releídas.
+- F2.1 **validada globalmente por el usuario el 28/10/2026** con «todo ok, continua»,
+  incluidas las revisiones de estructura, Play, onda y carátula. Esta aceptación
+  no amplía las comprobaciones individuales del agente. Autorizada la integración
+  del PR [#12](https://github.com/dgomezc/dj-tracks/pull/12) y continuación con F2.2.
+- Eliminados ambos `Class1.cs` vacíos por petición expresa del usuario del 28/10/2026, en commit separado de F2.1. No quedan esos cambios locales pendientes.
 - Checkout original actualizado por fast-forward a `develop` después de integrar F1.2; el trabajo de F1.3 se desarrolla en su rama dedicada. La rama del port se conserva como historial; no se han borrado ni reescrito ramas.
 - Entrega F1.2: PR [#5](https://github.com/dgomezc/dj-tracks/pull/5) **mergeado** en `develop` el 27/10/2026 a las 07:13:41 UTC, commit `8fc21f1` (comprobado en GitHub). Incluye el port y ambos historiales sin force-push. PR #6 también mergeado; no queda PR de F1.2 pendiente.
 - Continuidad confirmada: trabajar directamente en el checkout original, sin nuevos worktrees. Se han preservado los cambios locales preexistentes en los dos `Class1.cs`, sin incluirlos en los commits.
@@ -27,6 +33,184 @@ Consultar siempre el estado real de GitHub antes de actuar sobre un PR.
 - **Refactor transversal Vertical Slices: validado por el usuario el 27/10/2026** con "Perfecto, documenta toda la arquitectura actual… Después mezcla el PR y sigue con el siguiente paso". Arquitectura documentada en `ARQUITECTURA.md`. PR [#6](https://github.com/dgomezc/dj-tracks/pull/6) mergeado en `develop` (`c7c1508`). Diseño validado en `arquitectura/flujo-get-tracks.html` ("Cambia todas las llamadas").
 - Port F1.2 recibido de `dgomezc-fase-f1-2-filtros` (`1354305` código, `c38cddb` documentación). Se integra mediante merge en la rama original: se conservan ambos historiales y se resuelven los conflictos de código con la versión adaptada a Result/FluentValidation. Sin PR duplicado ni reescritura de ramas. Cambios preexistentes y JSON privado conservados; no se borran worktrees.
 - Comprobación de integración en checkout original (27/10/2026): `src` coincide con el port recibido; compilación completa con 0 errores y advertencias. API/UI aisladas con MP3 sintéticos: multiaño/multigrupo/multisubestilo, alias, ausencia de duplicados, resultados vacíos, explorador, errores 400/404, opciones, carga de ajustes y página Tracks correctos. No equivale a validación visual de biblioteca real. Servicios y fixtures temporales retirados después de comprobar.
+
+## F2.1: navegación de Sessions y cola (validada por el usuario)
+
+`/sessions` permite explorar Año → carpeta de sesión → archivos MP3. Años y
+sesiones ordenados por nombre descendente (con fecha `yyyy-MM-dd`, las más recientes
+primero; sin fecha, por nombre, sin inferir cronología); MP3 por nombre ascendente.
+La fecha en la carpeta es opcional. Admite varios MP3 en la misma carpeta,
+extensión sin distinguir mayúsculas y nombres con espacios, acentos, `&` y `+`.
+El `.txt` no se muestra ni interpreta todavía; la API identifica sus nombres
+compatibles en `tracklists`. Las carpetas enlazadas y archivos
+enlazados se excluyen igual que en Tracks; no hay exploración recursiva.
+
+El botón añadir por archivo lo añade a la misma cola de Tracks sin iniciar/interrumpir
+el audio; una URL ya presente no se duplica. Archivos homónimos de distinta
+carpeta o biblioteca son entradas distintas. Desde Cola se puede reproducir,
+saltar y quitar; la ficha muestra carpeta de sesión y datos básicos. Se incorpora
+el streaming con Range, Play directo, onda progresiva y carátula incrustada
+(ampliación expresa del 28/10/2026). La lectura del tracklist se deja para F2.2.
+No busca carátulas externas ni es una playlist
+persistente ni se guarda en BD. Añadir una carpeta completa no forma parte de F2.1.
+
+### Preparación y checklist del usuario
+
+Visual Studio 2026 (.NET 10), abrir `DjTracks.slnx` en `fase/f2-1-sesiones`,
+perfil **DJ Tracks (Api + UI)** y F5. UI `http://localhost:5050/sessions`, API
+`http://localhost:5247`. Mantener las rutas de Tracks y Sessions configuradas y
+accesibles a la API; sesiones bajo `Año\Nombre de sesión\Nombre.mp3`
+(fecha opcional en la carpeta).
+No hace falta base de datos. FFmpeg debe estar disponible para la API también
+para la onda de Sessions (PATH o `Waveform__BinaryFolder`); no es necesario
+para explorar ni para el audio básico. Si cambia la variable de usuario,
+reiniciar Visual Studio para heredarla.
+
+- [ ] Abrir Sessions: años recientes primero; entrar en un año, una carpeta de
+  sesión y ver solo sus MP3. Volver mediante las migas Años/año y «Volver a cargar»
+  mantiene el nivel. Tracks y sus filtros siguen funcionando.
+- [ ] Tags y duración correctos; tags ausentes muestran «Sin datos». Un MP3
+  ilegible muestra aviso en su fila sin impedir ver/añadir los demás.
+  Carpetas vacías muestran mensaje, sin error.
+- [ ] Añadir dos MP3: aumenta contador sin arrancar ni interrumpir audio.
+  Repetir el mismo desde Sessions no lo duplica. Mismo nombre en carpetas distintas
+  o en Tracks y Sessions debe poder coexistir.
+- [ ] Abrir Cola y reproducir una sesión: audio básico, pausa, volumen y seek
+  operativos; título/datos y carpeta de sesión correctos. Onda y portada propias
+  de la sesión, sin conservar las de Tracks; el tracklist aún no se muestra.
+- [ ] Cola mixta Tracks/Sessions: anterior/siguiente y fin automático cambian
+  correctamente, indicador activo actualizado con panel abierto. Al volver a un
+  Track se recupera su onda/carátula. Probar shuffle/bucle, quitar actual y vaciar.
+- [ ] Navegar entre Sessions, Tracks e Inicio conserva cola y audio. Recarga
+  completa vacía la cola, como hasta ahora.
+- [ ] Probar claro y oscuro en Light Green y al menos un tema distinto (por
+  ejemplo Cyberpunk). Listado, migas, alertas, cola y ficha legibles; desplegar
+  una lista larga, scroll y ventana estrecha sin tapar controles.
+- [ ] Si la carpeta seleccionada desaparece o falla el almacenamiento, «Volver
+  a cargar» muestra error y permite volver a Años/año; Configuración accesible.
+  No cambiar ni borrar datos reales para provocar el error.
+
+### Comprobaciones del agente en la entrega inicial (antes de ampliar onda/portada)
+
+- `dotnet build DjTracks.slnx`: correcto, 0 errores y advertencias, incluida la
+  versión final del panel. No se generaron tests unitarios.
+- API con biblioteca sintética: años `2026,2025` y carpetas de sesión en orden
+  descendente, MP3 en orden ascendente, `.MP3` admitido, `.txt` excluido, tags y
+  aviso de archivo corrupto. Vacíos devuelven 200; sesión sin año/identificador
+  con ruta y extensión no MP3 devuelven 400; carpeta/fichero ausentes 404;
+  ajustes aún no creados 409, JSON de ajustes inválido 500, almacenamiento ausente
+  503. Una junction se excluye y no permite abrir audio (404). Range bytes=4-9
+  devuelve 206, Content-Range correcto y seis bytes.
+- Navegador con MP3 sintéticos: navegación/migas/recarga, vacíos, tags y aviso
+  de corrupto; añadir dos archivos sin iniciar audio y repetidos sin duplicar.
+  URL con acento, `&` y `+` reproduce y permite seek. Fin real del audio avanza
+  con la cola abierta y ficha actualizada. Mismo fichero en Tracks y Sessions
+  coexiste; transición mixta anterior/siguiente/shuffle/bucle de cola retira y
+  recupera la onda de Tracks sin errores de circuito. Añadir repetido conserva
+  el mismo elemento audio y posición de 3 segundos.
+- Carpeta sintética renombrada mientras se muestra: recargar presenta el error
+  y Años permite recuperarse. Cierre del panel en español y procedencia
+  `Sessions · año · carpeta` comprobados en la versión final.
+- Capturas inspeccionadas a 642 px de ancho en Light Green y Cyberpunk, claro y
+  oscuro: tabla, migas, textos y reproductor legibles sin desbordamiento de página.
+  Cyberpunk se eligió desde Configuración; para comparar Light Green se cambió
+  temporalmente el atributo de tema en el DOM de la prueba. No se han comprobado
+  todos los temas ni tamaños, sonido por hardware ni biblioteca real.
+- Se usó el MCP de Blueprint para DataTable y Sheet. No se tocaron los ajustes
+  privados ni la biblioteca real; la eliminación de las clases vacías solicitada
+  por el usuario se guarda en commit separado.
+  Servicios y fixtures de comprobación retirados antes de la entrega.
+
+Aceptación global del usuario registrada el 28/10/2026 con «todo ok, continua».
+Las listas siguientes conservan el detalle de las entregas previas, no acreditan
+comprobaciones individuales adicionales.
+
+### Revisión: carpetas sin fecha y variantes de tracklist (28/10/2026)
+
+Petición del usuario: admitir carpetas con y sin fecha, y tracklists llamados
+`Nombre.txt`, `Tracklist.txt`, `Tracklist - Nombre.txt` o `Nombre - Tracklist.txt`.
+`Nombre` puede coincidir con el MP3 sin extensión o con la carpeta completa.
+Se admiten mayúsculas/minúsculas y varios candidatos simultáneos; no se selecciona
+ni concatena ninguno automáticamente. Otros TXT y enlaces se excluyen. La detección
+es por carpeta, no una asociación exclusiva por audio cuando hay varios MP3.
+No se cambia el orden por nombre ni se implementa todavía la lectura de F2.2.
+
+Comprobaciones nuevas (pendientes del usuario):
+
+- [ ] En el arranque indicado arriba, abrir un año con carpetas `Nombre de la sesión`,
+  `Otra sesión` y `2025-12-31 - Fin de año`: todas se pueden abrir, listar sus MP3,
+  añadir a cola y reproducir. Repetir añadir no duplica.
+- [ ] Con cada variante de TXT junto a un MP3, abrir
+  `http://localhost:5247/api/library/sessions?year=2026&session=Nombre%20de%20la%20sesión`
+  (adaptar año/nombre). `tracklists` incluye el nombre real de cada TXT compatible,
+  también `.TXT`; varios simultáneos se conservan. `Notas.txt` y TXT en subcarpetas
+  no aparecen. En la UI solo siguen apareciendo los MP3, sin tracklist visible.
+
+Repetir navegación y reproducción con los nuevos nombres. La checklist anterior
+de cola mixta y temas sigue pendiente; esta revisión no modifica componentes ni estilos.
+
+Comprobado por el agente en esta revisión:
+
+- `dotnet build DjTracks.slnx`: 0 errores y advertencias.
+- API con biblioteca temporal aislada: carpetas con y sin fecha, orden por nombre,
+  las cuatro variantes de TXT individualmente y coexistiendo, extensión `.TXT`,
+  coincidencia por nombre completo de carpeta y por nombre de MP3 distinto al
+  de la carpeta. `Notas.txt` y TXT en subcarpetas excluidos; `tracklists` vacío
+  en los niveles de años/carpetas. Streaming Range 206 con seis bytes en las
+  tres carpetas comprobadas. Los MP3 sintéticos de esta revisión son bytes de
+  prueba: no se atribuye reproducción sonora ni validación visual nueva.
+- Consultada documentación .NET mediante context7 para enumeración y comparación
+  ordinal de nombres. Sin ajustes privados modificados; API temporal detenida
+  y biblioteca temporal retirada después de comprobar.
+
+### Revisión: Play, onda y carátula de Sessions (28/10/2026)
+
+El usuario reporta ausencia de Play y onda y carátulas incorrectas. Se amplía
+expresamente F2.1: botón Play directo junto a añadir, endpoints de onda progresiva
+y carátula incrustada del MP3, conectados tanto al reproducir como al añadir.
+Se reutilizan generador/caché y lectura de carátula de Tracks. Ausencia de imagen
+muestra «Sin carátula», carga/error y reintento funcionan también para sesiones.
+No se buscan JPG/PNG externos ni se modifica el audio. F2.2 conserva el tracklist.
+
+Comprobaciones del agente:
+
+- Compilación completa: 0 errores/advertencias. Sin tests nuevos.
+- Biblioteca aislada con MP3 sintéticos de dos minutos: portada PNG extraída
+  idéntica a la incrustada, ausencia de portada devuelve null, corrupto 503,
+  rutas inválidas 400 y ausentes 404 en audio/onda/portada.
+  Primera onda: 65 bloques NDJSON, 1024 picos y finalización; caché posterior:
+  un bloque completo. La portada de Tracks sigue devolviendo la misma imagen.
+- Navegador: Play inicia audio real (`paused=false`, tiempo avanza), imagen
+  cargada y canvas con onda dibujada. Añadir repetido conserva elemento audio y
+  contador; añadir otra sesión no interrumpe. Anterior/siguiente actualizan onda
+  y portada; sesión sin imagen elimina portada anterior y muestra «Sin carátula».
+  Seek desde onda a 25 % sitúa audio en unos 30 s de 120 s. Transición a Tracks y
+  vuelta a Sessions conserva onda propia y portada/ausencia correspondiente.
+- Capturas inspeccionadas de Cyberpunk en oscuro y claro: Play/añadir, portada,
+  ficha y onda legibles. Tema cambiado temporalmente en DOM y modo con botón.
+  No se valida sonido por hardware, biblioteca real ni imágenes externas.
+  Servicios y biblioteca temporal retirados después de comprobar, sin tocar ajustes privados.
+
+Checklist nueva y a repetir (pendiente del usuario):
+
+- [ ] Detener y arrancar de nuevo **DJ Tracks (Api + UI)** en Visual Studio 2026,
+  F5; recargar completamente `http://localhost:5050/sessions` para renovar también
+  las URLs de la cola en memoria (se vacía). API `http://localhost:5247`.
+  Ruta Sessions accesible, MP3 válidos y FFmpeg disponible para la API.
+- [ ] Abrir año/carpeta y pulsar Play: inicia esa sesión sin abrir Cola; añadir
+  sigue sin interrumpir. Play tras añadir no crea duplicados.
+- [ ] Con una sesión larga sin caché, la onda se dibuja progresivamente y permite
+  seek con clic/flechas; al volver a reproducir carga desde caché.
+- [ ] Sesión con portada incrustada muestra su imagen; otra sin portada muestra
+  «Sin carátula» y no la anterior. Cambiar rápidamente entre sesiones y Tracks
+  no intercambia imágenes/ondas. Si falla la imagen, aparece aviso/reintento sin
+  parar el audio. Las imágenes externas no se leen.
+- [ ] Repetir cola mixta, anterior/siguiente y fin automático con el panel abierto:
+  entrada activa, onda y carátula se actualizan juntas.
+- [ ] Repetir claro/oscuro en Light Green y otro tema: ambos botones, onda y ficha
+  visibles/legibles, incluida ventana estrecha.
+
+Revisión aceptada globalmente por el usuario el 28/10/2026 con «todo ok, continua».
 
 ## Migración a Blazor Blueprint (transversal, tras F1.6)
 

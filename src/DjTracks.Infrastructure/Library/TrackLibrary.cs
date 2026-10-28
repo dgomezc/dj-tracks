@@ -156,7 +156,7 @@ public sealed class TrackLibrary
         return new TrackListing(null, null, [], tracks.ToArray());
     }
 
-    private static DirectoryInfo? FindChild(DirectoryInfo parent, string name) =>
+    internal static DirectoryInfo? FindChild(DirectoryInfo parent, string name) =>
         parent.EnumerateDirectories()
             .FirstOrDefault(child => IsRegularEntry(child)
                 && child.Name.Equals(name, StringComparison.Ordinal));
