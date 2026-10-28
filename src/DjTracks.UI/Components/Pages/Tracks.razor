@@ -151,6 +151,10 @@ else if (_listing is not null)
                                       OnClick="() => PlayTrack(track, enqueue: true)">
                                 <LucideIcon Name="list-plus" />
                             </BbButton>
+                            <BbButton Variant="ButtonVariant.Ghost" Size="ButtonSize.Icon"
+                                      AriaLabel="@($"Añadir a playlist {track.FileName}")" OnClick="() => AddToPlaylistAsync(track)">
+                                <LucideIcon Name="list-music" />
+                            </BbButton>
                         </div>
                     </CellTemplate>
                 </BbDataTableColumn>
@@ -163,4 +167,5 @@ else if (_listing is not null)
             Los tags ausentes se muestran como «Sin datos». Pulsa el icono de reproducción para escuchar una canción.
         </BbTypographyMuted>
     }
+    <AddToPlaylist @ref="_playlistPicker" />
 }

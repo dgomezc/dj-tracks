@@ -58,6 +58,11 @@ else if (_listing is not null)
                                   AriaLabel="@($"Añadir a la cola {file.FileName}")" OnClick="() => PlayRemember(file, enqueue: true)">
                             <LucideIcon Name="list-plus" />
                         </BbButton>
+                        <BbButton Variant="ButtonVariant.Ghost" Size="ButtonSize.Icon"
+                                  AriaLabel="@($"Añadir a playlist {file.FileName}")"
+                                  OnClick="() => AddToPlaylistAsync(file)">
+                            <LucideIcon Name="list-music" />
+                        </BbButton>
                     </div>
                 </CellTemplate>
             </BbDataTableColumn>
@@ -69,3 +74,4 @@ else if (_listing is not null)
         la onda se carga progresivamente y la carátula se lee del MP3.
     </BbTypographyMuted>
 }
+<AddToPlaylist @ref="_playlistPicker" />

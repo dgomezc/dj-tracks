@@ -1,0 +1,31 @@
+@implements IDisposable
+
+<p class="panel-label">Playlists manuales</p>
+<BbLink Href="/playlists">Gestionar playlists</BbLink>
+<BbButton Variant="ButtonVariant.Ghost" Disabled="@_busy" OnClick="LoadAsync">Recargar playlists</BbButton>
+@if (_busy)
+{
+    <span role="status">Cargando playlists…</span>
+}
+@if (_error is not null)
+{
+    <p class="text-warning" role="alert">@_error</p>
+}
+else if (_playlists is not null)
+{
+    @if (_playlists.Length == 0)
+    {
+        <BbTypographyMuted>Sin playlists</BbTypographyMuted>
+    }
+    <nav class="playlist-links" aria-label="Playlists manuales">
+        @foreach (var playlist in _playlists)
+        {
+            <NavLink href="@($"/playlists/{playlist.Id}")" class="app-nav-link">
+                @playlist.Name (@playlist.Entries.Length)
+            </NavLink>
+        }
+    </nav>
+}
+<BbSeparator />
+<p class="panel-label">Playlists automáticos</p>
+<BbTypographyMuted>Disponibles en una fase posterior</BbTypographyMuted>

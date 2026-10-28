@@ -11,6 +11,7 @@
         <NavLink href="/tracks" class="app-nav-link">Tracks</NavLink>
         <NavLink href="/sessions" class="app-nav-link">Sessions</NavLink>
         <NavLink href="/remember" class="app-nav-link">Remember</NavLink>
+        <NavLink href="/playlists" class="app-nav-link">Playlists</NavLink>
     </nav>
     <div class="app-actions">
         <BbButton Variant="ButtonVariant.Ghost" OnClick="() => _queueOpen = !_queueOpen" AriaLabel="Abrir cola">
@@ -27,11 +28,7 @@
 
 <div class="app-body">
     <aside class="library-panel" aria-label="Playlists">
-        <p class="panel-label">Playlists manuales</p>
-        <BbTypographyMuted>Sin playlists</BbTypographyMuted>
-        <BbSeparator />
-        <p class="panel-label">Playlists automáticos</p>
-        <BbTypographyMuted>Sin playlists</BbTypographyMuted>
+        <PlaylistSidebar />
     </aside>
 
     <main class="main-content">

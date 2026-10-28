@@ -14,6 +14,14 @@ public static class HttpClientResultExtensions
         ILogger logger, CancellationToken ct = default) =>
         SendAsync<T>(() => http.PutAsJsonAsync(url, body, ct), url, logger, ct);
 
+    public static Task<Result<T>> PostForResultAsync<TBody, T>(this HttpClient http, string url, TBody body,
+        ILogger logger, CancellationToken ct = default) =>
+        SendAsync<T>(() => http.PostAsJsonAsync(url, body, ct), url, logger, ct);
+
+    public static Task<Result<T>> DeleteForResultAsync<T>(this HttpClient http, string url,
+        ILogger logger, CancellationToken ct = default) =>
+        SendAsync<T>(() => http.DeleteAsync(url, ct), url, logger, ct);
+
     private static async Task<Result<T>> SendAsync<T>(Func<Task<HttpResponseMessage>> send, string url,
         ILogger logger, CancellationToken ct)
     {
