@@ -1,4 +1,5 @@
 using DjTracks.Api.Features.Library;
+using DjTracks.Api.Features.Playlists;
 using DjTracks.Api.Features.Settings;
 using DjTracks.Api.Features.Streaming;
 using DjTracks.Api.Shared;
@@ -14,6 +15,7 @@ builder.Services.AddValidatorsFromAssemblyContaining<Program>(ServiceLifetime.Si
 builder.Services.AddSettingsFeature();
 builder.Services.AddLibraryFeature();
 builder.Services.AddStreamingFeature();
+builder.Services.AddPlaylistsFeature();
 
 var app = builder.Build();
 
@@ -29,5 +31,6 @@ var api = app.MapGroup("/api").AddEndpointFilterFactory(ValidationFilter.Create)
 api.MapSettingsFeature();
 api.MapLibraryFeature();
 api.MapStreamingFeature();
+api.MapPlaylistsFeature();
 
 app.Run();

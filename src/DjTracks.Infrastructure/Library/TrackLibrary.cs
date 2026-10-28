@@ -183,23 +183,28 @@ public sealed class TrackLibrary
                 && file.Extension.Equals(".mp3", StringComparison.OrdinalIgnoreCase))
             .OrderBy(file => file.Name, StringComparer.OrdinalIgnoreCase))
         {
-            ct.ThrowIfCancellationRequested();
-            try
-            {
-                using var audio = TagLib.File.Create(file.FullName);
-                tracks.Add(new(file.Name, audio.Tag.Title, audio.Tag.Performers,
-                    audio.Tag.Album, audio.Properties.Duration.TotalSeconds, null,
-                    directory.Parent?.Name, directory.Name));
-            }
-            catch (Exception ex) when (ex is TagLib.CorruptFileException or TagLib.UnsupportedFormatException
-                or IOException or UnauthorizedAccessException)
-            {
-                tracks.Add(new(file.Name, null, [], null, null,
-                    "No se pudieron leer los tags o el audio. Comprueba el fichero y sus permisos.",
-                    directory.Parent?.Name, directory.Name));
-            }
+            tracks.Add(ReadTrack(file, ct));
         }
         return tracks.ToArray();
+    }
+
+    internal static TrackFile ReadTrack(FileInfo file, CancellationToken ct)
+    {
+        ct.ThrowIfCancellationRequested();
+        try
+        {
+            using var audio = TagLib.File.Create(file.FullName);
+            return new(file.Name, audio.Tag.Title, audio.Tag.Performers,
+                audio.Tag.Album, audio.Properties.Duration.TotalSeconds, null,
+                file.Directory?.Parent?.Name, file.Directory?.Name);
+        }
+        catch (Exception ex) when (ex is TagLib.CorruptFileException or TagLib.UnsupportedFormatException
+            or IOException or UnauthorizedAccessException)
+        {
+            return new(file.Name, null, [], null, null,
+                "No se pudieron leer los tags o el audio. Comprueba el fichero y sus permisos.",
+                file.Directory?.Parent?.Name, file.Directory?.Name);
+        }
     }
 
     private static (string Group, string? Substyle) SplitStyle(string style)
