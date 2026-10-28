@@ -1,5 +1,20 @@
 @DjTracks.Api_HostAddress = http://localhost:5247
 
+GET {{DjTracks.Api_HostAddress}}/api/library/sessions
+Accept: application/json
+
+###
+
+GET {{DjTracks.Api_HostAddress}}/api/library/sessions?year=2026&session=2026-10-28%20-%20Sesión
+Accept: application/json
+
+###
+
+GET {{DjTracks.Api_HostAddress}}/api/streaming/sessions?year=2026&session=2026-10-28%20-%20Sesión&fileName=Sesión.mp3
+Range: bytes=0-1023
+
+###
+
 GET {{DjTracks.Api_HostAddress}}/api/library/tracks
 Accept: application/json
 
