@@ -16,6 +16,10 @@
         <MudNavLink Href="/sessions" Style="width:auto">Sessions</MudNavLink>
         <MudNavLink Href="/remember" Style="width:auto">Remember</MudNavLink>
         <MudSpacer />
+        <MudButton OnClick="() => _queueOpen = !_queueOpen" Color="Color.Inherit"
+                   StartIcon="@Icons.Material.Filled.QueueMusic" aria-label="Abrir cola">
+            Cola (@AudioPlayer.Queue.Count)
+        </MudButton>
         <MudIconButton Icon="@Icons.Material.Filled.Settings" Href="/settings" Color="Color.Inherit" />
     </MudAppBar>
 
@@ -34,9 +38,24 @@
             @Body
         </MudContainer>
     </MudMainContent>
+    <PlaybackQueue @bind-Open="_queueOpen" />
 </MudLayout>
 
 <footer class="player-bar">
+    <div class="queue-controls">
+        <MudIconButton Icon="@Icons.Material.Filled.SkipPrevious" OnClick="AudioPlayer.Previous"
+                       Disabled="@(!AudioPlayer.CanPrevious)" aria-label="Canción anterior" />
+        <MudIconButton Icon="@Icons.Material.Filled.SkipNext" OnClick="AudioPlayer.Next"
+                       Disabled="@(!AudioPlayer.CanNext)" aria-label="Canción siguiente" />
+        <MudIconButton Icon="@Icons.Material.Filled.Shuffle" OnClick="AudioPlayer.ToggleShuffle"
+                       Color="@(AudioPlayer.Shuffle ? Color.Primary : Color.Default)"
+                       aria-label="Reproducción aleatoria" aria-pressed="@AudioPlayer.Shuffle.ToString().ToLowerInvariant()" />
+        <MudButton OnClick="AudioPlayer.CycleRepeat"
+                   Color="@(AudioPlayer.Repeat == DjTracks.UI.Shared.QueueRepeatMode.Off ? Color.Default : Color.Primary)"
+                   aria-label="Cambiar modo de bucle">
+            @RepeatLabel
+        </MudButton>
+    </div>
     @if (AudioPlayer.AudioUrl is null)
     {
         <MudText Typo="Typo.body2" Class="mud-text-secondary">Selecciona una canción para reproducir</MudText>
@@ -50,10 +69,12 @@
                 <MudText Typo="Typo.caption" Class="mud-text-secondary player-track-artist">@AudioPlayer.Artist</MudText>
             }
         </MudStack>
-        <div class="player-controls">
+        var playbackVersion = AudioPlayer.PlaybackVersion;
+        <div class="player-controls" @key="playbackVersion">
             <WaveformPlayer WaveformUrl="@AudioPlayer.WaveformUrl" />
-            <audio id="djtracks-audio" @key="AudioPlayer.AudioUrl" controls autoplay preload="metadata"
-                   src="@AudioPlayer.AudioUrl" aria-label="Controles de reproducción"></audio>
+            <audio id="djtracks-audio" controls autoplay preload="metadata"
+                   src="@AudioPlayer.AudioUrl" aria-label="Controles de reproducción"
+                   @onended="() => AudioPlayer.OnEnded(playbackVersion)"></audio>
         </div>
     }
 </footer>
@@ -65,6 +86,14 @@
 </div>
 
 @code {
+    private bool _queueOpen;
+    private string RepeatLabel => AudioPlayer.Repeat switch
+    {
+        DjTracks.UI.Shared.QueueRepeatMode.All => "Bucle: cola",
+        DjTracks.UI.Shared.QueueRepeatMode.One => "Bucle: canción",
+        _ => "Bucle: no"
+    };
+
     protected override void OnInitialized() => AudioPlayer.Changed += OnPlayerChanged;
 
     private void OnPlayerChanged() => _ = InvokeAsync(StateHasChanged);

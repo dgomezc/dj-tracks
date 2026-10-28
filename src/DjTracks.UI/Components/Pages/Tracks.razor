@@ -114,7 +114,7 @@ else if (_listing is not null)
                 <MudTh>Artista</MudTh>
                 <MudTh>Álbum</MudTh>
                 <MudTh>Duración</MudTh>
-                <MudTh>Reproducir</MudTh>
+                <MudTh>Reproducción / cola</MudTh>
             </HeaderContent>
             <RowTemplate>
                 @if (_appliedFilter is not null)
@@ -139,6 +139,9 @@ else if (_listing is not null)
                     <MudIconButton Icon="@Icons.Material.Filled.PlayArrow" Color="Color.Primary"
                                    aria-label="@($"Reproducir {context.FileName}")"
                                    OnClick="() => PlayTrack(context)" />
+                    <MudIconButton Icon="@Icons.Material.Filled.PlaylistAdd"
+                                   aria-label="@($"Añadir a la cola {context.FileName}")"
+                                   OnClick="() => PlayTrack(context, enqueue: true)" />
                 </MudTd>
             </RowTemplate>
             <NoRecordsContent>
