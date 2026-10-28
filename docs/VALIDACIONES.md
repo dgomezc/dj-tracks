@@ -35,8 +35,10 @@ Consultar siempre el estado real de GitHub antes de actuar sobre un PR.
 - PR #13 mergeado en `develop` el 28/10/2026 a las 12:29:27 UTC, commit `afdc690`
   (comprobado en GitHub); checkout original actualizado por fast-forward.
 - F3.1 Remember en `fase/f3-1-remember`, PR [#14](https://github.com/dgomezc/dj-tracks/pull/14)
-  abierto hacia `develop`, pendiente de validación. F2.3 opcional
-  sigue aplazada para el final y F4.1 no se ha iniciado.
+  validada globalmente por el usuario el 28/10/2026 con «ok, continua».
+  Esta aceptación no amplía las comprobaciones individuales del agente.
+  Autorizadas su integración y la continuación con F4.1; F2.3 opcional
+  sigue aplazada para el final.
 - Eliminados ambos `Class1.cs` vacíos por petición expresa del usuario del 28/10/2026, en commit separado de F2.1. No quedan esos cambios locales pendientes.
 - Checkout original actualizado por fast-forward a `develop` después de integrar F1.2; el trabajo de F1.3 se desarrolla en su rama dedicada. La rama del port se conserva como historial; no se han borrado ni reescrito ramas.
 - Entrega F1.2: PR [#5](https://github.com/dgomezc/dj-tracks/pull/5) **mergeado** en `develop` el 27/10/2026 a las 07:13:41 UTC, commit `8fc21f1` (comprobado en GitHub). Incluye el port y ambos historiales sin force-push. PR #6 también mergeado; no queda PR de F1.2 pendiente.
@@ -47,7 +49,7 @@ Consultar siempre el estado real de GitHub antes de actuar sobre un PR.
 - Port F1.2 recibido de `dgomezc-fase-f1-2-filtros` (`1354305` código, `c38cddb` documentación). Se integra mediante merge en la rama original: se conservan ambos historiales y se resuelven los conflictos de código con la versión adaptada a Result/FluentValidation. Sin PR duplicado ni reescritura de ramas. Cambios preexistentes y JSON privado conservados; no se borran worktrees.
 - Comprobación de integración en checkout original (27/10/2026): `src` coincide con el port recibido; compilación completa con 0 errores y advertencias. API/UI aisladas con MP3 sintéticos: multiaño/multigrupo/multisubestilo, alias, ausencia de duplicados, resultados vacíos, explorador, errores 400/404, opciones, carga de ajustes y página Tracks correctos. No equivale a validación visual de biblioteca real. Servicios y fixtures temporales retirados después de comprobar.
 
-## F3.1: Remember (validación manual pendiente)
+## F3.1: Remember (validada por el usuario)
 
 `/remember` abre Cortas y permite cambiar a Largas. MP3 por nombre ascendente,
 tags básicos, duración, avisos de tags ilegibles por archivo, vacío y errores
@@ -127,7 +129,7 @@ para renovar la cola en memoria.
   tamaños/temas. Servicios y biblioteca temporal retirados después de comprobar;
   ajustes privados y datos reales sin tocar.
 
-Validación del usuario pendiente. No mezclar ni avanzar a otra fase.
+Validación global del usuario recibida el 28/10/2026 con «ok, continua».
 
 ## F2.2: tracklist de la sesión activa (validada por el usuario)
 
