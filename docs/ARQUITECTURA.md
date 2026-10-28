@@ -146,6 +146,9 @@ recrear audio ni onda. Razor presenta el texto escapado, con saltos de línea,
 scroll y ajuste de líneas largas; no `MarkupString`, parser de canciones ni
 enlaces a posiciones temporales. Ausencia, vacío, carga y errores tienen estado
 visible independiente del audio.
+La ficha distribuye información y tracklist en dos columnas flexibles cuando
+su ancho disponible lo permite; si no, el tracklist pasa debajo. No depende del
+ancho total de la ventana (el panel lateral también ocupa espacio).
 
 | Elemento | Nombre | Namespace |
 |---|---|---|

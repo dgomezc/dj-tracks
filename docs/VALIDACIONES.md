@@ -112,6 +112,26 @@ Reiniciar Api/UI y recargar completamente la página para renovar la cola en mem
 
 Validación del usuario pendiente. No mezclar ni avanzar a otra fase.
 
+### Revisión responsive del tracklist (28/10/2026)
+
+Por petición del usuario, el tracklist aparece a la derecha de carátula/datos
+cuando hay ancho suficiente dentro de «Ahora suena», y debajo en espacios
+estrechos. Mantiene scroll interno y ajuste de líneas; Tracks sin tracklist
+conserva todo el ancho para sus datos.
+
+- [ ] Repetir con una sesión y TXT largo en ventana grande: tracklist a la derecha,
+  datos a la izquierda, sin desbordamientos. Estrechar ventana: tracklist debajo,
+  legible y con scroll interno. Probar claro/oscuro y otro tema además de Light Green.
+- [ ] Reproducir un Track: sin columna vacía; volver a sesión restaura el tracklist.
+
+Comprobado por el agente: compilación aislada con `--artifacts-path` sin errores
+ni advertencias (la compilación normal estaba bloqueada por la depuración activa,
+que no se detuvo). Edge headless con el CSS real y marcado sintético de la ficha:
+columnas a 1200/820 px disponibles, apilado a 780/642/393/320 px, sin desbordamiento
+horizontal y con scroll interno en todos los tamaños. Sin tracklist, datos ocupan
+todo el ancho. El navegador integrado agotó el tiempo de respuesta; no se atribuye
+una nueva inspección visual de biblioteca real ni de temas a esta revisión.
+
 ## F2.1: navegación de Sessions y cola (validada por el usuario)
 
 `/sessions` permite explorar Año → carpeta de sesión → archivos MP3. Años y

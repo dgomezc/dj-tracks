@@ -5,6 +5,7 @@
     <BbCardContent>
     @if (Player.Current is { } current)
     {
+        <div class="now-playing-sections">
         <div class="now-playing-content">
             <div class="now-playing-artwork">
                 @if (_dataUrl is not null && _error is null)
@@ -48,6 +49,7 @@
             </div>
         </div>
         <SessionTracklistPanel Url="@current.TracklistUrl" />
+        </div>
     }
     else
     {

@@ -204,8 +204,15 @@ body {
 }
 
 /* Ahora suena */
+.now-playing-sections {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-start;
+    gap: 24px;
+}
+
 .session-tracklist {
-    margin-top: 24px;
+    flex: 1 1 320px;
     min-width: 0;
 }
 
@@ -227,6 +234,8 @@ body {
 }
 
 .now-playing-content {
+    flex: 1 1 460px;
+    min-width: 0;
     display: flex;
     flex-wrap: wrap;
     gap: 24px;
