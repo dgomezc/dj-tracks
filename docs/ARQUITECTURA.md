@@ -170,7 +170,7 @@ sesión anterior. F3.1 no añadió playlists persistentes, filtrado de Tracks ni
 
 F4.1 añade `Features/Playlists` con slices explícitos GetPlaylists, GetPlaylist,
 CreatePlaylist, RenamePlaylist, DeletePlaylist, AddPlaylistTrack, RemovePlaylistTrack
-y LoadPlaylist. Cada endpoint delega en su handler; requests validados por
+y LoadPlaylist; F4.2 añade ExportPlaylist. Cada endpoint delega en su handler; requests validados por
 FluentValidation, respuestas `Result<T>` y traducción estándar de AppError.
 `JsonPlaylistStore` (singleton) carga la ruta desde `JsonSettingsStore` y guarda
 un JSON `<id:N>.json` por playlist manual. Nombre visible independiente del archivo;
@@ -210,6 +210,16 @@ actualice el nombre sin recargar. Recargar actualiza cambios de otras ventanas; 
 ni sincronización automática entre circuitos en esta fase. `/playlists` en la
 cabecera mantiene la gestión accesible cuando el lateral se oculta en móvil.
 La cola sigue en memoria: editar/borrar una playlist no modifica la cola ya cargada.
+
+`ExportPlaylistHandler` delega en `PlaylistM3uExporter` (Infrastructure), que lee
+una playlist y la configuración, resuelve cada fichero con `TrackLibrary` o
+`RememberLibrary`, y escribe el M3U en `M3uRoot`. El contenido es UTF-8 con
+`#EXTM3U`, `#EXTINF` y rutas relativas a la raíz; tags de control se limpian antes
+de formar las líneas. Se construye todo antes de escribir y se publica mediante
+un temporal y movimiento atómico, para no dejar exportaciones parciales. El nombre
+se deriva del de la playlist y se sanea para el sistema de archivos; si dos nombres
+colisionan al sanearlos, añade el ID de la playlist. La ruta M3U se valida como
+existente y escribible al guardar Configuración.
 
 | Elemento | Nombre | Namespace |
 |---|---|---|

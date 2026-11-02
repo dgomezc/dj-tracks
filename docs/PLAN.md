@@ -153,7 +153,10 @@ El estado de entrega y las checklists se mantienen en `VALIDACIONES.md`. Una imp
   error sin modificar la cola; se puede quitar la referencia desde la playlist.
   Persisten tras recargar/reiniciar, a diferencia de la cola. Sin reordenación,
   exportación M3U ni playlists automáticos todavía.
-- **F4.2 Export m3u** con la ruta raíz configurada.
+- **F4.2 Export M3U** de cada playlist manual a la raíz configurada; fichero
+  UTF-8 `<nombre>.m3u`, `#EXTM3U`/`#EXTINF` y rutas relativas a la raíz M3U.
+  La raíz debe existir y permitir escritura. Referencias no disponibles o fallos
+  de almacenamiento se informan sin dejar una exportación parcial.
 - **F4.3 Automáticos**: modal "Generar playlist automático" con filtros Año (multi), Estilo (multi), Incluir Remember; guardado de filtros y generación; export m3u.
 - **F4.4 Playlists vivos**: índice de biblioteca con watcher + reescaneo horario; los automáticos reflejan altas/bajas.
   *Prueba*: añadir/borrar un mp3 en carpeta y ver el cambio en el playlist.

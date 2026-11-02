@@ -41,19 +41,20 @@ Consultar siempre el estado real de GitHub antes de actuar sobre un PR.
   sigue aplazada para el final.
 - PR #14 mergeado en `develop` el 28/10/2026 a las 13:23:10 UTC, commit `9441862`
   (comprobado en GitHub); checkout original actualizado por fast-forward.
-- F4.1 playlists manuales en `fase/f4-1-playlists-manuales`, PR
-  [#15](https://github.com/dgomezc/dj-tracks/pull/15) abierto hacia `develop`,
-  pendiente de validación. F4.2 y F2.3 no iniciadas. Decisión confirmada: cargar añade al final,
-  sin duplicados ni interrumpir audio; no sustituye la cola.
+- F4.1 playlists manuales validada por el usuario el 02/11/2026 («Perfecto, sigue
+  con el siguiente punto») y mergeada en `develop` mediante PR
+  [#15](https://github.com/dgomezc/dj-tracks/pull/15), commit
+  `b5990820ddb692e46052b636873f34a511f2d0ed`. F4.2 es la fase actual en
+  `fase/f4-2-export-m3u`; F2.3 aplazada al final. Decisión confirmada: cargar
+  añade al final, sin duplicados ni interrumpir audio; no sustituye la cola.
 - Revisión de F4.1 pedida el 28/10/2026: «Pon tooltips a los botones que sólo tienen
   icono… Para crear o editar un playlist creo que es mejor hacerlo desde una ventana
-  modal con opciones de aceptar y cancelar». Aplicada en la misma rama y PR #15;
-  pendiente de nueva validación.
+  modal con opciones de aceptar y cancelar». Aplicada y validada dentro del PR #15.
 - Segunda revisión de F4.1 (28/10/2026): «Desde el listado de canciones de la playlist
   deberíamos tener un botón para escuchar la canción o para añadirla a la cola. El botón
   de añadir nuevo playlist debería estar en el panel izquierdo… Para editar o renombrar
   una playlist podemos poner un botón al lado del nombre de la playlist en el panel
-  izquierdo». Aplicada en la misma rama y PR #15; pendiente de validación.
+  izquierdo». Aplicada y validada dentro del PR #15.
 - Eliminados ambos `Class1.cs` vacíos por petición expresa del usuario del 28/10/2026, en commit separado de F2.1. No quedan esos cambios locales pendientes.
 - Checkout original actualizado por fast-forward a `develop` después de integrar F1.2; el trabajo de F1.3 se desarrolla en su rama dedicada. La rama del port se conserva como historial; no se han borrado ni reescrito ramas.
 - Entrega F1.2: PR [#5](https://github.com/dgomezc/dj-tracks/pull/5) **mergeado** en `develop` el 27/10/2026 a las 07:13:41 UTC, commit `8fc21f1` (comprobado en GitHub). Incluye el port y ambos historiales sin force-push. PR #6 también mergeado; no queda PR de F1.2 pendiente.
@@ -64,7 +65,7 @@ Consultar siempre el estado real de GitHub antes de actuar sobre un PR.
 - Port F1.2 recibido de `dgomezc-fase-f1-2-filtros` (`1354305` código, `c38cddb` documentación). Se integra mediante merge en la rama original: se conservan ambos historiales y se resuelven los conflictos de código con la versión adaptada a Result/FluentValidation. Sin PR duplicado ni reescritura de ramas. Cambios preexistentes y JSON privado conservados; no se borran worktrees.
 - Comprobación de integración en checkout original (27/10/2026): `src` coincide con el port recibido; compilación completa con 0 errores y advertencias. API/UI aisladas con MP3 sintéticos: multiaño/multigrupo/multisubestilo, alias, ausencia de duplicados, resultados vacíos, explorador, errores 400/404, opciones, carga de ajustes y página Tracks correctos. No equivale a validación visual de biblioteca real. Servicios y fixtures temporales retirados después de comprobar.
 
-## F4.1: playlists manuales (validación manual pendiente)
+## F4.1: playlists manuales (validada por el usuario)
 
 Gestión en `/playlists` y panel izquierdo (cuando el ancho lo permite).
 Crear y renombrar en ventana modal con Cancelar/Aceptar; borrar con confirmación;
@@ -208,7 +209,56 @@ o `Waveform__BinaryFolder` para la onda. No requiere BD ni modificar los MP3.
   cambia su nombre; «+» crea y navega a la nueva. Tooltip del lápiz visible.
   Capturas en Light Green oscuro y Cyberpunk oscuro y claro (modal incluido).
 
-Validación del usuario pendiente. No mezclar ni avanzar a F4.2.
+Confirmación del usuario el 02/11/2026: «Perfecto, sigue con el siguiente punto».
+PR #15 mergeada en `develop`; merge commit `b599082`.
+
+## F4.2: exportación M3U (implementada; validación manual pendiente)
+
+Exportar una playlist manual a un fichero M3U en la carpeta existente configurada
+como «Raíz M3U». El fichero usa el nombre de la playlist con extensión `.m3u`
+(saneado para el sistema de archivos; un nombre saneado en colisión lleva sufijo
+del ID), codificación UTF-8 y rutas relativas a dicha raíz. Si una referencia
+musical no se puede resolver o la carpeta no permite escribir, informar el error
+sin producir una exportación parcial. Configuración comprueba que «Raíz M3U»
+permite escritura.
+
+### Arranque y checklist del usuario
+
+Visual Studio 2026 (.NET 10), `DjTracks.slnx`, perfil **DJ Tracks (Api + UI)** y F5.
+UI `http://localhost:5050/playlists`, API `http://localhost:5247`. La ruta de
+Playlists debe existir y permitir lectura/escritura; «Raíz M3U» debe existir y
+permitir lectura/escritura. Usar playlists con MP3 de Tracks (`Año\Estilo`) y
+Remember (`Cortas`/`Largas`); no requiere BD ni FFmpeg.
+
+- [ ] En `/playlists/{id}`, «Exportar M3U» crea/actualiza `<nombre>.m3u` en Raíz M3U;
+  la página muestra el nombre del archivo y el número de canciones exportadas.
+- [ ] Abrir el fichero en un editor: empieza por `#EXTM3U`, muestra cada canción
+  una vez, con metadatos legibles y ruta relativa a la raíz configurada (no una
+  ruta absoluta); comprobar Tracks y Remember, incluidos acentos/Unicode.
+- [ ] Cambiar una playlist y exportar otra vez actualiza el M3U; playlist vacía
+  produce un M3U válido sin canciones.
+- [ ] MP3 ausente, ruta M3U sin permisos o configuración inválida muestra error
+  explícito y no deja un archivo parcial. Configuración rechaza una Raíz M3U sin
+  permiso de escritura.
+- [ ] Repetir con Light Green y otro tema, claro y oscuro; el botón/resultado se
+  entiende y no rompe el resto de acciones de playlist.
+
+### Comprobaciones del agente
+
+- `dotnet build DjTracks.slnx`: correcto, 0 errores/advertencias. Sin tests nuevos.
+- API en fixture aislado: exportación mezcla Tracks/Remember con tags Unicode,
+  `#EXTM3U`/`#EXTINF` y rutas relativas (`../library/...`), sin rutas absolutas
+  ni temporales residuales; playlist vacía produce solo la cabecera. MP3 ausente
+  devuelve 404 y conserva byte por byte el M3U anterior. Guardar Configuración con
+  una Raíz M3U inexistente devuelve 400 y conserva la configuración anterior; una
+  ruta M3U existente y escribible se guarda correctamente, sin dejar temporales.
+- UI en navegador integrado: botón «Exportar M3U» muestra nombre y número de
+  canciones tras exportar; al faltar un MP3, muestra el error en la página, y tras
+  restaurarlo permite exportar correctamente.
+- No comprobados permisos de escritura denegados por ACL, bibliotecas/unidades
+  distintas, reproductores M3U externos ni biblioteca real.
+
+Validación manual del usuario pendiente. No avanzar a F4.3.
 
 ## F3.1: Remember (validada por el usuario)
 
