@@ -2,6 +2,7 @@ using DjTracks.Domain;
 using DjTracks.UI.Shared;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.WebUtilities;
+using DjTracks.UI.Components.Layout;
 
 namespace DjTracks.UI.Components.Pages;
 
@@ -16,6 +17,10 @@ public partial class Remember
     private RememberListing? _listing;
     private string? _error;
     private bool _busy;
+    private AddToPlaylist _playlistPicker = default!;
+
+    private Task AddToPlaylistAsync(TrackFile file) => _playlistPicker.ShowAsync(
+        new("Remember", file.FileName, Category: _category));
 
     protected override Task OnInitializedAsync() => ReloadAsync();
 

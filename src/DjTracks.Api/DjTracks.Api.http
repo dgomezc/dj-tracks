@@ -91,3 +91,57 @@ GET {{DjTracks.Api_HostAddress}}/api/streaming/tracks/artwork?year=2025&style=Da
 Accept: application/json
 
 ###
+
+# Crear y copiar el id de la respuesta en playlistId.
+@playlistId = 00000000-0000-0000-0000-000000000000
+@entryId = 00000000-0000-0000-0000-000000000000
+
+POST {{DjTracks.Api_HostAddress}}/api/playlists
+Content-Type: application/json
+
+{"name": "Mi mezcla"}
+
+###
+
+GET {{DjTracks.Api_HostAddress}}/api/playlists
+
+###
+
+GET {{DjTracks.Api_HostAddress}}/api/playlists/{{playlistId}}
+
+###
+
+PUT {{DjTracks.Api_HostAddress}}/api/playlists/{{playlistId}}
+Content-Type: application/json
+
+{"name": "Mi mezcla renombrada"}
+
+###
+
+POST {{DjTracks.Api_HostAddress}}/api/playlists/{{playlistId}}/tracks
+Content-Type: application/json
+
+{"track": {"library": "Tracks", "year": "2025", "style": "Day Instrumental", "fileName": "Artist - Track.mp3"}}
+
+###
+
+POST {{DjTracks.Api_HostAddress}}/api/playlists/{{playlistId}}/tracks
+Content-Type: application/json
+
+{"track": {"library": "Remember", "category": "Cortas", "fileName": "Recuerdo.mp3"}}
+
+###
+
+# Resuelve las canciones actuales antes de incorporarlas a la cola en la UI.
+GET {{DjTracks.Api_HostAddress}}/api/playlists/{{playlistId}}/playback
+
+###
+
+DELETE {{DjTracks.Api_HostAddress}}/api/playlists/{{playlistId}}/tracks/{{entryId}}
+
+###
+
+# Solo borra el JSON de esta playlist, nunca los MP3 ni la cola.
+DELETE {{DjTracks.Api_HostAddress}}/api/playlists/{{playlistId}}
+
+###
