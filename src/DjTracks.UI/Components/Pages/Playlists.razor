@@ -50,6 +50,7 @@
         <h3 class="section-title">@_playlist.Name · @_playlist.Entries.Length canciones</h3>
         <div class="button-row">
             <BbButton OnClick="LoadQueueAsync" Disabled="@(_busy || _playlist.Entries.Length == 0)">Añadir playlist a la cola</BbButton>
+            <BbButton Variant="ButtonVariant.Outline" OnClick="ExportM3uAsync" Disabled="@_busy">Exportar M3U</BbButton>
             <BbButton Variant="ButtonVariant.Outline" OnClick="OpenRename" Disabled="@_busy" Class="narrow-only">
                 <Icon><LucideIcon Name="pencil" /></Icon>
                 <ChildContent>Renombrar playlist</ChildContent>

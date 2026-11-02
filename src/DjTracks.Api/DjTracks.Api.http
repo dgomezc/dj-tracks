@@ -137,6 +137,14 @@ GET {{DjTracks.Api_HostAddress}}/api/playlists/{{playlistId}}/playback
 
 ###
 
+# Exporta la playlist a M3U en la carpeta configurada como Raíz M3U.
+POST {{DjTracks.Api_HostAddress}}/api/playlists/{{playlistId}}/export
+Content-Type: application/json
+
+{}
+
+###
+
 DELETE {{DjTracks.Api_HostAddress}}/api/playlists/{{playlistId}}/tracks/{{entryId}}
 
 ###

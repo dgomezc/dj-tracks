@@ -98,6 +98,11 @@ public partial class Playlists : IDisposable
             _message = $"{Player.Queue.Count - before} canciones añadidas a la cola; {playback.Tracks.Length - (Player.Queue.Count - before)} ya estaban. La reproducción no se ha interrumpido.";
         });
 
+    private Task ExportM3uAsync() => RunAsync(
+        () => Http.PostForResultAsync<object, PlaylistM3uExport>(
+            $"api/playlists/{Id}/export", new { }, Logger),
+        result => _message = $"{result.FileName} exportado con {result.TrackCount} canciones.");
+
     private Task PlayEntryAsync(Guid entryId, bool play) => RunAsync(
         () => Http.GetForResultAsync<PlaylistPlayback>($"api/playlists/{Id}/playback?entryId={entryId}", Logger),
         playback =>

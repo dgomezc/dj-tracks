@@ -27,7 +27,7 @@ public sealed class SaveSettingsHandler(JsonSettingsStore settingsStore)
             (nameof(settings.M3uRoot), settings.M3uRoot)
         })
         {
-            var error = CheckFolder(path, writable: name == nameof(settings.Playlists));
+            var error = CheckFolder(path, writable: name is nameof(settings.Playlists) or nameof(settings.M3uRoot));
             if (error is not null)
                 errors[name] = [error];
         }

@@ -1,6 +1,7 @@
 using DjTracks.Api.Features.Playlists.AddPlaylistTrack;
 using DjTracks.Api.Features.Playlists.CreatePlaylist;
 using DjTracks.Api.Features.Playlists.DeletePlaylist;
+using DjTracks.Api.Features.Playlists.ExportPlaylist;
 using DjTracks.Api.Features.Playlists.GetPlaylist;
 using DjTracks.Api.Features.Playlists.LoadPlaylist;
 using DjTracks.Api.Features.Playlists.RemovePlaylistTrack;
@@ -46,6 +47,12 @@ public sealed class DeletePlaylistRequestValidator : AbstractValidator<DeletePla
 public sealed class LoadPlaylistRequestValidator : AbstractValidator<LoadPlaylistRequest>
 {
     public LoadPlaylistRequestValidator() =>
+        RuleFor(request => request.Id).NotEmpty().WithMessage("Selecciona una playlist válida.");
+}
+
+public sealed class ExportPlaylistRequestValidator : AbstractValidator<ExportPlaylistRequest>
+{
+    public ExportPlaylistRequestValidator() =>
         RuleFor(request => request.Id).NotEmpty().WithMessage("Selecciona una playlist válida.");
 }
 

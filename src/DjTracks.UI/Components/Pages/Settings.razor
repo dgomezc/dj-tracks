@@ -72,7 +72,7 @@
             <BbFieldContent>
                 <BbInput Id="settings-m3uroot" @bind-Value="_settings.M3uRoot" Disabled="@Disabled"
                          AriaDescribedBy="settings-m3uroot-help" />
-                <BbFieldDescription Id="settings-m3uroot-help">Las futuras exportaciones M3U usarán rutas relativas a esta carpeta.</BbFieldDescription>
+                <BbFieldDescription Id="settings-m3uroot-help">La carpeta debe existir y permitir escritura. Las exportaciones M3U usarán rutas relativas a ella.</BbFieldDescription>
                 <BbFieldError Errors="@FieldErrors(nameof(_settings.M3uRoot))" />
             </BbFieldContent>
         </BbField>
