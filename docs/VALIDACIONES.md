@@ -45,8 +45,10 @@ Consultar siempre el estado real de GitHub antes de actuar sobre un PR.
   con el siguiente punto») y mergeada en `develop` mediante PR
   [#15](https://github.com/dgomezc/dj-tracks/pull/15), commit
   `b5990820ddb692e46052b636873f34a511f2d0ed`. F4.2 es la fase actual en
-  `fase/f4-2-export-m3u`; F2.3 aplazada al final. Decisión confirmada: cargar
-  añade al final, sin duplicados ni interrumpir audio; no sustituye la cola.
+  `fase/f4-2-export-m3u`, PR [#16](https://github.com/dgomezc/dj-tracks/pull/16)
+  abierto hacia `develop`, pendiente de validación. F2.3 aplazada al final.
+  Decisión confirmada: cargar añade al final, sin duplicados ni interrumpir
+  audio; no sustituye la cola.
 - Revisión de F4.1 pedida el 28/10/2026: «Pon tooltips a los botones que sólo tienen
   icono… Para crear o editar un playlist creo que es mejor hacerlo desde una ventana
   modal con opciones de aceptar y cancelar». Aplicada y validada dentro del PR #15.
