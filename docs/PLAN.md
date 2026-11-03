@@ -14,7 +14,7 @@ Reproductor autoalojado de música electrónica (Tracks, Sessions, Remember). Se
 | Playlists | Un fichero M3U por playlist en la carpeta configurable, guardado automáticamente en cada cambio; legible por otros reproductores |
 | PostgreSQL | Solo estadísticas (reproducciones). EF Core + Npgsql |
 | Tags/carátula | TagLibSharp (lectura de tags y carátula incrustada) |
-| Onda | FFMpegCore decodifica PCM por pipe; desde F4.2a calcula una envolvente RMS estéreo con escala lineal fija, transmite bloques terminados progresivamente y cachea el JSON final (versión 2) bajo `App_Data/Waveforms`; requiere FFmpeg disponible en la API. NAudio se comparó y se descartó por menor rendimiento |
+| Onda | FFMpegCore decodifica PCM por pipe; desde F4.2a calcula una envolvente RMS estéreo, transmite bloques terminados progresivamente y cachea el JSON final (versión 2) bajo `App_Data/Waveforms`. El dibujo usa un realce suave fijo de niveles bajos/medios, sin normalización por canción; requiere FFmpeg disponible en la API. NAudio se comparó y se descartó por menor rendimiento |
 | Autenticación | Ninguna (red local/VPN) |
 | Playlists automáticos "vivos" | Se guardan los filtros; se resuelven al abrirlos contra un índice de la biblioteca. El índice se refresca con `FileSystemWatcher` + reescaneo horario (`BackgroundService`) por si el watcher falla en redes compartidas |
 | Audio | Endpoint con soporte de `Range` (seek) |
@@ -165,7 +165,7 @@ El estado de entrega y las checklists se mantienen en `VALIDACIONES.md`. Una imp
 - **F4.2a (extra) Rediseño del reproductor inferior**: intercalada antes de
   F4.3 por petición del usuario del 03/11/2026. Elegida la propuesta **B**:
   carátula, título, artista, estilo/categoría, año y tiempos a la izquierda;
-  onda progresiva RMS estéreo con amplitud lineal fija, seek y posición actual en el centro; añadir a playlist,
+  onda progresiva RMS estéreo con realce visual suave fijo, seek y posición actual en el centro; añadir a playlist,
   shuffle, anterior, play/pausa, siguiente, bucle y cola a la derecha.
   Volumen horizontal siempre visible debajo de los botones, porcentaje y mute
   que conserva el volumen al cambiar de canción. Sin controles nativos duplicados.
@@ -177,6 +177,8 @@ El estado de entrega y las checklists se mantienen en `VALIDACIONES.md`. Una imp
   muestra el error y una barra de seek alternativa sin detener el audio.
   La revisión de onda sustituye los máximos por energía media por tramo y también
   al agrupar barras según el ancho; no normaliza cada canción ni elimina graves.
+  Para evitar que el RMS se vea demasiado pequeño, el dibujo realza los niveles
+  bajos/medios mediante una curva fija acotada, sin recortar los niveles altos.
   Invalida las ondas de la versión anterior para regenerarlas al reproducir.
   *Prueba*: comparar con la propuesta B, reproducir las tres bibliotecas,
   buscar en la onda, probar controles/volumen/mute y revisar escritorio/móvil.

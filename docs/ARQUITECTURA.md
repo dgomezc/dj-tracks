@@ -246,10 +246,17 @@ cuadrado, evitando cancelación de fase. Frente al máximo absoluto anterior,
 un bombo breve no llena de amplitud máxima todo el tramo. Es una envolvente
 de energía, no una medición de loudness perceptual ni una copia del algoritmo de
 Beatport; no usa filtros de graves, ganancia automática ni normalización por canción.
-La amplitud RMS se dibuja en escala lineal fija respecto al PCM (0–1).
 Al reducir la onda al ancho del canvas se promedia la energía (cuadrados RMS),
 ponderando el solapamiento temporal de cada intervalo, y se toma su raíz; no
-se vuelven a escoger máximos ni se aplica una raíz adicional a la amplitud.
+se vuelven a escoger máximos.
+Tras agrupar, el dibujo aplica a `rms` una curva visual fija:
+`level * (1 + 0.75 * (1 - level))`, con `level = min(1, rms)`.
+Da más presencia a niveles bajos/medios sin multiplicar toda la señal por una
+ganancia que recorte los altos. Es creciente en 0–1 y conserva cero y uno:
+no usa el máximo de la pista ni los bloques recibidos, y no aplica raíz adicional.
+El límite de dibujo sigue en el 88 % de la altura y el silencio en una línea
+mínima de 1 px. Esta escala visual ya no es lineal ni representa una medición
+proporcional de amplitud; no altera el cálculo RMS, el audio ni la caché v2.
 Solo se dibujan barras cuyo intervalo está cargado por completo: permanecen
 estables mientras llegan los siguientes datos.
 

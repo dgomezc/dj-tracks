@@ -70,6 +70,10 @@ Consultar siempre el estado real de GitHub antes de actuar sobre un PR.
   máximos absolutos por RMS estéreo, también al agrupar barras en pantalla.
   Caché v2 y cinco JSON de ondas eliminados en este workspace.
   **Pendiente de nueva validación con música real; PR #17 sin autorización de merge.**
+- Tercera revisión F4.2a: el usuario indica «ahora las ondas han quedado un poco
+  pequeñas». Se conserva RMS/caché v2 y se añade únicamente un realce visual
+  suave fijo de niveles bajos/medios, sin normalización por canción ni recorte
+  de los niveles altos. **Pendiente de validación; no autoriza merge ni F4.3.**
 - Revisión de F4.1 pedida el 28/10/2026: «Pon tooltips a los botones que sólo tienen
   icono… Para crear o editar un playlist creo que es mejor hacerlo desde una ventana
   modal con opciones de aceptar y cancelar». Aplicada y validada dentro del PR #15.
@@ -168,7 +172,53 @@ No requiere BD, Docker, configuración nueva ni modificar MP3.
   actual; no se añaden datos ficticios ni lectura nueva de tags. La ficha grande
   se conserva para no perder álbum, archivo, avisos ni tracklist.
 
-### Segunda revisión de onda: RMS y caché (validación actual pendiente)
+### Tercera revisión de onda: tamaño visual (validación actual pendiente)
+
+Arranque: Visual Studio 2026 (.NET 10), abrir `DjTracks.slnx` en la rama del
+PR #17, perfil **DJ Tracks (Api + UI)** y F5. UI
+`http://localhost:5050/tracks`, API `http://localhost:5247`, rutas de biblioteca
+configuradas y FFmpeg disponible para ondas nuevas. Reiniciar UI y recargar
+completamente para cargar el módulo JS nuevo; la API conserva el algoritmo
+RMS. **No borrar ni regenerar caché v2**: el ajuste se aplica también a las
+ondas ya guardadas. Si todavía hay v1 se regenera automáticamente como antes.
+
+El RMS lineal se veía demasiado pequeño. Se realza solo el dibujo con la curva
+fija `level * (1 + 0.75 * (1 - level))`, después de agrupar la energía RMS.
+El incremento es mayor en niveles bajos/medios y disminuye hacia los altos:
+no hay normalización por canción ni un multiplicador que recorte los niveles
+altos al techo. Conserva cero, uno y el orden de amplitudes. No es una escala
+de medida lineal; es una decisión de legibilidad visual. Sin cambios en MP3,
+datos RMS, generación progresiva, caché, dimensiones del reproductor o controles.
+
+- [ ] **Repetir — tamaño/contraste:** reproducir las mismas pistas que se veían
+  pequeñas y comparar partes suaves, bombos y bajos sostenidos. Las barras
+  bajas/medias deben verse más altas; las fuertes deben conservar diferencias,
+  sin convertirse todas en una banda al máximo. Silencio como línea mínima.
+- [ ] **Repetir — caché/responsive:** abrir una onda RMS ya cacheada en Tracks,
+  Sessions y Remember, en escritorio y móvil. El realce debe verse sin regenerar,
+  sin desbordamientos ni nueva saturación al reducir el ancho.
+- [ ] **Repetir — carga/seek:** con una onda aún no generada, comprobar aparición
+  progresiva y altura estable de barras terminadas. Clic y flechas deben seguir
+  buscando; cambiar de pista durante la carga no recupera bloques de la anterior.
+  No hace falta repetir volumen/mute ni la checklist general por este ajuste.
+
+Comprobaciones del agente:
+
+- `dotnet build DjTracks.slnx`: 0 errores y 0 advertencias.
+- Navegador real con el módulo JS del repositorio y datos sintéticos, sin iniciar
+  API/UI ni usar música personal: comparación visual antes/después y ancho móvil.
+  En canvas de 100 px, RMS 0,05 / 0,1 / 0,2 / 0,5 / 0,8 pasa de
+  **4,4 / 8,8 / 17,6 / 44 / 70,4 px** a
+  **7,535 / 14,74 / 28,16 / 60,5 / 80,96 px**.
+  RMS 1 conserva 88 px; silencio conserva 1 px.
+- 1001 niveles entre cero y uno medidos en el dibujo real: todos finitos,
+  no decrecientes, sin meseta de recorte superior (solo mínimo de silencio).
+  Primera barra terminada estable al recibir el siguiente bloque.
+- La comparación fue aislada, no una prueba nueva del reproductor integrado
+  ni de música real. La aceptación del tamaño sigue pendiente del usuario.
+  Servicio y script temporal de comparación retirados; sin tests nuevos.
+
+### Segunda revisión de onda: RMS y caché (histórico; dibujo ajustado en revisión 3)
 
 Mismo arranque de F4.2a: Visual Studio 2026, perfil **DJ Tracks (Api + UI)**,
 UI `http://localhost:5050/tracks`, API `http://localhost:5247`, FFmpeg disponible.

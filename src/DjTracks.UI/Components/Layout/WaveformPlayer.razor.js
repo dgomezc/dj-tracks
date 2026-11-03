@@ -147,8 +147,11 @@ function draw(instance) {
             energy += peaks[sample] * peaks[sample] * weight;
         }
         const rms = Math.sqrt(energy / (end - start));
+        // Realce visual fijo: más presencia en niveles medios/bajos, sin recortar los altos.
+        const level = Math.min(1, rms);
+        const displayLevel = level * (1 + 0.75 * (1 - level));
         const x = (index + 0.5) * barWidth;
-        const amplitude = Math.max(0.5, Math.min(1, rms) * (height * 0.88) / 2);
+        const amplitude = Math.max(0.5, displayLevel * (height * 0.88) / 2);
         context.strokeStyle = x / width <= progress ? primary : muted;
         context.lineWidth = Math.max(1, barWidth * 0.65);
         context.beginPath();
