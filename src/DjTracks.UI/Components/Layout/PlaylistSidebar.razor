@@ -16,12 +16,12 @@
 }
 else if (_playlists is not null)
 {
-    @if (_playlists.Length == 0)
+    @if (!_playlists.Any(playlist => playlist.Filters is null))
     {
         <BbTypographyMuted>Sin playlists</BbTypographyMuted>
     }
     <nav class="playlist-links" aria-label="Playlists manuales">
-        @foreach (var playlist in _playlists)
+        @foreach (var playlist in _playlists.Where(playlist => playlist.Filters is null))
         {
             <div class="playlist-link-row">
                 <NavLink href="@($"/playlists/{playlist.Id}")" class="app-nav-link">
@@ -34,6 +34,28 @@ else if (_playlists is not null)
     </nav>
 }
 <BbSeparator />
-<p class="panel-label">Playlists automáticos</p>
-<BbTypographyMuted>Disponibles en una fase posterior</BbTypographyMuted>
+<div class="panel-heading">
+    <p class="panel-label">Playlists automáticos</p>
+    <IconButton Label="Generar playlist automático" Icon="plus" OnClick="() => _automaticDialogOpen = true" />
+</div>
+@if (_playlists is not null)
+{
+    @if (!_playlists.Any(playlist => playlist.Filters is not null))
+    {
+        <BbTypographyMuted>Sin playlists automáticos</BbTypographyMuted>
+    }
+    <nav class="playlist-links" aria-label="Playlists automáticos">
+        @foreach (var playlist in _playlists.Where(playlist => playlist.Filters is not null))
+        {
+            <div class="playlist-link-row">
+                <NavLink href="@($"/playlists/{playlist.Id}")" class="app-nav-link">
+                    @playlist.Name (@playlist.Entries.Length)
+                </NavLink>
+                <IconButton Label="Renombrar playlist" Icon="pencil" OnClick="() => OpenDialog(playlist)"
+                            AriaLabel="@($"Renombrar playlist {playlist.Name}")" />
+            </div>
+        }
+    </nav>
+}
 <PlaylistDialog @bind-Open="_dialogOpen" Playlist="@_dialogPlaylist" />
+<AutomaticPlaylistDialog @bind-Open="_automaticDialogOpen" />

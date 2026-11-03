@@ -1,0 +1,63 @@
+<BbDialog Open="@Open" OpenChanged="OnOpenChanged">
+    <BbDialogContent Class="playlist-dialog automatic-playlist-dialog" ShowClose="false" CloseOnOverlayClick="false">
+        <form @onsubmit="SaveAsync" @onsubmit:preventDefault>
+            <BbDialogHeader>
+                <BbDialogTitle>@(Playlist is null ? "Generar playlist automático" : "Editar filtros y regenerar")</BbDialogTitle>
+                <BbDialogDescription>
+                    Todas las coincidencias, sin límite ni selección aleatoria. Regenerar sustituye las canciones guardadas, pero no cambia la cola ni el audio.
+                </BbDialogDescription>
+            </BbDialogHeader>
+            @if (Playlist is null)
+            {
+                <BbField Class="playlist-dialog-field">
+                    <BbFieldLabel For="automatic-playlist-name">Nombre</BbFieldLabel>
+                    <BbInput Id="automatic-playlist-name" @bind-Value="_name" Disabled="@_busy" maxlength="120" data-autofocus="true" />
+                </BbField>
+            }
+            else
+            {
+                <p>@Playlist.Name</p>
+            }
+            <div class="playlist-form playlist-dialog-field">
+                <BbField>
+                    <BbFieldLabel>Año</BbFieldLabel>
+                    <BbMultiSelect TValue="string" @bind-Values="_years" Options="@YearOptions" AriaLabel="Años de la playlist"
+                                   Placeholder="Todos los años" Disabled="@(_busy || _loading || _options is null)" MatchTriggerWidth="true"
+                                   SearchPlaceholder="Buscar…" EmptyMessage="Sin resultados" SelectAllLabel="Seleccionar todo"
+                                   ClearLabel="Limpiar" CloseLabel="Cerrar" />
+                </BbField>
+                <BbField>
+                    <BbFieldLabel>Estilo</BbFieldLabel>
+                    <BbMultiSelect TValue="string" @bind-Values="_styles" Options="@StyleOptions" AriaLabel="Estilos de la playlist"
+                                   Placeholder="Todos los estilos" Disabled="@(_busy || _loading || _options is null)" MatchTriggerWidth="true"
+                                   SearchPlaceholder="Buscar…" EmptyMessage="Sin resultados" SelectAllLabel="Seleccionar todo"
+                                   ClearLabel="Limpiar" CloseLabel="Cerrar" />
+                </BbField>
+                <div class="button-row">
+                    <BbCheckbox Id="automatic-playlist-remember" @bind-Checked="_includeRemember" Disabled="@_busy" />
+                    <BbLabel For="automatic-playlist-remember">Incluir Remember (Cortas y Largas)</BbLabel>
+                </div>
+                <BbTypographyMuted>
+                    Sin selección = todos. Alternativas dentro de cada campo, coincidencia entre año y estilo.
+                    Remember no usa año/estilo. Los filtros se guardan en el M3U; las canciones solo cambian al regenerar.
+                    Orden: Tracks por año descendente, estilo y fichero ascendentes; después Remember Cortas y Largas por fichero.
+                </BbTypographyMuted>
+                @if (_loading)
+                {
+                    <span role="status">Cargando filtros…</span>
+                }
+                @if (_error is not null)
+                {
+                    <BbAlert Variant="AlertVariant.Danger"><BbAlertDescription>@_error</BbAlertDescription></BbAlert>
+                }
+                <BbButton Variant="ButtonVariant.Ghost" OnClick="LoadOptionsAsync" Disabled="@(_busy || _loading)">Recargar opciones</BbButton>
+            </div>
+            <BbDialogFooter>
+                <BbButton Variant="ButtonVariant.Outline" OnClick="CloseAsync" Disabled="@_busy">Cancelar</BbButton>
+                <BbButton Type="ButtonType.Submit" Disabled="@(_busy || _loading || _options is null)">
+                    @(_busy ? "Generando…" : Playlist is null ? "Generar" : "Guardar filtros y regenerar")
+                </BbButton>
+            </BbDialogFooter>
+        </form>
+    </BbDialogContent>
+</BbDialog>

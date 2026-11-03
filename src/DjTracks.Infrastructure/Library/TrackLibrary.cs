@@ -118,11 +118,34 @@ public sealed class TrackLibrary
             groups.OrderBy(group => group, StringComparer.OrdinalIgnoreCase).ToArray());
     }
 
-    public Result<TrackListing> Search(string root, TrackFilter filter, CancellationToken ct)
+    public AutomaticPlaylistOptions GetAutomaticOptions(string root, CancellationToken ct)
+    {
+        var years = new DirectoryInfo(root).EnumerateDirectories().Where(IsRegularEntry).ToArray();
+        HashSet<string> styles = new(StringComparer.OrdinalIgnoreCase);
+        foreach (var year in years)
+        {
+            ct.ThrowIfCancellationRequested();
+            foreach (var style in year.EnumerateDirectories().Where(IsRegularEntry))
+                styles.Add(AutomaticPlaylistFilters.CanonicalStyle(style.Name));
+        }
+        return new AutomaticPlaylistOptions(
+            years.Select(year => year.Name).OrderDescending(StringComparer.OrdinalIgnoreCase).ToArray(),
+            styles.Order(StringComparer.OrdinalIgnoreCase).ToArray());
+    }
+
+    public Result<TrackListing> SearchAutomatic(string root, AutomaticPlaylistFilters filters, CancellationToken ct) =>
+        Search(root, new TrackFilter(filters.Years, [], []), ct, filters.Styles);
+
+    public Result<TrackListing> Search(string root, TrackFilter filter, CancellationToken ct) =>
+        Search(root, filter, ct, []);
+
+    private Result<TrackListing> Search(string root, TrackFilter filter, CancellationToken ct, string[] styles)
     {
         var selectedYears = filter.Years.ToHashSet(StringComparer.OrdinalIgnoreCase);
         var selectedGroups = filter.Groups.ToHashSet(StringComparer.OrdinalIgnoreCase);
         var selectedSubstyles = filter.Substyles.ToHashSet(StringComparer.OrdinalIgnoreCase);
+        var selectedStyles = styles.Select(AutomaticPlaylistFilters.CanonicalStyle)
+            .ToHashSet(StringComparer.OrdinalIgnoreCase);
         var rootDirectory = new DirectoryInfo(root);
         List<DirectoryInfo> yearDirectories = [];
         if (selectedYears.Count == 0)
@@ -155,7 +178,9 @@ public sealed class TrackLibrary
             {
                 ct.ThrowIfCancellationRequested();
                 var (group, substyle) = SplitStyle(styleDirectory.Name);
-                if ((selectedGroups.Count > 0 && !selectedGroups.Contains(group))
+                if ((selectedStyles.Count > 0
+                        && !selectedStyles.Contains(AutomaticPlaylistFilters.CanonicalStyle(styleDirectory.Name)))
+                    || (selectedGroups.Count > 0 && !selectedGroups.Contains(group))
                     || (selectedSubstyles.Count > 0
                         && (substyle is null || !selectedSubstyles.Contains(substyle))))
                     continue;

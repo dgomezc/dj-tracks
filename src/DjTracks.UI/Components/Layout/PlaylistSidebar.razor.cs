@@ -15,6 +15,7 @@ public partial class PlaylistSidebar
     private int _version;
     private bool _dialogOpen;
     private ManualPlaylist? _dialogPlaylist;
+    private bool _automaticDialogOpen;
 
     protected override Task OnInitializedAsync()
     {

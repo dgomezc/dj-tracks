@@ -17,6 +17,7 @@ public sealed class M3uPlaylistStore(JsonSettingsStore settingsStore, TrackLibra
     private const string NamePrefix = "#PLAYLIST:";
     private const string IdPrefix = "#DJTRACKS-ID:";
     private const string InfoPrefix = "#EXTINF:";
+    private const string AutoPrefix = "#DJTRACKS-AUTO-V1:";
     private static readonly char[] InvalidFileNameCharacters = ['<', '>', ':', '"', '/', '\\', '|', '?', '*'];
     private static readonly HashSet<string> ReservedFileNames = new(StringComparer.OrdinalIgnoreCase)
     {
@@ -86,6 +87,56 @@ public sealed class M3uPlaylistStore(JsonSettingsStore settingsStore, TrackLibra
             return playlist;
         }, ct);
 
+    public Task<Result<ManualPlaylist>> GenerateAsync(Guid? id, string name,
+        AutomaticPlaylistFilters filters, CancellationToken ct) =>
+        ExecuteAsync<ManualPlaylist>(async settings =>
+        {
+            var all = await ReadAllAsync(settings, ct);
+            var stored = id is null ? null : all.FirstOrDefault(item => item.Playlist.Id == id);
+            if (id is not null && stored is null)
+                return NotFound();
+            if (stored is not null && stored.Playlist.Filters is null)
+                return new AppError(ErrorKind.Conflict, "Playlist manual.",
+                    "No se puede regenerar una playlist manual mediante filtros.");
+            var path = stored?.Path ?? TargetPath(settings.Playlists, name);
+            if (stored is null && IsTaken(all, name, path, null))
+                return DuplicateName();
+            if (string.IsNullOrWhiteSpace(settings.Tracks)
+                || filters.IncludeRemember && string.IsNullOrWhiteSpace(settings.Remember))
+                return new AppError(ErrorKind.Conflict, "Configura la biblioteca.",
+                    "Configura Tracks y, si lo incluyes, Remember antes de generar la playlist.");
+
+            filters = filters.Normalize();
+            var listing = tracks.SearchAutomatic(settings.Tracks, filters, ct);
+            if (listing.IsFailed)
+                return listing.ToResult();
+            List<PlaylistTrackReference> references = listing.Value.Tracks.Select(track =>
+                new PlaylistTrackReference("Tracks", track.FileName, track.Year, track.Style)).ToList();
+            foreach (var track in listing.Value.Tracks.Where(track => track.Warning is not null))
+                logger.LogWarning("Tags no disponibles al generar playlist: {Year}/{Style}/{File}: {Warning}",
+                    track.Year, track.Style, track.FileName, track.Warning);
+            if (filters.IncludeRemember)
+            {
+                foreach (var category in new[] { "Cortas", "Largas" })
+                {
+                    var result = remember.Browse(settings.Remember, category, ct);
+                    if (result.IsFailed)
+                        return result.ToResult();
+                    foreach (var track in result.Value.Files)
+                    {
+                        references.Add(new PlaylistTrackReference("Remember", track.FileName, Category: category));
+                        if (track.Warning is not null)
+                            logger.LogWarning("Tags no disponibles al generar playlist: Remember/{Category}/{File}: {Warning}",
+                                category, track.FileName, track.Warning);
+                    }
+                }
+            }
+            var playlist = new ManualPlaylist(stored?.Playlist.Id ?? Guid.NewGuid(),
+                stored?.Playlist.Name ?? name, references.Distinct().Select(NewEntry).ToArray(), filters);
+            await WriteAsync(settings, playlist, [], path, overwrite: stored is not null, ct);
+            return playlist;
+        }, ct);
+
     public Task<Result<Guid>> DeleteAsync(Guid id, CancellationToken ct) =>
         ExecuteAsync<Guid>(async settings =>
         {
@@ -104,6 +155,8 @@ public sealed class M3uPlaylistStore(JsonSettingsStore settingsStore, TrackLibra
             if (result.IsFailed)
                 return result.ToResult();
             var stored = result.Value;
+            if (stored.Playlist.Filters is not null)
+                return AutomaticReadOnly();
             if (stored.Playlist.Entries.Any(entry => entry.Track == track))
                 return stored.Playlist;
             var playlist = stored.Playlist with { Entries = [.. stored.Playlist.Entries, NewEntry(track)] };
@@ -118,6 +171,8 @@ public sealed class M3uPlaylistStore(JsonSettingsStore settingsStore, TrackLibra
             if (result.IsFailed)
                 return result.ToResult();
             var stored = result.Value;
+            if (stored.Playlist.Filters is not null)
+                return AutomaticReadOnly();
             if (!stored.Playlist.Entries.Any(entry => entry.Id == entryId))
                 return new AppError(ErrorKind.NotFound, "Canción no encontrada.",
                     "La entrada ya no está en la playlist. Vuelve a cargarla.");
@@ -208,6 +263,7 @@ public sealed class M3uPlaylistStore(JsonSettingsStore settingsStore, TrackLibra
         Guid? id = null;
         string? name = null;
         string? info = null;
+        AutomaticPlaylistFilters? filters = null;
         List<PlaylistEntry> entries = [];
         Dictionary<PlaylistTrackReference, string> infos = [];
         foreach (var raw in lines)
@@ -223,6 +279,22 @@ public sealed class M3uPlaylistStore(JsonSettingsStore settingsStore, TrackLibra
                 id = Guid.TryParseExact(line[IdPrefix.Length..].Trim(), "N", out var parsed) && parsed != Guid.Empty
                     ? parsed
                     : throw new InvalidDataException($"«{file.Name}» tiene un identificador inválido.");
+            else if (line.StartsWith("#DJTRACKS-AUTO", StringComparison.OrdinalIgnoreCase))
+            {
+                if (filters is not null || !line.StartsWith(AutoPrefix, StringComparison.OrdinalIgnoreCase))
+                    throw new InvalidDataException($"«{file.Name}» tiene filtros repetidos o una versión automática no compatible.");
+                try
+                {
+                    filters = JsonSerializer.Deserialize<AutomaticPlaylistFilters>(line[AutoPrefix.Length..], LegacyJsonOptions);
+                }
+                catch (JsonException ex)
+                {
+                    throw new InvalidDataException($"«{file.Name}» contiene filtros automáticos inválidos.", ex);
+                }
+                if (filters is null || !filters.IsValid())
+                    throw new InvalidDataException($"«{file.Name}» contiene filtros automáticos inválidos.");
+                filters = filters.Normalize();
+            }
             else if (!line.StartsWith('#'))
             {
                 var reference = ToReference(settings, line)
@@ -241,7 +313,7 @@ public sealed class M3uPlaylistStore(JsonSettingsStore settingsStore, TrackLibra
         if (!IsValidName(name))
             throw new InvalidDataException($"«{file.Name}» tiene un nombre de playlist inválido.");
         var playlist = new ManualPlaylist(id ?? StableGuid("file:" + file.Name.ToLowerInvariant()),
-            name.Trim(), entries.ToArray());
+            name.Trim(), entries.ToArray(), filters);
         return new StoredPlaylist(playlist, file.FullName, infos);
     }
 
@@ -285,6 +357,8 @@ public sealed class M3uPlaylistStore(JsonSettingsStore settingsStore, TrackLibra
         var root = Path.GetFullPath(settings.Playlists);
         StringBuilder content = new();
         content.AppendLine("#EXTM3U").AppendLine(NamePrefix + playlist.Name).AppendLine($"{IdPrefix}{playlist.Id:N}");
+        if (playlist.Filters is not null)
+            content.AppendLine(AutoPrefix + JsonSerializer.Serialize(playlist.Filters, LegacyJsonOptions));
         foreach (var entry in playlist.Entries)
         {
             ct.ThrowIfCancellationRequested();
@@ -402,4 +476,7 @@ public sealed class M3uPlaylistStore(JsonSettingsStore settingsStore, TrackLibra
 
     private static AppError DuplicateName() => new(ErrorKind.Conflict, "Nombre repetido.",
         "Ya existe una playlist con ese nombre (o con un nombre de archivo equivalente). Elige otro.");
+
+    private static AppError AutomaticReadOnly() => new(ErrorKind.Conflict, "Playlist automática.",
+        "Sus canciones solo se cambian editando los filtros y regenerando la playlist.");
 }

@@ -141,7 +141,30 @@ DELETE {{DjTracks.Api_HostAddress}}/api/playlists/{{playlistId}}/tracks/{{entryI
 
 ###
 
-# Solo borra el JSON de esta playlist, nunca los MP3 ni la cola.
+# Solo borra el M3U de esta playlist, nunca los MP3 ni la cola.
 DELETE {{DjTracks.Api_HostAddress}}/api/playlists/{{playlistId}}
+
+###
+
+# Opciones reales por nombres de carpeta (estilos completos).
+GET {{DjTracks.Api_HostAddress}}/api/playlists/automatic/options
+
+###
+
+# Copiar su id en automaticPlaylistId. Sin selección en un campo = todos.
+@automaticPlaylistId = 00000000-0000-0000-0000-000000000000
+
+POST {{DjTracks.Api_HostAddress}}/api/playlists/automatic
+Content-Type: application/json
+
+{"name": "Day con recuerdos", "filters": {"years": ["2025", "2026"], "styles": ["Day Vocal", "Day Instrumental"], "includeRemember": true}}
+
+###
+
+# Sustituye filtros y canciones; conserva nombre/ID y no toca la cola.
+PUT {{DjTracks.Api_HostAddress}}/api/playlists/{{automaticPlaylistId}}/automatic
+Content-Type: application/json
+
+{"name": "Day con recuerdos", "filters": {"years": [], "styles": ["Night Instrumental"], "includeRemember": false}}
 
 ###

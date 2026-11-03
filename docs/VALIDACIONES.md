@@ -7,15 +7,22 @@ Consultar siempre el estado real de GitHub antes de actuar sobre un PR.
 
 ## Estado actual
 
+- **F4.3 validada globalmente por el usuario** (03/11/2026):
+  rama `fase/f4-3-automaticos`, desde `develop` limpio con F4.2a integrada.
+  PR [#18](https://github.com/dgomezc/dj-tracks/pull/18) abierto hacia
+  `develop`. Confirmación: «todo ok, continua». Autoriza su integración y
+  continuación con F4.4; no atribuye pruebas individuales adicionales.
+  Decisiones confirmadas en esta sesión: solo cambiar canciones mediante
+  filtros/regeneración, estilos completos y todo Remember opcional; detalle abajo.
 - **F4.2a validada globalmente por el usuario el 03/11/2026**:
   «Ok, damos esto por validado. Mezcla el PR». Incluye el reproductor B y
   las revisiones de onda RMS/realce visual. Autorizado el merge del
   PR [#17](https://github.com/dgomezc/dj-tracks/pull/17) hacia `develop`;
-  consultar GitHub para su estado final y commit de integración.
+  **mergeado** el 03/11/2026 a las 10:54:13 UTC, commit
+  `70703599a7fbb7b78949199e1f155f996bb5bd7d` (comprobado en GitHub).
   Esta aceptación sustituye los estados pendientes históricos de abajo,
   sin atribuir pruebas individuales adicionales al usuario o al agente.
-  F4.3 es la siguiente fase; todavía no iniciada. El usuario solicita una
-  recomendación de sesión, no ha pedido empezar la implementación.
+  F4.3 se desarrolla en esta sesión de continuidad por petición posterior.
 - Planificación: PR #1 mergeado.
 - F0.1: validada por el usuario el 26/10/2026, incluido el inicio conjunto; PR [#2](https://github.com/dgomezc/dj-tracks/pull/2) mergeado en `develop` (estado comprobado en GitHub).
 - Continuación anterior autorizada el 26/10/2026: "Validado. Continua". Sustituida por la pausa explícita de F1.2 indicada abajo.
@@ -104,6 +111,113 @@ Consultar siempre el estado real de GitHub antes de actuar sobre un PR.
 - **Refactor transversal Vertical Slices: validado por el usuario el 27/10/2026** con "Perfecto, documenta toda la arquitectura actual… Después mezcla el PR y sigue con el siguiente paso". Arquitectura documentada en `ARQUITECTURA.md`. PR [#6](https://github.com/dgomezc/dj-tracks/pull/6) mergeado en `develop` (`c7c1508`). Diseño validado en `arquitectura/flujo-get-tracks.html` ("Cambia todas las llamadas").
 - Port F1.2 recibido de `dgomezc-fase-f1-2-filtros` (`1354305` código, `c38cddb` documentación). Se integra mediante merge en la rama original: se conservan ambos historiales y se resuelven los conflictos de código con la versión adaptada a Result/FluentValidation. Sin PR duplicado ni reescritura de ramas. Cambios preexistentes y JSON privado conservados; no se borran worktrees.
 - Comprobación de integración en checkout original (27/10/2026): `src` coincide con el port recibido; compilación completa con 0 errores y advertencias. API/UI aisladas con MP3 sintéticos: multiaño/multigrupo/multisubestilo, alias, ausencia de duplicados, resultados vacíos, explorador, errores 400/404, opciones, carga de ajustes y página Tracks correctos. No equivale a validación visual de biblioteca real. Servicios y fixtures temporales retirados después de comprobar.
+
+## F4.3: playlists automáticas (validada globalmente por el usuario)
+
+Confirmación del 03/11/2026: «todo ok, continua». Aceptación global y
+autorización de integración/continuación con F4.4. Las casillas se conservan
+como registro de alcance, sin afirmar pruebas individuales no detalladas.
+
+Modal «Generar playlist automático» con nombre, Año y Estilo completo
+multiselección, e Incluir Remember. Genera todas las coincidencias sin límite
+ni selección aleatoria: OR por campo, AND entre campos, vacío = todos.
+Remember incluye Cortas y Largas, sin año/estilo; Sessions queda excluida.
+`Night Intrumental` se filtra como `Night Instrumental`, sin renombrar carpetas.
+Tracks por año descendente, estilo/fichero ascendentes; después Remember por
+categoría (Cortas, Largas) y fichero ascendente.
+
+Un M3U por playlist, con filtros en `#DJTRACKS-AUTO-V1:` y canciones `#EXTINF`
++ ruta relativa (absoluta solo entre unidades). Sin JSON adicional. Solo se
+modifican las canciones editando filtros y regenerando; se sustituyen todas
+las entradas conservando ID/nombre. Se puede renombrar, borrar, reproducir o
+cargar en cola como las manuales. Abrir/recargar no regenera: watcher, índice
+y actualización viva pertenecen a F4.4, no implementada ni iniciada.
+
+### Arranque y checklist del usuario
+
+Visual Studio 2026 (.NET 10), abrir `DjTracks.slnx` en
+`fase/f4-3-automaticos`, perfil **DJ Tracks (Api + UI)** y F5.
+Reiniciar API/UI y recargar completamente. UI
+`http://localhost:5050/playlists`, API `http://localhost:5247`.
+En `/settings`, configurar las cuatro rutas existentes; Playlists debe permitir
+lectura/escritura. Tracks contiene `Año\Estilo\MP3` y Remember `Cortas`/`Largas`.
+Usar al menos dos años/estilos y ambas categorías para comprobar combinaciones.
+FFmpeg en PATH o `Waveform__BinaryFolder` para ondas. Sin BD ni Docker.
+Para provocar errores o altas/bajas, usar exclusivamente copias/datos de prueba.
+
+- [ ] **Crear y cancelar:** «+» en Playlists automáticos del lateral, o
+  «Generar playlist automático» en `/playlists` sin lateral, abre el modal.
+  Cancelar/Escape no crean nada; reabrir descarta cambios. Nombre vacío o
+  repetido muestra error dentro, sin cerrar ni alterar las existentes.
+- [ ] **Filtros:** seleccionar dos años y dos estilos completos genera su
+  intersección por campos/unión de alternativas. Vaciar un campo incluye
+  todos sus valores. Incluir Remember añade todas las Cortas/Largas sin
+  aplicarles año/estilo. No hay Sessions ni duplicados. Revisar orden y alias
+  Night; sin coincidencias, playlist vacía explícita con filtros conservados.
+- [ ] **M3U y persistencia:** en la carpeta Playlists aparece solo su `.m3u`,
+  con filtros, `#EXTINF` y rutas relativas. Reiniciar API/UI y recargar conserva
+  nombre, filtros y canciones; abrir en un reproductor externo resuelve los MP3.
+- [ ] **Regenerar:** abrir Editar filtros y regenerar recupera las selecciones.
+  Cancelar conserva filtros/entradas; guardar los sustituye y actualiza
+  contador/resumen/lateral sin cambiar ID/nombre. Con datos de prueba, añadir
+  o borrar un MP3 no cambia la playlist al abrir/recargar; regenerar sí.
+- [ ] **Cola y edición:** con audio sonando, cargar añade solo las canciones
+  que faltan al final, sin reiniciar audio; repetir añade cero. Cola vacía
+  no inicia audio. Regenerar no modifica la cola ya cargada. Reproducir/encolar
+  una fila funciona; no hay Quitar ni se ofrece la automática como destino
+  en Añadir a playlist. Las manuales siguen permitiendo añadir/quitar.
+- [ ] **Renombrar y borrar:** renombrar conserva filtros/canciones; cancelar
+  borrado conserva todo y confirmar elimina solo el M3U, no MP3 ni cola.
+- [ ] **Pantallas y temas:** escritorio y móvil (390 px), Light Green y otro
+  tema, claro/oscuro: controles, desplegables y botones accesibles, modal con
+  scroll si hace falta y sin desbordamiento horizontal. Tooltips de iconos.
+- [ ] **Errores con datos de prueba:** un año seleccionado o una categoría de
+  Remember ausentes avisan sin sustituir el M3U anterior; almacenamiento
+  inaccesible o filtros M3U corruptos dan error sin sobrescribir. Recuperar
+  datos/rutas y volver a cargar permite reintentar. No provocar fallos con
+  archivos reales.
+
+### Comprobaciones del agente y límites
+
+PR [#18](https://github.com/dgomezc/dj-tracks/pull/18), hacia `develop`;
+validada globalmente por el usuario; consultar GitHub para su integración.
+
+- Compilación de la solución: 0 errores y 0 advertencias; sin tests nuevos.
+  Context7 (Minimal API) y MCP Blueprint (Dialog/MultiSelect/Checkbox) consultados.
+- API/UI aisladas en 5347/5150, biblioteca propia sintética fuera del repositorio;
+  ajustes, música y caché del usuario sin tocar.
+- HTTP/disco: opciones reales/canónicas, combinación multi-año/estilo, orden,
+  alias Night, vacío = todos, Remember completo opcional, cero coincidencias,
+  filtros dentro del único M3U y rutas relativas. Regenerar conserva ID/nombre
+  y sustituye entradas/filtros; renombrar conserva metadatos. Manuales editables;
+  añadir/quitar una automática y regenerar una manual devuelven 409.
+  Reiniciar la API conserva filtros y canciones generadas desde el navegador;
+  borrar una automática elimina solo el M3U y mantiene los MP3. Los filtros
+  previos por grupos/subestilos de Tracks siguen devolviendo las mismas pistas.
+- Validación 400 para nombres vacíos, filtros ausentes/nulos, segmentos nulos
+  y traversal; 409 para nombre repetido. Año/categoría ausente: 404 y snapshot
+  anterior intacto. Filtros M3U corruptos o con versión desconocida: 500
+  explícito sin sobrescribir.
+  Playback resuelve tags actuales y streaming Range sigue devolviendo 206.
+- Navegador integrado: crear desde lateral, error dentro del modal, selección
+  de año/estilo/Remember, creación y actualización de detalle/lateral; editar
+  recupera filtros, regenerar actualiza canciones y resumen. Con audio sintético
+  en reproducción, cargar añadió tres canciones y reconoció una repetida:
+  mismo elemento audio y tiempo avanzando. Regenerar de cuatro a dos canciones
+  mantuvo el audio y las cuatro de la cola. Selector del reproductor solo
+  ofreció la manual. Cancelar y reabrir dejó el nombre vacío.
+- Capturas inspeccionadas de escritorio y viewport de 390 px en iframe real:
+  modal y desplegable sin desbordamiento horizontal, botones accesibles con
+  scroll, Light Green oscuro y Cyberpunk oscuro/claro.
+- Pendientes del usuario: biblioteca y sonido reales, teclado físico/Escape,
+  lector de pantalla, todos los temas/dispositivos, reproductor M3U externo
+  y comportamiento en su almacenamiento. Las etiquetas internas `Remove`/
+  `Clear` de las etiquetas seleccionadas de `BbMultiSelect` siguen en inglés
+  en Blueprint 4.1.0; los textos y parámetros de localización expuestos se
+  pasan en español. No se modifica la dependencia ni el reproductor F4.2a.
+- Una API por carpeta de playlists. Cambios de otras ventanas requieren
+  recarga; F4.3 no sincroniza ni regenera automáticamente.
+- Servicios, audio/caché sintéticos y scripts temporales retirados al terminar.
 
 ## F4.2a: reproductor inferior, opción B (validada globalmente por el usuario)
 

@@ -16,7 +16,7 @@ Reproductor autoalojado de música electrónica (Tracks, Sessions, Remember). Se
 | Tags/carátula | TagLibSharp (lectura de tags y carátula incrustada) |
 | Onda | FFMpegCore decodifica PCM por pipe; desde F4.2a calcula una envolvente RMS estéreo, transmite bloques terminados progresivamente y cachea el JSON final (versión 2) bajo `App_Data/Waveforms`. El dibujo usa un realce suave fijo de niveles bajos/medios, sin normalización por canción; requiere FFmpeg disponible en la API. NAudio se comparó y se descartó por menor rendimiento |
 | Autenticación | Ninguna (red local/VPN) |
-| Playlists automáticos "vivos" | Se guardan los filtros; se resuelven al abrirlos contra un índice de la biblioteca. El índice se refresca con `FileSystemWatcher` + reescaneo horario (`BackgroundService`) por si el watcher falla en redes compartidas |
+| Playlists automáticos | F4.3: filtros y canciones generadas en un único M3U; solo cambian al regenerar explícitamente. F4.4: resolución al abrir contra un índice, refrescado con `FileSystemWatcher` + reescaneo horario (`BackgroundService`) por si el watcher falla en redes compartidas |
 | Audio | Endpoint con soporte de `Range` (seek) |
 | Tests | No se generan; validación manual por fase |
 
@@ -183,7 +183,22 @@ El estado de entrega y las checklists se mantienen en `VALIDACIONES.md`. Una imp
   *Prueba*: comparar con la propuesta B, reproducir las tres bibliotecas,
   buscar en la onda, probar controles/volumen/mute y revisar escritorio/móvil.
   No avanzar a F4.3 hasta validar e integrar esta fase.
-- **F4.3 Automáticos**: modal "Generar playlist automático" con filtros Año (multi), Estilo (multi), Incluir Remember; guardado de filtros y generación; se guardan como m3u.
+- **F4.3 Automáticos**: modal "Generar playlist automático" desde el panel
+  izquierdo y `/playlists` en pantallas sin lateral, con nombre, Año (multi),
+  Estilo completo (multi) e Incluir Remember (Cortas y Largas).
+  Decisiones confirmadas el 03/11/2026: OR dentro de cada campo, AND entre
+  campos, sin selección = todos; Remember no usa año/estilo. Estilos completos,
+  sin separar grupos/subestilos; `Night Intrumental` equivale a `Night Instrumental`.
+  Todas las coincidencias, sin límite ni selección aleatoria. Orden estable:
+  Tracks por año descendente, estilo y fichero ascendentes; después Remember
+  Cortas y Largas por fichero. Sin Sessions.
+  Filtros en comentario `#DJTRACKS-AUTO-V1:` dentro del propio M3U junto a las
+  canciones, sin JSON adicional. Editar filtros y regenerar sustituye sus
+  entradas conservando ID/nombre; no se permite añadir/quitar canciones a mano.
+  Se puede renombrar, borrar, reproducir y cargar en cola con las mismas reglas
+  de las manuales. Sin coincidencias se guarda vacía con sus filtros.
+  Abrir/recargar no regenera ni refleja altas/bajas automáticamente en F4.3.
+  No modifica la cola ni interrumpe el audio al crear o regenerar.
 - **F4.4 Playlists vivos**: índice de biblioteca con watcher + reescaneo horario; los automáticos reflejan altas/bajas.
   *Prueba*: añadir/borrar un mp3 en carpeta y ver el cambio en el playlist.
 

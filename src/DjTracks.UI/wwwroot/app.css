@@ -271,6 +271,16 @@ body {
     margin: 16px 0;
 }
 
+.automatic-playlist-dialog {
+    max-height: 85dvh;
+    overflow-y: auto;
+}
+
+.automatic-playlist-dialog [role="combobox"] {
+    max-width: 100%;
+    min-width: 0;
+}
+
 .playlist-picker [role="combobox"] {
     height: auto;
     min-height: 2.5rem;
