@@ -229,12 +229,12 @@ el contrato compartido para reutilizar lectura, renombrado, borrado y reproducci
 con los mismos validadores, Result/AppError y registro explícito de handlers.
 
 `TrackLibrary.GetAutomaticOptions` lee años y estilos completos de las carpetas,
-sin tags. `SearchAutomatic` reutiliza la búsqueda ordenada y segura de Tracks,
-añadiendo la selección de estilos completos; no cambia los filtros de `/tracks`.
+sin tags. Desde F4.4, la generación resuelve referencias mediante
+`PlaylistLibraryIndex`, sin cambiar los filtros de `/tracks`.
 El alias `Night Intrumental` se presenta/filtra como `Night Instrumental`, pero
 las referencias conservan el nombre real de la carpeta. La generación incluye
 todas las coincidencias y, opcionalmente, las dos categorías de Remember, sin
-filtrar estas por año/estilo. No lee Sessions, ni añade índice, watcher o BD.
+filtrar estas por año/estilo. No lee Sessions ni usa BD.
 
 `M3uPlaylistStore.GenerateAsync` genera bajo el mismo semáforo que las otras
 operaciones, sin escribir hasta resolver las bibliotecas requeridas. Guarda el
@@ -245,8 +245,9 @@ metadatos y rechaza duplicados, contenido corrupto o versiones desconocidas sin
 sobrescribirlos. Renombrar conserva los filtros; regenerar conserva ID/nombre,
 sustituye todas las entradas y relee tags para `#EXTINF`. Añadir/quitar canciones
 de una automática devuelve 409; no se convierte una manual por esta ruta.
-Un resultado sin coincidencias se guarda vacío. Si un año seleccionado ha
-desaparecido o una categoría de Remember no existe, falla sin guardar parcialmente.
+Un resultado sin coincidencias se guarda vacío. Desde F4.4, un año seleccionado
+desaparecido aporta cero coincidencias sin perder su filtro; una categoría de
+Remember ausente falla sin guardar parcialmente.
 
 `AutomaticPlaylistDialog` usa `BbDialog`, dos `BbMultiSelect` y `BbCheckbox`;
 Cancelar/Escape descartan cambios, los errores se muestran dentro y un guardado
@@ -255,8 +256,55 @@ guardadas aunque ya no estén entre las opciones actuales para poder quitarlas.
 `PlaylistSidebar` separa manuales/automáticas y ofrece crear ambas; `/playlists`
 mantiene la gestión sin lateral, muestra filtros y ofrece editar/regenerar.
 `AddToPlaylist` solo lista manuales, también desde el reproductor. Play, añadir
-a cola y cargar reutilizan el playback existente. Abrir o recargar conserva el
-snapshot: la resolución viva queda para F4.4. No modifica la onda ni sus datos.
+a cola y cargar reutilizan el playback existente. F4.4 añade resolución viva al
+abrir/recargar, sin modificar la onda ni sus datos.
+
+F4.4 registra `PlaylistLibraryIndex` como singleton en Infrastructure y
+`PlaylistLibraryIndexWorker` como hosted service en la API, dentro de
+`AddPlaylistsFeature`. No añade endpoints: reutiliza listado, detalle, generación
+y playback. El índice contiene solo `PlaylistTrackReference`, ordenadas por
+año descendente/estilo/fichero y luego Remember Cortas/Largas/fichero.
+`TrackLibrary.IndexReferences` y `RememberLibrary.IndexReferences` reutilizan
+la enumeración de MP3 y exclusión de enlaces, sin abrir tags ni recorrer Sessions.
+Se indexan Tracks y Remember por separado: una automática sin Remember no depende
+de su disponibilidad.
+
+Cada raíz conserva referencias, revisión de cambios, error y `FileSystemWatcher`.
+Un semáforo serializa escaneos/resoluciones. La vigilancia se inicia antes del
+escaneo; los eventos solo incrementan la revisión y escriben en un canal acotado
+de capacidad uno. El worker agrupa ráfagas durante 250 ms y refresca las raíces
+invalidadas fuera del callback. Al iniciar y cada hora (`PeriodicTimer`) fuerza
+un reescaneo para recuperar eventos perdidos en red. Un error/overflow invalida
+el índice y recrea el watcher; si no puede vigilar, registra un aviso y mantiene
+el reescaneo de respaldo. Un fallo de lectura registra log y `AppError`; no
+publica resultados parciales ni referencias antiguas como éxito.
+
+Cada resolución comprueba acceso a la raíz aun con caché limpia: desconectada
+no equivale a vacía. Remember exige ambas categorías. Los errores se reintentan
+al consultar; un año eliminado simplemente deja de aportar referencias. Tras
+guardar ajustes con éxito, `SaveSettingsHandler` invalida y despierta el worker;
+al detectar otra ruta, se liberan el watcher y las referencias anteriores.
+El token del host cancela esperas/timer/escaneos y DI libera los watchers.
+
+`M3uPlaylistStore` resuelve las automáticas al listar, abrir o cargar playback;
+generar/editar filtros fuerza reescaneo. Compara referencias ordenadas con el
+snapshot del M3U y solo reescribe si cambian, conservando ID/nombre/filtros,
+IDs de entradas estables y `#EXTINF` conocidos. Lee tags solo de referencias
+nuevas al escribir; una nueva referencia inaccesible cancela el guardado.
+Al cambiar raíces, un snapshot automático con rutas locales MP3 de la antigua
+configuración se descarta y se reconstruye únicamente desde filtros/índice;
+nunca se reproduce esa ruta obsoleta. Metadatos corruptos o versiones
+desconocidas siguen protegidos. Las manuales no tienen esta excepción: siguen
+rechazando referencias ajenas a las raíces configuradas.
+
+Decisión confirmada: la pantalla abierta no se actualiza espontáneamente.
+Abrir o «Volver a cargar playlists» refresca detalle, catálogo y contadores del
+lateral mediante `PlaylistChanges`; sin polling ni eventos del watcher hacia
+la UI. El worker no escribe M3U: se sincroniza al consultarlo desde DJ Tracks,
+no solo por abrirlo en un reproductor externo. El audio y la cola ya cargada
+permanecen intactos; cargar resuelve las coincidencias actuales antes de encolar,
+sin duplicados ni iniciar/interrumpir reproducción. Un único proceso de API
+por carpeta de playlists sigue siendo el límite de concurrencia soportado.
 
 F4.2a sustituye los controles nativos del pie por `BottomPlayer` (Razor,
 code-behind y módulo JS aislado). `MainLayout` conserva la ficha grande, el

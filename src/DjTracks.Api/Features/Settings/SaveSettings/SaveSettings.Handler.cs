@@ -1,10 +1,11 @@
 using DjTracks.Domain;
 using DjTracks.Infrastructure.Settings;
 using FluentResults;
+using DjTracks.Infrastructure.Library;
 
 namespace DjTracks.Api.Features.Settings.SaveSettings;
 
-public sealed class SaveSettingsHandler(JsonSettingsStore settingsStore)
+public sealed class SaveSettingsHandler(JsonSettingsStore settingsStore, PlaylistLibraryIndex index)
 {
     public async Task<Result<PathSettings>> HandleAsync(SaveSettingsRequest request, CancellationToken ct)
     {
@@ -33,7 +34,10 @@ public sealed class SaveSettingsHandler(JsonSettingsStore settingsStore)
             return new AppError(ErrorKind.Validation, "Revisa las rutas indicadas.",
                 "Revisa las rutas indicadas.", errors);
 
-        return (await settingsStore.SaveAsync(settings, ct)).ToResult(settings);
+        var saved = await settingsStore.SaveAsync(settings, ct);
+        if (saved.IsSuccess)
+            index.ConfigurationChanged();
+        return saved.ToResult(settings);
     }
 
     private static string? CheckFolder(string path, bool writable)
