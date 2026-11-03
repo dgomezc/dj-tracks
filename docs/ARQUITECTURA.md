@@ -239,6 +239,12 @@ Un `ResizeObserver` ajusta `--player-height` para reservar espacio bajo el conte
 La onda agrupa los picos por ancho visible para mantener barras separadas y
 pinta una línea de posición; `UnavailableChanged` permite mostrar el seek
 alternativo solo si la onda falla. No hay endpoints, persistencia ni paquetes nuevos.
+La amplitud se dibuja en escala lineal fija respecto al PCM (0–1), sin normalizar
+al máximo recibido ni aplicar raíz cuadrada: los pasajes suaves no crecen al
+principio ni cambian de altura al llegar bloques posteriores. Tracks, Sessions
+y Remember desactivan el buffering de respuesta antes del primer bloque NDJSON
+y hacen flush tras cada línea. El progreso visual usa porcentajes enteros para
+evitar decimales con coma en atributos/estilos del componente Blueprint.
 
 
 | Elemento | Nombre | Namespace |

@@ -133,7 +133,6 @@ function draw(instance) {
         ? audio.duration : instance.duration;
     const progress = duration > 0 ? audio.currentTime / duration : 0;
     const middle = height / 2;
-    const maxPeak = Math.max(0, ...peaks);
     const barCount = Math.min(peaks.length, Math.max(1, Math.floor(width / 3)));
     const barWidth = width / barCount;
 
@@ -145,8 +144,7 @@ function draw(instance) {
         for (let sample = start; sample < end; sample++)
             peak = Math.max(peak, peaks[sample]);
         const x = (index + 0.5) * barWidth;
-        const normalizedPeak = maxPeak > 0 ? Math.sqrt(peak / maxPeak) : 0;
-        const amplitude = Math.max(1, normalizedPeak * (height * 0.88) / 2);
+        const amplitude = Math.max(0.5, Math.min(1, peak) * (height * 0.88) / 2);
         context.strokeStyle = x / width <= progress ? primary : muted;
         context.lineWidth = Math.max(1, barWidth * 0.65);
         context.beginPath();

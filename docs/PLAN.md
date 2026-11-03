@@ -165,7 +165,7 @@ El estado de entrega y las checklists se mantienen en `VALIDACIONES.md`. Una imp
 - **F4.2a (extra) Rediseño del reproductor inferior**: intercalada antes de
   F4.3 por petición del usuario del 03/11/2026. Elegida la propuesta **B**:
   carátula, título, artista, estilo/categoría, año y tiempos a la izquierda;
-  onda progresiva con seek y posición actual en el centro; añadir a playlist,
+  onda progresiva con amplitud lineal fija, seek y posición actual en el centro; añadir a playlist,
   shuffle, anterior, play/pausa, siguiente, bucle y cola a la derecha.
   Volumen horizontal siempre visible debajo de los botones, porcentaje y mute
   que conserva el volumen al cambiar de canción. Sin controles nativos duplicados.

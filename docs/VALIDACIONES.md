@@ -60,6 +60,11 @@ Consultar siempre el estado real de GitHub antes de actuar sobre un PR.
   PR [#17](https://github.com/dgomezc/dj-tracks/pull/17) abierto hacia `develop`.
   No autoriza merge ni continuar con F4.3.
   La elección de maqueta no equivale a validar la implementación.
+- Revisión F4.2a del 03/11/2026: el usuario reporta que la onda aparece solo al
+  terminar de generarse y que los valores se ven saturados. Se refuerza el
+  streaming sin buffering en las tres bibliotecas, se corrige el progreso a
+  enteros y se elimina la amplificación visual por normalización/raíz cuadrada.
+  **Pendiente de nueva comprobación del usuario; no validada ni autorizada para merge.**
 - Revisión de F4.1 pedida el 28/10/2026: «Pon tooltips a los botones que sólo tienen
   icono… Para crear o editar un playlist creo que es mejor hacerlo desde una ventana
   modal con opciones de aceptar y cancelar». Aplicada y validada dentro del PR #15.
@@ -157,6 +162,53 @@ No requiere BD, Docker, configuración nueva ni modificar MP3.
   BPM y tonalidad de la maqueta eran ilustrativos y no existen en el contrato
   actual; no se añaden datos ficticios ni lectura nueva de tags. La ficha grande
   se conserva para no perder álbum, archivo, avisos ni tracklist.
+
+### Revisión de onda: pasos que deben repetirse
+
+Mismo arranque de F4.2a: Visual Studio 2026, perfil **DJ Tracks (Api + UI)**,
+UI `http://localhost:5050/tracks`, API `http://localhost:5247`, FFmpeg disponible.
+Reiniciar **ambos** proyectos y recargar completamente para cargar también el JS.
+No se cambia el formato ni se necesita borrar la caché existente para ajustar
+la amplitud. Para ver generación progresiva, elegir un MP3 largo que aún no
+tenga onda cacheada (o una copia de prueba con otro nombre, sin tocar el original).
+Una onda cacheada debe aparecer completa de inmediato: eso es intencionado.
+
+- [ ] **Repetir — generación sin caché:** reproducir un Track largo; antes
+  de finalizar FFmpeg deben aparecer barras desde la izquierda y avanzar el
+  indicador, dejando vacía la zona aún no generada. El audio sigue sonando;
+  no debe esperarse al 100 % para ver la primera parte.
+- [ ] **Nuevo — escala real:** comparar un pasaje suave con uno fuerte.
+  Las alturas reflejan picos PCM en escala lineal fija, sin elevar toda canción
+  al máximo. Las barras ya dibujadas no cambian de altura al llegar otras mayores.
+  El silencio queda como una línea mínima. Una pista realmente limitada puede
+  seguir teniendo picos altos: no se comprime ni modifica el audio.
+- [ ] **Repetir — bibliotecas/caché:** probar también Sessions (incluida una
+  sesión de 1 h+) y Remember sin caché; volver a reproducir una ya generada:
+  misma amplitud y carga completa inmediata desde caché.
+- [ ] **Repetir — seek y continuidad:** clic/flechas en la onda, pausa/continuar
+  y cambio de pista durante la generación; audio/posición/onda corresponden a
+  la activa, sin reaparecer los bloques de la anterior. Volumen/mute y resto
+  de controles no cambian en esta revisión; no hace falta repetir su checklist completa.
+
+Comprobaciones del agente de esta revisión:
+
+- Compilación completa: 0 errores y 0 advertencias.
+- Navegador real + API/UI aisladas, MP3 propio de una hora sin caché:
+  onda parcial visible a los **1,507 s** (3 %, 22/692 px) y crecimiento a
+  **6,008 s** (18 %, 131/692 px), aún generándose; no es solo comprobar HTTP 200.
+- El flujo local previo ya entregaba bloques: no se reprodujo el bloqueo total
+  reportado. Se desactiva explícitamente buffering del host en Tracks/Sessions/
+  Remember además del flush existente. Falta confirmar el resultado en el
+  arranque real del usuario; no se atribuye el fallo a una infraestructura no comprobada.
+- Medición del dibujo real con picos 0,1 / 0,5 / 1 en canvas de 100 px:
+  alturas **8,8 / 44 / 88 px**. La primera mantiene 8,8 px después de
+  recibir el pico mayor; antes se normalizaba al máximo y se amplificaba con raíz.
+- Progreso entero en DOM (1 %, 3 %, …), sin comas decimales en estilos/atributos.
+  Datos temporales propios; sin tests nuevos ni cambios en el audio/JSON de picos.
+- Medición adicional de NDJSON sin caché: primer bloque con 16 picos a
+  **0,696 s**, `IsComplete=false`; final a **30,316 s**, 65 bloques.
+  Siguiente lectura cacheada: un bloque con 1024 picos y `IsComplete=true`.
+  En navegador la carga llegó al final y la flecha derecha siguió buscando +5 s.
 
 ## F4.1: playlists manuales (validada por el usuario)
 
