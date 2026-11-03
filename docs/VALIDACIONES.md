@@ -46,8 +46,10 @@ Consultar siempre el estado real de GitHub antes de actuar sobre un PR.
   [#15](https://github.com/dgomezc/dj-tracks/pull/15), commit
   `b5990820ddb692e46052b636873f34a511f2d0ed`. F4.2 es la fase actual en
   `fase/f4-2-export-m3u`, PR [#16](https://github.com/dgomezc/dj-tracks/pull/16)
-  abierto hacia `develop`, pendiente de validación. Revisada el 03/11/2026:
-  guardado automático solo en M3U, sin botón de exportar ni «Raíz M3U». F2.3 aplazada al final.
+  abierto hacia `develop`. Revisada el 03/11/2026 (guardado automático solo en
+  M3U, sin botón de exportar ni «Raíz M3U») y validada globalmente por el usuario
+  ese día. Pendiente de autorización de merge; pausa hasta que el usuario
+  defina un paso extra. F2.3 aplazada al final.
   Decisión confirmada: cargar añade al final, sin duplicados ni interrumpir
   audio; no sustituye la cola.
 - Revisión de F4.1 pedida el 28/10/2026: «Pon tooltips a los botones que sólo tienen
@@ -215,7 +217,7 @@ o `Waveform__BinaryFolder` para la onda. No requiere BD ni modificar los MP3.
 Confirmación del usuario el 02/11/2026: «Perfecto, sigue con el siguiente punto».
 PR #15 mergeada en `develop`; merge commit `b599082`.
 
-## F4.2: playlists guardadas en M3U (revisión implementada; validación manual pendiente)
+## F4.2: playlists guardadas en M3U (validada por el usuario)
 
 Revisión del usuario del 03/11/2026: «Hay que quitar el botón de exportar m3u y que
 el guardado de los playlist sea automático… No tiene sentido mantener tanto m3u
