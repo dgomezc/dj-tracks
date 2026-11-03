@@ -281,7 +281,10 @@ copia de seguridad de la carpeta Playlists antes de arrancar (se migrarán tus
   sin botón de exportar (Light Green oscuro). No comprobados otros temas, modo
   claro, reproductores externos ni la biblioteca real.
 
-Validación manual del usuario pendiente. No avanzar a F4.3.
+Validada globalmente por el usuario el 03/11/2026: «Perfecto, haz el PR y para,
+que quiero añadir un paso extra». Esta aceptación no amplía las comprobaciones
+individuales del agente. PR #16 listo para merge, pendiente de autorización
+expresa. Trabajo en pausa: el usuario añadirá un paso antes de F4.3.
 ## F3.1: Remember (validada por el usuario)
 
 `/remember` abre Cortas y permite cambiar a Largas. MP3 por nombre ascendente,
