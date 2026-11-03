@@ -133,19 +133,33 @@ public sealed class TrackLibrary
             styles.Order(StringComparer.OrdinalIgnoreCase).ToArray());
     }
 
-    public Result<TrackListing> SearchAutomatic(string root, AutomaticPlaylistFilters filters, CancellationToken ct) =>
-        Search(root, new TrackFilter(filters.Years, [], []), ct, filters.Styles);
+    public PlaylistTrackReference[] IndexReferences(string root, CancellationToken ct)
+    {
+        List<PlaylistTrackReference> references = [];
+        foreach (var year in new DirectoryInfo(root).EnumerateDirectories().Where(IsRegularEntry)
+            .OrderByDescending(directory => directory.Name, StringComparer.OrdinalIgnoreCase))
+        {
+            ct.ThrowIfCancellationRequested();
+            foreach (var style in year.EnumerateDirectories().Where(IsRegularEntry)
+                .OrderBy(directory => directory.Name, StringComparer.OrdinalIgnoreCase))
+            {
+                foreach (var file in AudioFiles(style))
+                {
+                    ct.ThrowIfCancellationRequested();
+                    var reference = new PlaylistTrackReference("Tracks", file.Name, year.Name, style.Name);
+                    if (reference.IsValid())
+                        references.Add(reference);
+                }
+            }
+        }
+        return references.ToArray();
+    }
 
-    public Result<TrackListing> Search(string root, TrackFilter filter, CancellationToken ct) =>
-        Search(root, filter, ct, []);
-
-    private Result<TrackListing> Search(string root, TrackFilter filter, CancellationToken ct, string[] styles)
+    public Result<TrackListing> Search(string root, TrackFilter filter, CancellationToken ct)
     {
         var selectedYears = filter.Years.ToHashSet(StringComparer.OrdinalIgnoreCase);
         var selectedGroups = filter.Groups.ToHashSet(StringComparer.OrdinalIgnoreCase);
         var selectedSubstyles = filter.Substyles.ToHashSet(StringComparer.OrdinalIgnoreCase);
-        var selectedStyles = styles.Select(AutomaticPlaylistFilters.CanonicalStyle)
-            .ToHashSet(StringComparer.OrdinalIgnoreCase);
         var rootDirectory = new DirectoryInfo(root);
         List<DirectoryInfo> yearDirectories = [];
         if (selectedYears.Count == 0)
@@ -178,9 +192,7 @@ public sealed class TrackLibrary
             {
                 ct.ThrowIfCancellationRequested();
                 var (group, substyle) = SplitStyle(styleDirectory.Name);
-                if ((selectedStyles.Count > 0
-                        && !selectedStyles.Contains(AutomaticPlaylistFilters.CanonicalStyle(styleDirectory.Name)))
-                    || (selectedGroups.Count > 0 && !selectedGroups.Contains(group))
+                if ((selectedGroups.Count > 0 && !selectedGroups.Contains(group))
                     || (selectedSubstyles.Count > 0
                         && (substyle is null || !selectedSubstyles.Contains(substyle))))
                     continue;
@@ -203,15 +215,18 @@ public sealed class TrackLibrary
     internal static TrackFile[] ReadTracks(DirectoryInfo directory, CancellationToken ct)
     {
         List<TrackFile> tracks = [];
-        foreach (var file in directory.EnumerateFiles()
-            .Where(file => IsRegularEntry(file)
-                && file.Extension.Equals(".mp3", StringComparison.OrdinalIgnoreCase))
-            .OrderBy(file => file.Name, StringComparer.OrdinalIgnoreCase))
+        foreach (var file in AudioFiles(directory))
         {
             tracks.Add(ReadTrack(file, ct));
         }
         return tracks.ToArray();
     }
+
+    internal static IEnumerable<FileInfo> AudioFiles(DirectoryInfo directory) =>
+        directory.EnumerateFiles()
+            .Where(file => IsRegularEntry(file)
+                && file.Extension.Equals(".mp3", StringComparison.OrdinalIgnoreCase))
+            .OrderBy(file => file.Name, StringComparer.OrdinalIgnoreCase);
 
     internal static TrackFile ReadTrack(FileInfo file, CancellationToken ct)
     {

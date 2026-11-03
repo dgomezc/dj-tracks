@@ -52,9 +52,11 @@ public partial class Playlists : IDisposable
             if (detail.IsFailed)
                 _error = detail.Errors[0].Message;
             else
-                _playlist = detail.Value;
+                Update(detail.Value);
         }
         _busy = false;
+        if (_error is null)
+            Changes.Notify();
     }
 
     private void OpenCreate() => OpenDialog(renaming: false);

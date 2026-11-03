@@ -9,6 +9,7 @@ using DjTracks.Api.Features.Playlists.RenamePlaylist;
 using DjTracks.Api.Features.Playlists.GenerateAutomaticPlaylist;
 using DjTracks.Api.Features.Playlists.GetAutomaticPlaylistOptions;
 using DjTracks.Infrastructure.Playlists;
+using DjTracks.Infrastructure.Library;
 
 namespace DjTracks.Api.Features.Playlists;
 
@@ -16,6 +17,8 @@ public static class PlaylistsFeature
 {
     public static IServiceCollection AddPlaylistsFeature(this IServiceCollection services) =>
         services.AddSingleton<M3uPlaylistStore>()
+            .AddSingleton<PlaylistLibraryIndex>()
+            .AddHostedService<PlaylistLibraryIndexWorker>()
             .AddScoped<PlaylistTrackResolver>()
             .AddScoped<GetPlaylistsHandler>().AddScoped<GetPlaylistHandler>()
             .AddScoped<CreatePlaylistHandler>().AddScoped<RenamePlaylistHandler>()

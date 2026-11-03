@@ -54,7 +54,7 @@
         @if (_playlist.Filters is { } filters)
         {
             <p class="filter-summary">
-                Automática · Años: @(filters.Years.Length == 0 ? "Todos" : string.Join(", ", filters.Years)) ·
+                Automática viva · Años: @(filters.Years.Length == 0 ? "Todos" : string.Join(", ", filters.Years)) ·
                 Estilos: @(filters.Styles.Length == 0 ? "Todos" : string.Join(", ", filters.Styles)) ·
                 Remember: @(filters.IncludeRemember ? "Cortas y Largas" : "No")
             </p>
@@ -117,7 +117,7 @@
             Cada cambio se guarda en su archivo M3U, con rutas relativas a la carpeta de playlists.
             @(_playlist.Filters is null
                 ? "Se conserva el orden de incorporación. Si falta un MP3 al cargar, puedes quitar su entrada aquí."
-                : "Solo los filtros y la regeneración cambian sus canciones; abrir o recargar no regenera. Si falta un MP3, regenera para actualizar las referencias.")
+                : "Al abrir, recargar o cargar en cola, se resuelven los filtros contra el índice y se actualiza el M3U. La playlist abierta no cambia sola, ni modifica la cola ya cargada. El watcher detecta altas/bajas; si la red no avisa, el índice se reescanea cada hora. Guardar filtros y regenerar fuerza un reescaneo inmediato.")
             Un error al cargar no modifica la cola.
         </BbTypographyMuted>
     }
