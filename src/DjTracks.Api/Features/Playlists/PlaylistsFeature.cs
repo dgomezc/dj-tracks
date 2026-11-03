@@ -6,6 +6,8 @@ using DjTracks.Api.Features.Playlists.GetPlaylists;
 using DjTracks.Api.Features.Playlists.LoadPlaylist;
 using DjTracks.Api.Features.Playlists.RemovePlaylistTrack;
 using DjTracks.Api.Features.Playlists.RenamePlaylist;
+using DjTracks.Api.Features.Playlists.GenerateAutomaticPlaylist;
+using DjTracks.Api.Features.Playlists.GetAutomaticPlaylistOptions;
 using DjTracks.Infrastructure.Playlists;
 
 namespace DjTracks.Api.Features.Playlists;
@@ -18,7 +20,8 @@ public static class PlaylistsFeature
             .AddScoped<GetPlaylistsHandler>().AddScoped<GetPlaylistHandler>()
             .AddScoped<CreatePlaylistHandler>().AddScoped<RenamePlaylistHandler>()
             .AddScoped<DeletePlaylistHandler>().AddScoped<AddPlaylistTrackHandler>()
-            .AddScoped<RemovePlaylistTrackHandler>().AddScoped<LoadPlaylistHandler>();
+            .AddScoped<RemovePlaylistTrackHandler>().AddScoped<LoadPlaylistHandler>()
+            .AddScoped<GenerateAutomaticPlaylistHandler>().AddScoped<GetAutomaticPlaylistOptionsHandler>();
 
     public static void MapPlaylistsFeature(this RouteGroupBuilder api)
     {
@@ -30,5 +33,7 @@ public static class PlaylistsFeature
         api.MapAddPlaylistTrack();
         api.MapRemovePlaylistTrack();
         api.MapLoadPlaylist();
+        api.MapGenerateAutomaticPlaylist();
+        api.MapGetAutomaticPlaylistOptions();
     }
 }

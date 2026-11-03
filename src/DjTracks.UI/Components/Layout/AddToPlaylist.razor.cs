@@ -47,7 +47,7 @@ public partial class AddToPlaylist
         if (version != _version)
             return;
         _busy = false;
-        _playlists = result.IsSuccess ? result.Value : null;
+        _playlists = result.IsSuccess ? result.Value.Where(item => item.Filters is null).ToArray() : null;
         _error = result.IsFailed ? result.Errors[0].Message : null;
         if (_playlists is null || !_playlists.Any(item => item.Id.ToString() == _selected))
             _selected = null;

@@ -23,6 +23,8 @@ public partial class Playlists : IDisposable
     private int _version;
     private bool _dialogOpen;
     private bool _renaming;
+    private bool _automaticDialogOpen;
+    private bool _editingFilters;
 
     protected override void OnInitialized() => Changes.Renamed += OnRenamed;
 
@@ -35,6 +37,7 @@ public partial class Playlists : IDisposable
         _error = _message = null;
         _playlist = null;
         _confirmDelete = false;
+        _automaticDialogOpen = false;
         var result = await Http.GetForResultAsync<ManualPlaylist[]>("api/playlists", Logger);
         if (version != _version)
             return;
@@ -57,6 +60,20 @@ public partial class Playlists : IDisposable
     private void OpenCreate() => OpenDialog(renaming: false);
 
     private void OpenRename() => OpenDialog(renaming: true);
+
+    private void OpenAutomatic(bool editing)
+    {
+        _editingFilters = editing;
+        _automaticDialogOpen = true;
+    }
+
+    private void OnGenerated(ManualPlaylist playlist)
+    {
+        if (playlist.Id != Id)
+            return;
+        Update(playlist);
+        _message = $"Playlist regenerada: {playlist.Entries.Length} canciones. La cola y el audio no cambian.";
+    }
 
     private void OpenDialog(bool renaming)
     {

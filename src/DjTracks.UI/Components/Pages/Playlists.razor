@@ -3,7 +3,7 @@
 @using DjTracks.Domain
 
 <PageTitle>Playlists - DJ Tracks</PageTitle>
-<BbTypographyH2 Class="page-title">Playlists manuales</BbTypographyH2>
+<BbTypographyH2 Class="page-title">Playlists</BbTypographyH2>
 <BbTypographyMuted Class="page-intro">
     Mezcla Tracks y Remember. Cargar añade al final de la cola sin duplicados ni interrumpir el audio.
 </BbTypographyMuted>
@@ -12,6 +12,9 @@
         <BbButton OnClick="OpenCreate" Disabled="@_busy" Class="narrow-only">
             <Icon><LucideIcon Name="plus" /></Icon>
             <ChildContent>Nueva playlist</ChildContent>
+        </BbButton>
+        <BbButton OnClick="() => OpenAutomatic(false)" Disabled="@_busy" Class="narrow-only">
+            Generar playlist automático
         </BbButton>
         <BbButton Variant="ButtonVariant.Outline" OnClick="LoadAsync" Disabled="@_busy">Volver a cargar playlists</BbButton>
     </div>
@@ -36,24 +39,38 @@
                 <BbButton Href="@($"/playlists/{playlist.Id}")"
                           Class="playlist-choice"
                           Variant="@(playlist.Id == Id ? ButtonVariant.Secondary : ButtonVariant.Outline)">
-                    @playlist.Name (@playlist.Entries.Length)
+                    @playlist.Name (@playlist.Entries.Length) · @(playlist.Filters is null ? "Manual" : "Automática")
                 </BbButton>
             }
         </nav>
         @if (_catalog.Length == 0)
         {
-            <p>No hay playlists. Crea una y añade canciones desde Tracks o Remember.</p>
+            <p>No hay playlists. Crea una manual o genera una mediante filtros.</p>
         }
     }
     @if (_playlist is not null)
     {
         <h3 class="section-title">@_playlist.Name · @_playlist.Entries.Length canciones</h3>
+        @if (_playlist.Filters is { } filters)
+        {
+            <p class="filter-summary">
+                Automática · Años: @(filters.Years.Length == 0 ? "Todos" : string.Join(", ", filters.Years)) ·
+                Estilos: @(filters.Styles.Length == 0 ? "Todos" : string.Join(", ", filters.Styles)) ·
+                Remember: @(filters.IncludeRemember ? "Cortas y Largas" : "No")
+            </p>
+        }
         <div class="button-row">
             <BbButton OnClick="LoadQueueAsync" Disabled="@(_busy || _playlist.Entries.Length == 0)">Añadir playlist a la cola</BbButton>
             <BbButton Variant="ButtonVariant.Outline" OnClick="OpenRename" Disabled="@_busy" Class="narrow-only">
                 <Icon><LucideIcon Name="pencil" /></Icon>
                 <ChildContent>Renombrar playlist</ChildContent>
             </BbButton>
+            @if (_playlist.Filters is not null)
+            {
+                <BbButton Variant="ButtonVariant.Outline" OnClick="() => OpenAutomatic(true)" Disabled="@_busy">
+                    Editar filtros y regenerar
+                </BbButton>
+            }
             <BbButton Variant="ButtonVariant.Outline" OnClick="() => _confirmDelete = true" Disabled="@_busy">Borrar playlist</BbButton>
         </div>
         @if (_confirmDelete)
@@ -82,18 +99,28 @@
                                         OnClick="() => PlayEntryAsync(entry.Id, play: true)" AriaLabel="@($"Reproducir {entry.Track.FileName}")" />
                             <IconButton Label="Añadir a la cola" Icon="list-plus" Disabled="@_busy"
                                         OnClick="() => PlayEntryAsync(entry.Id, play: false)" AriaLabel="@($"Añadir a la cola {entry.Track.FileName}")" />
-                            <IconButton Label="Quitar de la playlist" Icon="trash-2" Disabled="@_busy"
-                                        OnClick="() => RemoveAsync(entry.Id)" AriaLabel="@($"Quitar de la playlist {entry.Track.FileName}")" />
+                            @if (_playlist.Filters is null)
+                            {
+                                <IconButton Label="Quitar de la playlist" Icon="trash-2" Disabled="@_busy"
+                                            OnClick="() => RemoveAsync(entry.Id)" AriaLabel="@($"Quitar de la playlist {entry.Track.FileName}")" />
+                            }
                         </div>
                     </CellTemplate>
                 </BbDataTableColumn>
             </Columns>
-            <EmptyTemplate>Playlist vacía. Añade canciones desde Tracks o Remember.</EmptyTemplate>
+            <EmptyTemplate>
+                @(_playlist.Filters is null ? "Playlist vacía. Añade canciones desde Tracks o Remember."
+                    : "No hay coincidencias. Puedes cambiar los filtros y regenerar.")
+            </EmptyTemplate>
         </BbDataTable>
         <BbTypographyMuted>
-            Se conserva el orden de incorporación. Cada cambio se guarda automáticamente en su archivo M3U, con rutas relativas a la carpeta de playlists.
-            Si falta un MP3 al cargar, se informa del error sin modificar la cola; puedes quitar su entrada aquí.
+            Cada cambio se guarda en su archivo M3U, con rutas relativas a la carpeta de playlists.
+            @(_playlist.Filters is null
+                ? "Se conserva el orden de incorporación. Si falta un MP3 al cargar, puedes quitar su entrada aquí."
+                : "Solo los filtros y la regeneración cambian sus canciones; abrir o recargar no regenera. Si falta un MP3, regenera para actualizar las referencias.")
+            Un error al cargar no modifica la cola.
         </BbTypographyMuted>
     }
 </div>
 <PlaylistDialog @bind-Open="_dialogOpen" Playlist="@(_renaming ? _playlist : null)" />
+<AutomaticPlaylistDialog @bind-Open="_automaticDialogOpen" Playlist="@(_editingFilters ? _playlist : null)" Saved="OnGenerated" />

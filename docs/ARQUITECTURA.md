@@ -219,6 +219,45 @@ ni sincronización automática entre circuitos en esta fase. `/playlists` en la
 cabecera mantiene la gestión accesible cuando el lateral se oculta en móvil.
 La cola sigue en memoria: editar/borrar una playlist no modifica la cola ya cargada.
 
+F4.3 amplía el contrato existente `ManualPlaylist` con `Filters` opcional
+(`AutomaticPlaylistFilters`: Years, Styles, IncludeRemember). Nulo identifica
+una manual; presente, una automática, incluso con cero canciones. Se conserva
+el contrato compartido para reutilizar lectura, renombrado, borrado y reproducción.
+`GenerateAutomaticPlaylist` expone POST `playlists/automatic` y PUT
+`playlists/{id}/automatic`; `GetAutomaticPlaylistOptions` expone GET
+`playlists/automatic/options`. La UI obtiene opciones y genera por HTTP,
+con los mismos validadores, Result/AppError y registro explícito de handlers.
+
+`TrackLibrary.GetAutomaticOptions` lee años y estilos completos de las carpetas,
+sin tags. `SearchAutomatic` reutiliza la búsqueda ordenada y segura de Tracks,
+añadiendo la selección de estilos completos; no cambia los filtros de `/tracks`.
+El alias `Night Intrumental` se presenta/filtra como `Night Instrumental`, pero
+las referencias conservan el nombre real de la carpeta. La generación incluye
+todas las coincidencias y, opcionalmente, las dos categorías de Remember, sin
+filtrar estas por año/estilo. No lee Sessions, ni añade índice, watcher o BD.
+
+`M3uPlaylistStore.GenerateAsync` genera bajo el mismo semáforo que las otras
+operaciones, sin escribir hasta resolver las bibliotecas requeridas. Guarda el
+snapshot de canciones y los filtros normalizados en un solo M3U mediante la
+escritura atómica existente. `#DJTRACKS-AUTO-V1:<JSON compacto>` es un comentario
+M3U que los reproductores externos pueden ignorar. El lector valida esos
+metadatos y rechaza duplicados, contenido corrupto o versiones desconocidas sin
+sobrescribirlos. Renombrar conserva los filtros; regenerar conserva ID/nombre,
+sustituye todas las entradas y relee tags para `#EXTINF`. Añadir/quitar canciones
+de una automática devuelve 409; no se convierte una manual por esta ruta.
+Un resultado sin coincidencias se guarda vacío. Si un año seleccionado ha
+desaparecido o una categoría de Remember no existe, falla sin guardar parcialmente.
+
+`AutomaticPlaylistDialog` usa `BbDialog`, dos `BbMultiSelect` y `BbCheckbox`;
+Cancelar/Escape descartan cambios, los errores se muestran dentro y un guardado
+correcto actualiza el detalle y el lateral del circuito. Conserva selecciones
+guardadas aunque ya no estén entre las opciones actuales para poder quitarlas.
+`PlaylistSidebar` separa manuales/automáticas y ofrece crear ambas; `/playlists`
+mantiene la gestión sin lateral, muestra filtros y ofrece editar/regenerar.
+`AddToPlaylist` solo lista manuales, también desde el reproductor. Play, añadir
+a cola y cargar reutilizan el playback existente. Abrir o recargar conserva el
+snapshot: la resolución viva queda para F4.4. No modifica la onda ni sus datos.
+
 F4.2a sustituye los controles nativos del pie por `BottomPlayer` (Razor,
 code-behind y módulo JS aislado). `MainLayout` conserva la ficha grande, el
 tracklist y el panel de cola; pasa al reproductor el estado de apertura de la cola.

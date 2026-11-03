@@ -27,7 +27,7 @@
             <BbButton Variant="ButtonVariant.Outline" OnClick="LoadAsync" Disabled="@_busy">Recargar playlists</BbButton>
             @if (_playlists?.Length == 0)
             {
-                <p>No hay playlists. Crea una en Gestionar playlists y vuelve al listado para añadir canciones.</p>
+                <p>No hay playlists manuales. Crea una en Gestionar playlists y vuelve al listado para añadir canciones. Las automáticas se gestionan solo mediante filtros.</p>
             }
             <BbLink Href="/playlists" OnClick="() => SetOpen(false)">Gestionar playlists</BbLink>
         </div>

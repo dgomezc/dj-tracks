@@ -5,10 +5,22 @@ using DjTracks.Api.Features.Playlists.GetPlaylist;
 using DjTracks.Api.Features.Playlists.LoadPlaylist;
 using DjTracks.Api.Features.Playlists.RemovePlaylistTrack;
 using DjTracks.Api.Features.Playlists.RenamePlaylist;
+using DjTracks.Api.Features.Playlists.GenerateAutomaticPlaylist;
 using DjTracks.Infrastructure.Playlists;
 using FluentValidation;
 
 namespace DjTracks.Api.Features.Playlists;
+
+public sealed class GenerateAutomaticPlaylistRequestValidator : AbstractValidator<GenerateAutomaticPlaylistRequest>
+{
+    public GenerateAutomaticPlaylistRequestValidator()
+    {
+        RuleFor(request => request.Name).Must(M3uPlaylistStore.IsValidName)
+            .WithMessage("Escribe un nombre de 1 a 120 caracteres, sin caracteres de control.");
+        RuleFor(request => request.Filters).Must(filters => filters is not null && filters.IsValid())
+            .WithMessage("Indica años y estilos como listas de nombres de carpeta, sin rutas ni valores vacíos.");
+    }
+}
 
 public sealed class CreatePlaylistRequestValidator : AbstractValidator<CreatePlaylistRequest>
 {
