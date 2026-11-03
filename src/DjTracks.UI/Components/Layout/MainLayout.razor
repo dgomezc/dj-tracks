@@ -40,46 +40,7 @@
 </div>
 <PlaybackQueue @bind-Open="_queueOpen" />
 
-<footer class="player-bar">
-    <div class="queue-controls">
-        <IconButton Label="Canción anterior" Icon="skip-back" OnClick="AudioPlayer.Previous"
-                    Disabled="@(!AudioPlayer.CanPrevious)" />
-        <IconButton Label="Canción siguiente" Icon="skip-forward" OnClick="AudioPlayer.Next"
-                    Disabled="@(!AudioPlayer.CanNext)" />
-        <IconButton Label="@(AudioPlayer.Shuffle ? "Desactivar reproducción aleatoria" : "Activar reproducción aleatoria")"
-                    AriaLabel="Reproducción aleatoria" Icon="shuffle" OnClick="AudioPlayer.ToggleShuffle"
-                    Variant="@(AudioPlayer.Shuffle ? ButtonVariant.Secondary : ButtonVariant.Ghost)"
-                    aria-pressed="@AudioPlayer.Shuffle.ToString().ToLowerInvariant()" />
-        <BbButton Variant="@(AudioPlayer.Repeat == DjTracks.UI.Shared.QueueRepeatMode.Off ? ButtonVariant.Ghost : ButtonVariant.Secondary)"
-                  OnClick="AudioPlayer.CycleRepeat" AriaLabel="Cambiar modo de bucle">
-            @RepeatLabel
-        </BbButton>
-    </div>
-    @if (AudioPlayer.AudioUrl is null)
-    {
-        <BbTypographyMuted>Selecciona una canción para reproducir</BbTypographyMuted>
-    }
-    else
-    {
-        <div class="player-track">
-            <div class="player-track-title">@AudioPlayer.Title</div>
-            @if (!string.IsNullOrWhiteSpace(AudioPlayer.Artist))
-            {
-                <div class="player-track-artist">@AudioPlayer.Artist</div>
-            }
-        </div>
-        var playbackVersion = AudioPlayer.PlaybackVersion;
-        <div class="player-controls" @key="playbackVersion">
-            @if (AudioPlayer.WaveformUrl is not null)
-            {
-                <WaveformPlayer WaveformUrl="@AudioPlayer.WaveformUrl" />
-            }
-            <audio id="djtracks-audio" controls autoplay preload="metadata"
-                   src="@AudioPlayer.AudioUrl" aria-label="Controles de reproducción"
-                   @onended="() => AudioPlayer.OnEnded(playbackVersion)"></audio>
-        </div>
-    }
-</footer>
+<BottomPlayer QueueOpen="@_queueOpen" OnToggleQueue="() => _queueOpen = !_queueOpen" />
 
 <div id="blazor-error-ui" data-nosnippet>
     An unhandled error has occurred.
@@ -89,13 +50,6 @@
 
 @code {
     private bool _queueOpen;
-    private string RepeatLabel => AudioPlayer.Repeat switch
-    {
-        DjTracks.UI.Shared.QueueRepeatMode.All => "Bucle: cola",
-        DjTracks.UI.Shared.QueueRepeatMode.One => "Bucle: canción",
-        _ => "Bucle: no"
-    };
-
     protected override void OnInitialized() => AudioPlayer.Changed += OnPlayerChanged;
 
     private void OnPlayerChanged() => _ = InvokeAsync(StateHasChanged);

@@ -6,6 +6,8 @@ namespace DjTracks.UI.Components.Layout;
 
 public partial class NowPlaying
 {
+    [Parameter] public bool Compact { get; set; }
+
     [Inject] private AudioPlayerState Player { get; set; } = default!;
     [Inject] private HttpClient Http { get; set; } = default!;
     [Inject] private ILogger<NowPlaying> Logger { get; set; } = default!;

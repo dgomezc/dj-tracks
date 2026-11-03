@@ -133,20 +133,34 @@ function draw(instance) {
         ? audio.duration : instance.duration;
     const progress = duration > 0 ? audio.currentTime / duration : 0;
     const middle = height / 2;
-    const barWidth = Math.max(1, width / peaks.length);
     const maxPeak = Math.max(0, ...peaks);
+    const barCount = Math.min(peaks.length, Math.max(1, Math.floor(width / 3)));
+    const barWidth = width / barCount;
 
-    peaks.slice(0, instance.loadedCount).forEach((peak, index) => {
-        const x = index * width / peaks.length;
+    for (let index = 0; index < barCount; index++) {
+        const start = Math.floor(index * peaks.length / barCount);
+        if (start >= instance.loadedCount) break;
+        const end = Math.min(instance.loadedCount, Math.ceil((index + 1) * peaks.length / barCount));
+        let peak = 0;
+        for (let sample = start; sample < end; sample++)
+            peak = Math.max(peak, peaks[sample]);
+        const x = (index + 0.5) * barWidth;
         const normalizedPeak = maxPeak > 0 ? Math.sqrt(peak / maxPeak) : 0;
         const amplitude = Math.max(1, normalizedPeak * (height * 0.88) / 2);
         context.strokeStyle = x / width <= progress ? primary : muted;
-        context.lineWidth = barWidth;
+        context.lineWidth = Math.max(1, barWidth * 0.65);
         context.beginPath();
         context.moveTo(x, middle - amplitude);
         context.lineTo(x, middle + amplitude);
         context.stroke();
-    });
+    }
+
+    context.strokeStyle = style.getPropertyValue("--foreground").trim() || style.color;
+    context.lineWidth = 1.5;
+    context.beginPath();
+    context.moveTo(progress * width, 0);
+    context.lineTo(progress * width, height);
+    context.stroke();
 
     canvas.setAttribute("aria-valuenow", Math.round(progress * 100).toString());
     canvas.setAttribute("aria-valuetext",

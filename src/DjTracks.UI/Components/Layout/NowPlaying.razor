@@ -1,5 +1,48 @@
 @implements IDisposable
 
+@if (Compact)
+{
+    <div class="player-track-info">
+        <div class="player-artwork">
+            @if (_dataUrl is not null && _error is null)
+            {
+                var dataUrl = _dataUrl;
+                <img @key="dataUrl" src="@dataUrl" alt="@($"Carátula de {Player.Title}")"
+                     @onerror="() => OnImageError(dataUrl)" />
+            }
+            else
+            {
+                <LucideIcon Name="disc-3" Size="30" />
+                <span>@(_loading ? "Cargando…" : _error is null ? "Sin carátula" : "No disponible")</span>
+            }
+        </div>
+        <div class="player-track">
+            <div class="player-track-title" title="@Player.Title">@(Player.Title ?? "Selecciona una canción")</div>
+            <div class="player-track-artist" title="@Player.Artist">
+                @(Player.Current is null ? "Tracks · Sessions · Remember" : Display(Player.Artist))
+            </div>
+            @if (Player.Current is { } current)
+            {
+                <div class="player-track-tags">
+                    <span class="player-style" title="@(current.SessionFolder ?? current.RememberCategory ?? current.Details.Style)">
+                        @(current.SessionFolder is not null ? "Session" : current.RememberCategory is not null
+                            ? $"Remember · {current.RememberCategory}" : Display(current.Details.Style))
+                    </span>
+                    @if (current.Details.Year is not null)
+                    {
+                        <span>@current.Details.Year</span>
+                    }
+                </div>
+            }
+            @if (_error is not null)
+            {
+                <span class="player-artwork-error" title="@_error" role="status">Carátula no disponible</span>
+            }
+        </div>
+    </div>
+}
+else
+{
 <BbCard Class="now-playing" role="region" aria-label="Ahora suena">
     <BbCardHeader><BbCardTitle>Ahora suena</BbCardTitle></BbCardHeader>
     <BbCardContent>
@@ -64,3 +107,4 @@
     }
     </BbCardContent>
 </BbCard>
+}
