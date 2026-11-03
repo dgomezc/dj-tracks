@@ -50,7 +50,6 @@
         <h3 class="section-title">@_playlist.Name · @_playlist.Entries.Length canciones</h3>
         <div class="button-row">
             <BbButton OnClick="LoadQueueAsync" Disabled="@(_busy || _playlist.Entries.Length == 0)">Añadir playlist a la cola</BbButton>
-            <BbButton Variant="ButtonVariant.Outline" OnClick="ExportM3uAsync" Disabled="@_busy">Exportar M3U</BbButton>
             <BbButton Variant="ButtonVariant.Outline" OnClick="OpenRename" Disabled="@_busy" Class="narrow-only">
                 <Icon><LucideIcon Name="pencil" /></Icon>
                 <ChildContent>Renombrar playlist</ChildContent>
@@ -61,7 +60,7 @@
         {
             <BbAlert Variant="AlertVariant.Warning">
                 <BbAlertDescription>
-                    ¿Borrar «@_playlist.Name»? Solo se elimina su JSON; no los MP3 ni la cola actual.
+                    ¿Borrar «@_playlist.Name»? Solo se elimina su archivo M3U; no los MP3 ni la cola actual.
                     <div class="button-row">
                         <BbButton OnClick="DeleteAsync" Disabled="@_busy">Confirmar borrado</BbButton>
                         <BbButton Variant="ButtonVariant.Outline" OnClick="() => _confirmDelete = false" Disabled="@_busy">Cancelar</BbButton>
@@ -92,7 +91,7 @@
             <EmptyTemplate>Playlist vacía. Añade canciones desde Tracks o Remember.</EmptyTemplate>
         </BbDataTable>
         <BbTypographyMuted>
-            Se conserva el orden de incorporación. Las referencias se guardan sin rutas absolutas.
+            Se conserva el orden de incorporación. Cada cambio se guarda automáticamente en su archivo M3U, con rutas relativas a la carpeta de playlists.
             Si falta un MP3 al cargar, se informa del error sin modificar la cola; puedes quitar su entrada aquí.
         </BbTypographyMuted>
     }

@@ -4,7 +4,7 @@ using FluentResults;
 
 namespace DjTracks.Api.Features.Playlists.LoadPlaylist;
 
-public sealed class LoadPlaylistHandler(JsonPlaylistStore store, PlaylistTrackResolver resolver)
+public sealed class LoadPlaylistHandler(M3uPlaylistStore store, PlaylistTrackResolver resolver)
 {
     public async Task<Result<PlaylistPlayback>> HandleAsync(LoadPlaylistRequest request, CancellationToken ct)
     {

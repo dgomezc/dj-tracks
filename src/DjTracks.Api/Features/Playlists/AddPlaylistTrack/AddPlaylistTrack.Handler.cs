@@ -4,7 +4,7 @@ using FluentResults;
 
 namespace DjTracks.Api.Features.Playlists.AddPlaylistTrack;
 
-public sealed class AddPlaylistTrackHandler(JsonPlaylistStore store, PlaylistTrackResolver resolver)
+public sealed class AddPlaylistTrackHandler(M3uPlaylistStore store, PlaylistTrackResolver resolver)
 {
     public async Task<Result<ManualPlaylist>> HandleAsync(Guid id, AddPlaylistTrackRequest request, CancellationToken ct)
     {

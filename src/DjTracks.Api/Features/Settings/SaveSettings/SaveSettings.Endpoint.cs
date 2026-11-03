@@ -3,7 +3,7 @@ using DjTracks.Api.Shared;
 namespace DjTracks.Api.Features.Settings.SaveSettings;
 
 public sealed record SaveSettingsRequest(string? Tracks, string? Sessions, string? Remember,
-    string? Playlists, string? M3uRoot);
+    string? Playlists);
 
 public static class SaveSettingsEndpoint
 {

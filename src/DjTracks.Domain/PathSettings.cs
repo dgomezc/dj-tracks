@@ -15,7 +15,4 @@ public sealed record PathSettings
 
     [JsonRequired]
     public string Playlists { get; set; } = "";
-
-    [JsonRequired]
-    public string M3uRoot { get; set; } = "";
 }

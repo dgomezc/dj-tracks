@@ -1,7 +1,6 @@
 using DjTracks.Api.Features.Playlists.AddPlaylistTrack;
 using DjTracks.Api.Features.Playlists.CreatePlaylist;
 using DjTracks.Api.Features.Playlists.DeletePlaylist;
-using DjTracks.Api.Features.Playlists.ExportPlaylist;
 using DjTracks.Api.Features.Playlists.GetPlaylist;
 using DjTracks.Api.Features.Playlists.GetPlaylists;
 using DjTracks.Api.Features.Playlists.LoadPlaylist;
@@ -14,14 +13,12 @@ namespace DjTracks.Api.Features.Playlists;
 public static class PlaylistsFeature
 {
     public static IServiceCollection AddPlaylistsFeature(this IServiceCollection services) =>
-        services.AddSingleton<JsonPlaylistStore>()
-            .AddSingleton<PlaylistM3uExporter>()
+        services.AddSingleton<M3uPlaylistStore>()
             .AddScoped<PlaylistTrackResolver>()
             .AddScoped<GetPlaylistsHandler>().AddScoped<GetPlaylistHandler>()
             .AddScoped<CreatePlaylistHandler>().AddScoped<RenamePlaylistHandler>()
             .AddScoped<DeletePlaylistHandler>().AddScoped<AddPlaylistTrackHandler>()
-            .AddScoped<RemovePlaylistTrackHandler>().AddScoped<LoadPlaylistHandler>()
-            .AddScoped<ExportPlaylistHandler>();
+            .AddScoped<RemovePlaylistTrackHandler>().AddScoped<LoadPlaylistHandler>();
 
     public static void MapPlaylistsFeature(this RouteGroupBuilder api)
     {
@@ -30,7 +27,6 @@ public static class PlaylistsFeature
         api.MapCreatePlaylist();
         api.MapRenamePlaylist();
         api.MapDeletePlaylist();
-        api.MapExportPlaylist();
         api.MapAddPlaylistTrack();
         api.MapRemovePlaylistTrack();
         api.MapLoadPlaylist();

@@ -63,17 +63,8 @@
             <BbFieldContent>
                 <BbInput Id="settings-playlists" @bind-Value="_settings.Playlists" Disabled="@Disabled"
                          AriaDescribedBy="settings-playlists-help" />
-                <BbFieldDescription Id="settings-playlists-help">Carpeta donde se guardarán los archivos JSON de las playlists; requiere escritura.</BbFieldDescription>
+                <BbFieldDescription Id="settings-playlists-help">Carpeta donde se guardan automáticamente las playlists como archivos M3U, con rutas relativas a ella; requiere escritura.</BbFieldDescription>
                 <BbFieldError Errors="@FieldErrors(nameof(_settings.Playlists))" />
-            </BbFieldContent>
-        </BbField>
-        <BbField IsInvalid="@HasError(nameof(_settings.M3uRoot))">
-            <BbFieldLabel For="settings-m3uroot">Raíz M3U</BbFieldLabel>
-            <BbFieldContent>
-                <BbInput Id="settings-m3uroot" @bind-Value="_settings.M3uRoot" Disabled="@Disabled"
-                         AriaDescribedBy="settings-m3uroot-help" />
-                <BbFieldDescription Id="settings-m3uroot-help">La carpeta debe existir y permitir escritura. Las exportaciones M3U usarán rutas relativas a ella.</BbFieldDescription>
-                <BbFieldError Errors="@FieldErrors(nameof(_settings.M3uRoot))" />
             </BbFieldContent>
         </BbField>
         <div class="button-row">
