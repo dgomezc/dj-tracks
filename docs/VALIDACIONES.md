@@ -74,6 +74,10 @@ Consultar siempre el estado real de GitHub antes de actuar sobre un PR.
   pequeñas». Se conserva RMS/caché v2 y se añade únicamente un realce visual
   suave fijo de niveles bajos/medios, sin normalización por canción ni recorte
   de los niveles altos. **Pendiente de validación; no autoriza merge ni F4.3.**
+- El 03/11/2026 el usuario confirma «ahora está perfecto» tras el ajuste visual
+  de la onda. **Tamaño/aspecto de la onda aceptados**. La confirmación no detalla
+  pruebas de carga, caché, bibliotecas, cola o móvil y no se extiende a ellas.
+  Pregunta qué queda por hacer/probar: no autoriza merge ni iniciar F4.3.
 - Revisión de F4.1 pedida el 28/10/2026: «Pon tooltips a los botones que sólo tienen
   icono… Para crear o editar un playlist creo que es mejor hacerlo desde una ventana
   modal con opciones de aceptar y cancelar». Aplicada y validada dentro del PR #15.
@@ -172,7 +176,11 @@ No requiere BD, Docker, configuración nueva ni modificar MP3.
   actual; no se añaden datos ficticios ni lectura nueva de tags. La ficha grande
   se conserva para no perder álbum, archivo, avisos ni tracklist.
 
-### Tercera revisión de onda: tamaño visual (validación actual pendiente)
+### Tercera revisión de onda: tamaño visual aceptado; comprobaciones restantes pendientes
+
+Confirmación del usuario el 03/11/2026: «ahora está perfecto». Se acepta el
+tamaño/aspecto final de la onda; no se presupone que se haya recorrido el resto
+de la checklist ni que esté autorizado el merge del PR #17.
 
 Arranque: Visual Studio 2026 (.NET 10), abrir `DjTracks.slnx` en la rama del
 PR #17, perfil **DJ Tracks (Api + UI)** y F5. UI
@@ -190,7 +198,9 @@ altos al techo. Conserva cero, uno y el orden de amplitudes. No es una escala
 de medida lineal; es una decisión de legibilidad visual. Sin cambios en MP3,
 datos RMS, generación progresiva, caché, dimensiones del reproductor o controles.
 
-- [ ] **Repetir — tamaño/contraste:** reproducir las mismas pistas que se veían
+- [x] **Tamaño/aspecto aceptados por el usuario** («ahora está perfecto»).
+  No consta desglose individual de pasajes o dispositivos.
+- [ ] **Cobertura adicional de contraste:** reproducir las mismas pistas que se veían
   pequeñas y comparar partes suaves, bombos y bajos sostenidos. Las barras
   bajas/medias deben verse más altas; las fuertes deben conservar diferencias,
   sin convertirse todas en una banda al máximo. Silencio como línea mínima.
