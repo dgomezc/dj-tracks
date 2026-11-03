@@ -11,7 +11,7 @@ Reproductor autoalojado de música electrónica (Tracks, Sessions, Remember). Se
 | Backend | ASP.NET Minimal API + Vertical Slices (`src/DjTracks.Api/Features/<Feature>`) |
 | Proyectos | `Api`, `UI`, `Domain`, `Infrastructure` (ya creados en `DjTracks.slnx`) |
 | Biblioteca musical | Sin BD: se lee del sistema de ficheros (carpetas = año/estilo) |
-| Playlists | Ficheros JSON en disco (carpeta configurable). Simple, portable y exportable a m3u |
+| Playlists | Un fichero M3U por playlist en la carpeta configurable, guardado automáticamente en cada cambio; legible por otros reproductores |
 | PostgreSQL | Solo estadísticas (reproducciones). EF Core + Npgsql |
 | Tags/carátula | TagLibSharp (lectura de tags y carátula incrustada) |
 | Onda | FFMpegCore decodifica PCM por pipe, transmite los picos en bloques para pintar la onda progresivamente y cachea el JSON final bajo `App_Data/Waveforms`; requiere FFmpeg disponible en la API. NAudio se comparó y se descartó por menor rendimiento |
@@ -62,7 +62,7 @@ Sessions\
 Features/
   Library/      (tracks, sessions, remember: listado y navegación)
   Streaming/    (audio, carátula, onda)
-  Playlists/    (manuales, automáticos, export m3u)
+  Playlists/    (manuales y automáticos, guardados como m3u)
   Stats/
   Settings/
 ```
@@ -83,7 +83,7 @@ El estado de entrega y las checklists se mantienen en `VALIDACIONES.md`. Una imp
 ### Bloque 0 — Base
 - **F0.1 Layout**: MudBlazor, tema oscuro (migrado después a Blazor Blueprint con modo claro/oscuro), layout con panel izquierdo (playlists, vacío), zona central, barra inferior de reproductor (vacía), pestañas Tracks / Sessions / Remember, Inicio y Configuración. UI llama a la API vía `HttpClient`. Perfiles de lanzamiento múltiples en VS (Api + UI).
   *Prueba*: navegar entre páginas, layout correcto.
-- **F0.2 Configuración de rutas**: página Configuración que edita rutas (tracks, sessions, remember, playlists, ruta raíz m3u) guardadas en un JSON de ajustes; validación de que existen.
+- **F0.2 Configuración de rutas**: página Configuración que edita rutas (tracks, sessions, remember, playlists; la ruta raíz m3u se eliminó en F4.2) guardadas en un JSON de ajustes; validación de que existen.
   *Prueba*: guardar rutas y ver mensaje de validación.
 
 ### Bloque 1 — Tracks
@@ -136,7 +136,7 @@ El estado de entrega y las checklists se mantienen en `VALIDACIONES.md`. Una imp
 ### Bloque 4 — Playlists
 - **F4.1 Manuales**: crear/borrar/renombrar, añadir y quitar canciones (botón en listados de Tracks y Remember), cargar en cola. Panel izquierdo.
   Gestión también en `/playlists` para pantallas sin panel lateral. Un JSON por
-  playlist (`<id N minúsculo>.json`) en la ruta configurada, con nombre visible y
+  playlist (`<id N minúsculo>.json`; sustituido por M3U en F4.2) en la ruta configurada, con nombre visible y
   referencias relativas a Tracks (año/estilo/fichero) o Remember (categoría/fichero),
   nunca Sessions, rutas absolutas ni URLs. Orden de incorporación y sin repetidos.
   Nombres de 1–120 caracteres, recortados y únicos sin distinguir mayúsculas;
@@ -153,11 +153,16 @@ El estado de entrega y las checklists se mantienen en `VALIDACIONES.md`. Una imp
   error sin modificar la cola; se puede quitar la referencia desde la playlist.
   Persisten tras recargar/reiniciar, a diferencia de la cola. Sin reordenación,
   exportación M3U ni playlists automáticos todavía.
-- **F4.2 Export M3U** de cada playlist manual a la raíz configurada; fichero
-  UTF-8 `<nombre>.m3u`, `#EXTM3U`/`#EXTINF` y rutas relativas a la raíz M3U.
-  La raíz debe existir y permitir escritura. Referencias no disponibles o fallos
-  de almacenamiento se informan sin dejar una exportación parcial.
-- **F4.3 Automáticos**: modal "Generar playlist automático" con filtros Año (multi), Estilo (multi), Incluir Remember; guardado de filtros y generación; export m3u.
+- **F4.2 Playlists en M3U**: revisión del usuario (03/11/2026): sin botón de
+  exportar y un único formato. Cada playlist manual se guarda **automáticamente**
+  como `<nombre>.m3u` (UTF-8) en la carpeta de playlists al crear, renombrar,
+  añadir, quitar o borrar; ya no hay JSON de playlists ni «Raíz M3U». Contiene
+  `#EXTM3U`, `#PLAYLIST:<nombre>`, `#DJTRACKS-ID:<id>` y `#EXTINF` + ruta
+  relativa a la carpeta de playlists (absoluta solo si está en otra unidad).
+  Las playlists JSON de F4.1 se convierten a M3U automáticamente y se borra el
+  JSON. Los M3U externos de la carpeta se listan si todas sus rutas son de
+  Tracks o Remember. Escritura atómica; un M3U inválido no se sobrescribe.
+- **F4.3 Automáticos**: modal "Generar playlist automático" con filtros Año (multi), Estilo (multi), Incluir Remember; guardado de filtros y generación; se guardan como m3u.
 - **F4.4 Playlists vivos**: índice de biblioteca con watcher + reescaneo horario; los automáticos reflejan altas/bajas.
   *Prueba*: añadir/borrar un mp3 en carpeta y ver el cambio en el playlist.
 
@@ -172,7 +177,7 @@ El estado de entrega y las checklists se mantienen en `VALIDACIONES.md`. Una imp
 ## Aclaraciones confirmadas
 
 1. Biblioteca de ~1000 mp3, crecimiento de 3-4 al mes: el índice en memoria es suficiente; no hace falta paginación ni BD para la biblioteca.
-2. Los m3u usan rutas **relativas** (relativas a la ruta raíz configurada).
+2. Los m3u usan rutas **relativas** a la carpeta de playlists (desde F4.2 no hay ruta raíz M3U aparte).
 3. Los playlists manuales pueden mezclar Tracks y Remember.
 4. Las sesiones no se pueden añadir a playlists manuales.
 5. Las rutas se introducen mediante campos de texto, sin botón Examinar ni selector de carpetas (decisión del usuario del 26/10/2026, que revoca la propuesta del selector).

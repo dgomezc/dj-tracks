@@ -46,7 +46,8 @@ Consultar siempre el estado real de GitHub antes de actuar sobre un PR.
   [#15](https://github.com/dgomezc/dj-tracks/pull/15), commit
   `b5990820ddb692e46052b636873f34a511f2d0ed`. F4.2 es la fase actual en
   `fase/f4-2-export-m3u`, PR [#16](https://github.com/dgomezc/dj-tracks/pull/16)
-  abierto hacia `develop`, pendiente de validación. F2.3 aplazada al final.
+  abierto hacia `develop`, pendiente de validación. Revisada el 03/11/2026:
+  guardado automático solo en M3U, sin botón de exportar ni «Raíz M3U». F2.3 aplazada al final.
   Decisión confirmada: cargar añade al final, sin duplicados ni interrumpir
   audio; no sustituye la cola.
 - Revisión de F4.1 pedida el 28/10/2026: «Pon tooltips a los botones que sólo tienen
@@ -214,54 +215,71 @@ o `Waveform__BinaryFolder` para la onda. No requiere BD ni modificar los MP3.
 Confirmación del usuario el 02/11/2026: «Perfecto, sigue con el siguiente punto».
 PR #15 mergeada en `develop`; merge commit `b599082`.
 
-## F4.2: exportación M3U (implementada; validación manual pendiente)
+## F4.2: playlists guardadas en M3U (revisión implementada; validación manual pendiente)
 
-Exportar una playlist manual a un fichero M3U en la carpeta existente configurada
-como «Raíz M3U». El fichero usa el nombre de la playlist con extensión `.m3u`
-(saneado para el sistema de archivos; un nombre saneado en colisión lleva sufijo
-del ID), codificación UTF-8 y rutas relativas a dicha raíz. Si una referencia
-musical no se puede resolver o la carpeta no permite escribir, informar el error
-sin producir una exportación parcial. Configuración comprueba que «Raíz M3U»
-permite escritura.
+Revisión del usuario del 03/11/2026: «Hay que quitar el botón de exportar m3u y que
+el guardado de los playlist sea automático… No tiene sentido mantener tanto m3u
+como json, con uno de los dos vale». Elegido con el usuario: **solo M3U**, en la
+carpeta **Playlists**, eliminando la opción «Raíz M3U».
+
+- Cada playlist es `<nombre>.m3u` (UTF-8, nombre saneado) en la carpeta Playlists.
+  Se reescribe automáticamente al crear, renombrar, añadir o quitar canciones, y
+  se borra al borrar la playlist. Ya no hay botón «Exportar M3U» ni endpoint.
+- Contenido: `#EXTM3U`, `#PLAYLIST:<nombre>`, `#DJTRACKS-ID:<id>` y, por canción,
+  `#EXTINF:<segundos>,<Artista - Título>` + ruta relativa a la carpeta Playlists
+  (p. ej. `../Tracks/2024/Techno/a.mp3`); absoluta solo si está en otra unidad.
+- Las playlists JSON de F4.1 se convierten a M3U al primer acceso y se borra el
+  JSON. Un JSON antiguo inválido no se toca y se avisa.
+- Un M3U añadido a mano en la carpeta aparece como playlist si todas sus rutas
+  son MP3 de Tracks (`Año\Estilo\archivo`) o Remember (`Cortas|Largas\archivo`);
+  si no, se muestra un error con el archivo y la línea, sin sobrescribirlo.
+- Configuración tiene cuatro rutas; `m3uRoot` del JSON de ajustes se ignora y
+  desaparece al volver a guardar.
 
 ### Arranque y checklist del usuario
 
 Visual Studio 2026 (.NET 10), `DjTracks.slnx`, perfil **DJ Tracks (Api + UI)** y F5.
-UI `http://localhost:5050/playlists`, API `http://localhost:5247`. La ruta de
-Playlists debe existir y permitir lectura/escritura; «Raíz M3U» debe existir y
-permitir lectura/escritura. Usar playlists con MP3 de Tracks (`Año\Estilo`) y
-Remember (`Cortas`/`Largas`); no requiere BD ni FFmpeg.
+Reiniciar API/UI tras cambiar de rama. UI `http://localhost:5050/playlists`.
+La carpeta Playlists debe existir y permitir lectura/escritura. Recomendado:
+copia de seguridad de la carpeta Playlists antes de arrancar (se migrarán tus
+2 playlists JSON). No requiere BD.
 
-- [ ] En `/playlists/{id}`, «Exportar M3U» crea/actualiza `<nombre>.m3u` en Raíz M3U;
-  la página muestra el nombre del archivo y el número de canciones exportadas.
-- [ ] Abrir el fichero en un editor: empieza por `#EXTM3U`, muestra cada canción
-  una vez, con metadatos legibles y ruta relativa a la raíz configurada (no una
-  ruta absoluta); comprobar Tracks y Remember, incluidos acentos/Unicode.
-- [ ] Cambiar una playlist y exportar otra vez actualiza el M3U; playlist vacía
-  produce un M3U válido sin canciones.
-- [ ] MP3 ausente, ruta M3U sin permisos o configuración inválida muestra error
-  explícito y no deja un archivo parcial. Configuración rechaza una Raíz M3U sin
-  permiso de escritura.
-- [ ] Repetir con Light Green y otro tema, claro y oscuro; el botón/resultado se
-  entiende y no rompe el resto de acciones de playlist.
+- [ ] **Nuevo:** al abrir `/playlists`, tus playlists JSON anteriores aparecen con
+  el mismo nombre y canciones; en la carpeta Playlists hay un `.m3u` por cada una
+  y ya no están los `.json`.
+- [ ] **Nuevo:** en `/playlists/{id}` ya no aparece «Exportar M3U».
+- [ ] **Nuevo:** crear una playlist crea `<nombre>.m3u`; añadir canciones de Tracks
+  y Remember y quitar una actualiza el fichero al momento (abrirlo en un editor:
+  `#EXTM3U`, nombre, una línea `#EXTINF` y una ruta relativa por canción).
+- [ ] **Nuevo:** renombrar cambia el nombre del fichero (también si solo cambian
+  mayúsculas) y conserva canciones; borrar elimina el `.m3u`, no los MP3.
+- [ ] **Nuevo:** abrir el `.m3u` en un reproductor externo (VLC, foobar…): suenan
+  las canciones (rutas relativas a la carpeta Playlists).
+- [ ] **Nuevo:** `/settings` muestra cuatro rutas (sin «Raíz M3U»); guardar funciona.
+- [ ] **Repetir:** cargar la playlist en la cola, Reproducir/Añadir a la cola por
+  canción y quitar siguen funcionando como en F4.1; persisten tras reiniciar.
+- [ ] **Repetir:** Light Green y otro tema, en claro y oscuro: página de playlists
+  y Configuración legibles.
 
 ### Comprobaciones del agente
 
-- `dotnet build DjTracks.slnx`: correcto, 0 errores/advertencias. Sin tests nuevos.
-- API en fixture aislado: exportación mezcla Tracks/Remember con tags Unicode,
-  `#EXTM3U`/`#EXTINF` y rutas relativas (`../library/...`), sin rutas absolutas
-  ni temporales residuales; playlist vacía produce solo la cabecera. MP3 ausente
-  devuelve 404 y conserva byte por byte el M3U anterior. Guardar Configuración con
-  una Raíz M3U inexistente devuelve 400 y conserva la configuración anterior; una
-  ruta M3U existente y escribible se guarda correctamente, sin dejar temporales.
-- UI en navegador integrado: botón «Exportar M3U» muestra nombre y número de
-  canciones tras exportar; al faltar un MP3, muestra el error en la página, y tras
-  restaurarlo permite exportar correctamente.
-- No comprobados permisos de escritura denegados por ACL, bibliotecas/unidades
-  distintas, reproductores M3U externos ni biblioteca real.
+- `dotnet build` de la solución (a carpeta temporal porque Visual Studio tenía la
+  app en ejecución): 0 errores/advertencias. Sin tests nuevos.
+- API en fixture aislado: migración de un JSON antiguo a `Vieja_Lista.m3u`
+  (nombre con `/` saneado; ID conservado) y borrado del JSON; JSON antiguo
+  inválido devuelve 500 sin tocar el fichero. Crear, añadir Tracks (incluido un
+  archivo que empieza por `#`) y Remember, quitar, renombrar solo mayúsculas,
+  renombrar a otro nombre, nombre de archivo equivalente → 409, `playback` y
+  borrar: el fichero en disco refleja cada cambio. `POST …/export` → 404.
+- M3U externo sin ID con ruta absoluta, separador `\`, categoría en minúsculas y
+  entrada repetida: se lista con 2 canciones. M3U con una ruta fuera de las
+  bibliotecas: error 500 explícito y fichero intacto.
+- `PUT /api/settings` con cuatro rutas guarda sin `m3uRoot`.
+- Navegador integrado: Configuración con cuatro rutas; playlist migrada abierta
+  sin botón de exportar (Light Green oscuro). No comprobados otros temas, modo
+  claro, reproductores externos ni la biblioteca real.
 
 Validación manual del usuario pendiente. No avanzar a F4.3.
-
 ## F3.1: Remember (validada por el usuario)
 
 `/remember` abre Cortas y permite cambiar a Largas. MP3 por nombre ascendente,
