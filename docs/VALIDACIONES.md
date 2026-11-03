@@ -7,10 +7,11 @@ Consultar siempre el estado real de GitHub antes de actuar sobre un PR.
 
 ## Estado actual
 
-- **F4.3 implementada, pendiente de validación del usuario** (03/11/2026):
+- **F4.3 validada globalmente por el usuario** (03/11/2026):
   rama `fase/f4-3-automaticos`, desde `develop` limpio con F4.2a integrada.
   PR [#18](https://github.com/dgomezc/dj-tracks/pull/18) abierto hacia
-  `develop`. No autoriza merge ni avanzar a F4.4.
+  `develop`. Confirmación: «todo ok, continua». Autoriza su integración y
+  continuación con F4.4; no atribuye pruebas individuales adicionales.
   Decisiones confirmadas en esta sesión: solo cambiar canciones mediante
   filtros/regeneración, estilos completos y todo Remember opcional; detalle abajo.
 - **F4.2a validada globalmente por el usuario el 03/11/2026**:
@@ -111,7 +112,11 @@ Consultar siempre el estado real de GitHub antes de actuar sobre un PR.
 - Port F1.2 recibido de `dgomezc-fase-f1-2-filtros` (`1354305` código, `c38cddb` documentación). Se integra mediante merge en la rama original: se conservan ambos historiales y se resuelven los conflictos de código con la versión adaptada a Result/FluentValidation. Sin PR duplicado ni reescritura de ramas. Cambios preexistentes y JSON privado conservados; no se borran worktrees.
 - Comprobación de integración en checkout original (27/10/2026): `src` coincide con el port recibido; compilación completa con 0 errores y advertencias. API/UI aisladas con MP3 sintéticos: multiaño/multigrupo/multisubestilo, alias, ausencia de duplicados, resultados vacíos, explorador, errores 400/404, opciones, carga de ajustes y página Tracks correctos. No equivale a validación visual de biblioteca real. Servicios y fixtures temporales retirados después de comprobar.
 
-## F4.3: playlists automáticas (pendiente de validación del usuario)
+## F4.3: playlists automáticas (validada globalmente por el usuario)
+
+Confirmación del 03/11/2026: «todo ok, continua». Aceptación global y
+autorización de integración/continuación con F4.4. Las casillas se conservan
+como registro de alcance, sin afirmar pruebas individuales no detalladas.
 
 Modal «Generar playlist automático» con nombre, Año y Estilo completo
 multiselección, e Incluir Remember. Genera todas las coincidencias sin límite
@@ -175,7 +180,7 @@ Para provocar errores o altas/bajas, usar exclusivamente copias/datos de prueba.
 ### Comprobaciones del agente y límites
 
 PR [#18](https://github.com/dgomezc/dj-tracks/pull/18), hacia `develop`;
-implementación entregada, validación manual pendiente.
+validada globalmente por el usuario; consultar GitHub para su integración.
 
 - Compilación de la solución: 0 errores y 0 advertencias; sin tests nuevos.
   Context7 (Minimal API) y MCP Blueprint (Dialog/MultiSelect/Checkbox) consultados.
