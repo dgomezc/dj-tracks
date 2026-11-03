@@ -9,7 +9,8 @@ Consultar siempre el estado real de GitHub antes de actuar sobre un PR.
 
 - **F4.3 implementada, pendiente de validación del usuario** (03/11/2026):
   rama `fase/f4-3-automaticos`, desde `develop` limpio con F4.2a integrada.
-  PR pendiente de publicación. No autoriza merge ni avanzar a F4.4.
+  PR [#18](https://github.com/dgomezc/dj-tracks/pull/18) abierto hacia
+  `develop`. No autoriza merge ni avanzar a F4.4.
   Decisiones confirmadas en esta sesión: solo cambiar canciones mediante
   filtros/regeneración, estilos completos y todo Remember opcional; detalle abajo.
 - **F4.2a validada globalmente por el usuario el 03/11/2026**:
@@ -173,6 +174,9 @@ Para provocar errores o altas/bajas, usar exclusivamente copias/datos de prueba.
 
 ### Comprobaciones del agente y límites
 
+PR [#18](https://github.com/dgomezc/dj-tracks/pull/18), hacia `develop`;
+implementación entregada, validación manual pendiente.
+
 - Compilación de la solución: 0 errores y 0 advertencias; sin tests nuevos.
   Context7 (Minimal API) y MCP Blueprint (Dialog/MultiSelect/Checkbox) consultados.
 - API/UI aisladas en 5347/5150, biblioteca propia sintética fuera del repositorio;
@@ -208,6 +212,7 @@ Para provocar errores o altas/bajas, usar exclusivamente copias/datos de prueba.
   pasan en español. No se modifica la dependencia ni el reproductor F4.2a.
 - Una API por carpeta de playlists. Cambios de otras ventanas requieren
   recarga; F4.3 no sincroniza ni regenera automáticamente.
+- Servicios, audio/caché sintéticos y scripts temporales retirados al terminar.
 
 ## F4.2a: reproductor inferior, opción B (validada globalmente por el usuario)
 
