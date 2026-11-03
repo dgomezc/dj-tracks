@@ -162,6 +162,22 @@ El estado de entrega y las checklists se mantienen en `VALIDACIONES.md`. Una imp
   Las playlists JSON de F4.1 se convierten a M3U automáticamente y se borra el
   JSON. Los M3U externos de la carpeta se listan si todas sus rutas son de
   Tracks o Remember. Escritura atómica; un M3U inválido no se sobrescribe.
+- **F4.2a (extra) Rediseño del reproductor inferior**: intercalada antes de
+  F4.3 por petición del usuario del 03/11/2026. Elegida la propuesta **B**:
+  carátula, título, artista, estilo/categoría, año y tiempos a la izquierda;
+  onda progresiva con seek y posición actual en el centro; añadir a playlist,
+  shuffle, anterior, play/pausa, siguiente, bucle y cola a la derecha.
+  Volumen horizontal siempre visible debajo de los botones, porcentaje y mute
+  que conserva el volumen al cambiar de canción. Sin controles nativos duplicados.
+  Mantiene la ficha grande y el tracklist; conserva las restricciones de playlists
+  (Tracks/Remember, no Sessions), la cola en memoria y los temas claro/oscuro.
+  En pantallas estrechas redistribuye los tres bloques sin ocultar controles.
+  BPM y tonalidad eran ilustrativos en la maqueta: no se inventan ni se amplían
+  los tags en esta fase. Fallos de audio/autoplay explícitos; si falla la onda,
+  muestra el error y una barra de seek alternativa sin detener el audio.
+  *Prueba*: comparar con la propuesta B, reproducir las tres bibliotecas,
+  buscar en la onda, probar controles/volumen/mute y revisar escritorio/móvil.
+  No avanzar a F4.3 hasta validar e integrar esta fase.
 - **F4.3 Automáticos**: modal "Generar playlist automático" con filtros Año (multi), Estilo (multi), Incluir Remember; guardado de filtros y generación; se guardan como m3u.
 - **F4.4 Playlists vivos**: índice de biblioteca con watcher + reescaneo horario; los automáticos reflejan altas/bajas.
   *Prueba*: añadir/borrar un mp3 en carpeta y ver el cambio en el playlist.

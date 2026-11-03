@@ -219,6 +219,27 @@ ni sincronización automática entre circuitos en esta fase. `/playlists` en la
 cabecera mantiene la gestión accesible cuando el lateral se oculta en móvil.
 La cola sigue en memoria: editar/borrar una playlist no modifica la cola ya cargada.
 
+F4.2a sustituye los controles nativos del pie por `BottomPlayer` (Razor,
+code-behind y módulo JS aislado). `MainLayout` conserva la ficha grande, el
+tracklist y el panel de cola; pasa al reproductor el estado de apertura de la cola.
+La barra usa `NowPlaying Compact` para reutilizar la lectura HTTP de la carátula,
+el descarte de respuestas atrasadas y los datos de la entrada activa.
+`IconButton` y `BbSlider` presentan los controles; añadir a playlist reutiliza
+`AddToPlaylist` con referencias de Tracks/Remember, nunca de Sessions.
+
+`BottomPlayer` mantiene volumen/mute durante el circuito y enlaza un único
+`audio` por `PlaybackVersion`. El módulo JS escucha eventos reales del audio,
+actualiza los tiempos y la regla de la onda en el navegador y solo notifica a
+.NET play/pausa, fallos y fin de pista. La cola sigue usando `AudioPlayerState`,
+con el mismo control de versiones para descartar eventos atrasados; abrir
+paneles, navegar y cambiar shuffle/bucle no recrean el audio.
+Los errores de autoplay/audio se muestran y registran, sin convertir un inicio
+bloqueado en éxito. Se desconectan listeners y observadores al liberar la barra.
+Un `ResizeObserver` ajusta `--player-height` para reservar espacio bajo el contenido.
+La onda agrupa los picos por ancho visible para mantener barras separadas y
+pinta una línea de posición; `UnavailableChanged` permite mostrar el seek
+alternativo solo si la onda falla. No hay endpoints, persistencia ni paquetes nuevos.
+
 
 | Elemento | Nombre | Namespace |
 |---|---|---|

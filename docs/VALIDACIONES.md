@@ -44,14 +44,21 @@ Consultar siempre el estado real de GitHub antes de actuar sobre un PR.
 - F4.1 playlists manuales validada por el usuario el 02/11/2026 («Perfecto, sigue
   con el siguiente punto») y mergeada en `develop` mediante PR
   [#15](https://github.com/dgomezc/dj-tracks/pull/15), commit
-  `b5990820ddb692e46052b636873f34a511f2d0ed`. F4.2 es la fase actual en
+  `b5990820ddb692e46052b636873f34a511f2d0ed`. F4.2 se desarrolló en
   `fase/f4-2-export-m3u`, PR [#16](https://github.com/dgomezc/dj-tracks/pull/16)
-  abierto hacia `develop`. Revisada el 03/11/2026 (guardado automático solo en
+  hacia `develop`. Revisada el 03/11/2026 (guardado automático solo en
   M3U, sin botón de exportar ni «Raíz M3U») y validada globalmente por el usuario
-  ese día. Pendiente de autorización de merge; pausa hasta que el usuario
-  defina un paso extra. F2.3 aplazada al final.
+  ese día. PR #16 **mergeado** el 03/11/2026 a las 08:20:29 UTC,
+  commit `43b4d734235643bb994bc82176dbde28616001e8` (comprobado en GitHub).
+  F2.3 aplazada al final.
   Decisión confirmada: cargar añade al final, sin duplicados ni interrumpir
   audio; no sustituye la cola.
+- **F4.2a extra: reproductor inferior, opción B**, autorizada el 03/11/2026:
+  «Me gusta más la opción B. Realiza la implementación lo más parecido posible
+  a esta opción». Rama `dgomezc-disenos-del-reproductor`, desde `develop`
+  con F4.2 integrada. Implementada y pendiente de validación del usuario;
+  PR pendiente de creación. No autoriza merge ni continuar con F4.3.
+  La elección de maqueta no equivale a validar la implementación.
 - Revisión de F4.1 pedida el 28/10/2026: «Pon tooltips a los botones que sólo tienen
   icono… Para crear o editar un playlist creo que es mejor hacerlo desde una ventana
   modal con opciones de aceptar y cancelar». Aplicada y validada dentro del PR #15.
@@ -69,6 +76,86 @@ Consultar siempre el estado real de GitHub antes de actuar sobre un PR.
 - **Refactor transversal Vertical Slices: validado por el usuario el 27/10/2026** con "Perfecto, documenta toda la arquitectura actual… Después mezcla el PR y sigue con el siguiente paso". Arquitectura documentada en `ARQUITECTURA.md`. PR [#6](https://github.com/dgomezc/dj-tracks/pull/6) mergeado en `develop` (`c7c1508`). Diseño validado en `arquitectura/flujo-get-tracks.html` ("Cambia todas las llamadas").
 - Port F1.2 recibido de `dgomezc-fase-f1-2-filtros` (`1354305` código, `c38cddb` documentación). Se integra mediante merge en la rama original: se conservan ambos historiales y se resuelven los conflictos de código con la versión adaptada a Result/FluentValidation. Sin PR duplicado ni reescritura de ramas. Cambios preexistentes y JSON privado conservados; no se borran worktrees.
 - Comprobación de integración en checkout original (27/10/2026): `src` coincide con el port recibido; compilación completa con 0 errores y advertencias. API/UI aisladas con MP3 sintéticos: multiaño/multigrupo/multisubestilo, alias, ausencia de duplicados, resultados vacíos, explorador, errores 400/404, opciones, carga de ajustes y página Tracks correctos. No equivale a validación visual de biblioteca real. Servicios y fixtures temporales retirados después de comprobar.
+
+## F4.2a: reproductor inferior, opción B (pendiente de validación)
+
+Barra fija con información/carátula a la izquierda, onda/seek en el centro
+y botones a la derecha. Volumen horizontal y mute siempre visibles bajo
+los botones, sin controles nativos duplicados. Play/pausa, anterior/siguiente,
+shuffle, bucle desactivado/cola/canción, contador/abrir cola y añadir a playlist.
+La ficha grande y el tracklist siguen disponibles. Los colores usan las
+variables del tema seleccionado; en tablet la onda pasa debajo y en móvil
+información, onda y controles se apilan. Se reserva automáticamente la altura
+del pie para que el contenido pueda desplazarse por encima de él.
+
+### Arranque y checklist del usuario
+
+Visual Studio 2026 (.NET 10), abrir `DjTracks.slnx` **en esta rama**,
+perfil **DJ Tracks (Api + UI)** y F5. Reiniciar API/UI y recargar completamente.
+UI `http://localhost:5050/tracks`, API `http://localhost:5247`.
+Configurar las cuatro rutas existentes en `/settings`; usar MP3 reales de
+Tracks (`Año\Estilo`), Sessions (`Año\Sesión`, opcional TXT compatible) y
+Remember (`Cortas`/`Largas`). Para guardar playlists, su carpeta debe permitir
+escritura. FFmpeg en PATH o `Waveform__BinaryFolder` para generar ondas.
+No requiere BD, Docker, configuración nueva ni modificar MP3.
+
+- [ ] **Diseño y datos:** reproducir un Track con tags/carátula. En escritorio
+  ancho (>1100 px), ver información a la izquierda, onda central y botones
+  a la derecha, con volumen debajo como en la propuesta B. Título, artista,
+  estilo/año y portada corresponden al archivo; tiempos transcurrido/total/
+  restante cambian con el audio. Sin tags/carátula hay mensajes, no datos inventados.
+- [ ] **Reproducción y seek:** play/pausa cambia icono y sonido sin perder
+  posición. Clic en la onda salta al punto elegido; con foco, flechas buscan
+  ±5 s y Home/End al inicio/final. La línea sigue la posición, verde lo
+  reproducido y neutro lo pendiente. Probar también una sesión larga.
+- [ ] **Volumen/mute:** arrastrar el slider y usar flechas/Home/End cambia
+  volumen/porcentaje. Mute silencia sin pausar ni perder la posición; restaurar
+  recupera el nivel. Llevar el slider a cero y restaurar recupera el último nivel
+  audible. Cambiar canción conserva volumen y mute; ajustar el slider desactiva mute.
+- [ ] **Cola y modos:** encolar al menos tres canciones; anterior/siguiente
+  cambian pista/datos/onda sin duplicar audio. Shuffle se ilumina al activarlo;
+  bucle recorre desactivado → cola → canción → desactivado, con tooltip e icono
+  distintos. Al terminar se respeta cada modo. Abrir/cerrar cola desde el pie
+  muestra el contador correcto; quitar la activa o vaciar la cola actualiza el pie.
+- [ ] **Bibliotecas y playlists:** navegar mientras suena mantiene audio/
+  posición; probar Play desde Tracks, Remember y Sessions, también desde cola
+  y playlists. «+» guarda la activa de Tracks/Remember en la playlist elegida
+  sin interrumpir sonido ni duplicar entradas. En Sessions está deshabilitado;
+  la ficha grande conserva su tracklist y la opción de recargarlo.
+- [ ] **Responsive, temas y accesibilidad:** comprobar escritorio, tablet
+  y móvil (390 px); todos los controles siguen accesibles y el pie no genera
+  scroll horizontal. Hacer scroll hasta la última fila: puede quedar por encima
+  del pie. Probar claro/oscuro y otro tema. Tabular: tooltips en español,
+  foco visible y controles de volumen/onda manejables por teclado.
+- [ ] **Errores:** si el navegador bloquea autoplay, aparece un aviso y
+  Reproducir permite reintentarlo. Un audio ausente/ilegible da error visible.
+  Si FFmpeg/onda falla, se muestra el error y un seek alternativo utilizable
+  cuando el audio tiene duración; no se detiene un audio válido.
+
+### Comprobaciones del agente y límites
+
+- `dotnet build DjTracks.slnx`: 0 errores y 0 advertencias.
+- API/UI reales en puertos aislados 5347/5150 con MP3 sintéticos propios,
+  portada y playlist temporales, sin usar rutas/archivos personales.
+- Navegador: play/pausa, tiempo real, seek en onda al 40 % (≈30 s/75 s),
+  anterior/siguiente, shuffle/bucle e inicio desde cero en bucle de canción;
+  volumen 70 % → cero → restaurar 70 %, mute conservado al cambiar de pista.
+- Sin tags ni portada: nombre de fichero, «Sin datos» y «Sin carátula»;
+  portada incrustada mostrada en el pie. Remember se guardó en una playlist
+  desde el «+» del pie; Sessions conserva tracklist y deshabilita ese botón.
+- Navegación conservó el mismo elemento de audio, pausa y posición.
+  Capturas inspeccionadas de escritorio (1440 px, pie 112 px) y móvil
+  (390 px, pie 248 px), sin desbordamiento horizontal del pie/documento.
+  Modo claro comprobado con variables del tema. Autoplay bloqueado mostró aviso.
+- Un MP3 sintético inválido mostró errores explícitos de audio, onda y carátula.
+  Se hizo visible el seek alternativo, deshabilitado al no haber duración válida.
+- Pendientes del usuario: sonido/UX con biblioteca real, sesiones de 1 h+,
+  recorrido completo de los modos de cola, arrastre táctil, otros temas y
+  fallos reales de almacenamiento/FFmpeg. No se han generado tests.
+- Volumen/mute se mantienen durante el circuito, no tras recarga completa.
+  BPM y tonalidad de la maqueta eran ilustrativos y no existen en el contrato
+  actual; no se añaden datos ficticios ni lectura nueva de tags. La ficha grande
+  se conserva para no perder álbum, archivo, avisos ni tracklist.
 
 ## F4.1: playlists manuales (validada por el usuario)
 
