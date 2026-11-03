@@ -4,7 +4,7 @@ using FluentResults;
 
 namespace DjTracks.Api.Features.Playlists.CreatePlaylist;
 
-public sealed class CreatePlaylistHandler(JsonPlaylistStore store)
+public sealed class CreatePlaylistHandler(M3uPlaylistStore store)
 {
     public Task<Result<ManualPlaylist>> HandleAsync(CreatePlaylistRequest request, CancellationToken ct) =>
         store.CreateAsync(request.Name!.Trim(), ct);

@@ -172,8 +172,15 @@ F4.1 añade `Features/Playlists` con slices explícitos GetPlaylists, GetPlaylis
 CreatePlaylist, RenamePlaylist, DeletePlaylist, AddPlaylistTrack, RemovePlaylistTrack
 y LoadPlaylist. Cada endpoint delega en su handler; requests validados por
 FluentValidation, respuestas `Result<T>` y traducción estándar de AppError.
-`JsonPlaylistStore` (singleton) carga la ruta desde `JsonSettingsStore` y guarda
-un JSON `<id:N>.json` por playlist manual. Nombre visible independiente del archivo;
+`M3uPlaylistStore` (singleton) carga las rutas desde `JsonSettingsStore` y guarda
+cada playlist como `<nombre saneado>.m3u` en la carpeta de playlists, reescrito en
+cada operación (crear, renombrar, añadir, quitar, borrar). El nombre visible va en
+`#PLAYLIST:` y el ID estable en `#DJTRACKS-ID:`; los IDs de entrada se derivan de
+la referencia. Cada entrada es `#EXTINF` + ruta relativa a la carpeta de playlists
+(absoluta si está en otra unidad); al leer, la ruta se traduce de nuevo a una
+referencia de Tracks (año/estilo/fichero) o Remember (Cortas|Largas/fichero).
+Los `#EXTINF` existentes se conservan y solo se leen tags de las canciones nuevas.
+Los JSON `<id:N>.json` de F4.1 se convierten una vez a M3U y se borran.
 `ManualPlaylist(Id, Name, Entries)` y `PlaylistEntry(Id, Track)` usan referencias
 `PlaylistTrackReference` con biblioteca/identificadores relativos, nunca rutas
 absolutas ni URLs de la API. Su validación de formato compartida también comprueba
@@ -182,14 +189,15 @@ idénticas y se conserva el orden de incorporación.
 
 El store serializa lectura/modificación/escritura mediante un semáforo por proceso;
 guarda primero un temporal, hace flush a disco y lo mueve sobre el destino.
-No crea raíces de almacenamiento ausentes ni sobrescribe/elimina JSON inválido.
-Ignora archivos ajenos al patrón de ID, rechaza enlaces de archivos gestionados
-y expone fallos de JSON/E/S con log. Un proceso de API por carpeta de playlists;
+No crea raíces de almacenamiento ausentes ni sobrescribe un M3U inválido (ruta
+fuera de las bibliotecas, ID repetido o nombre inválido). Un M3U externo sin ID
+recibe uno derivado del nombre de archivo. Rechaza enlaces de archivos gestionados
+y expone fallos de formato/E/S con log. Un proceso de API por carpeta de playlists;
 no se coordina con editores externos ni otras instancias.
 `PlaylistTrackResolver` resuelve las referencias con las bibliotecas existentes
 y reutiliza `TrackLibrary.ReadTrack` para tags actuales, sin escanear toda la
 carpeta por canción. Cualquier referencia ausente cancela la carga completa
-antes de cambiar la cola; la edición del JSON sigue disponible para quitarla.
+antes de cambiar la cola; la playlist sigue editable para quitarla.
 
 `Playlists.razor.cs` gestiona por HTTP nombres, entradas y carga. Crear y renombrar
 usan `PlaylistDialog` (`BbDialog` con Cancelar/Aceptar; el error de la API se queda
@@ -200,7 +208,7 @@ resolver solo esa entrada; sin `entryId` resuelve toda la playlist.
 Construye URLs
 de streaming/onda/portada con los mismos identificadores y orden de query que
 Tracks/Remember; `AudioPlayerState.Enqueue` conserva audio/posición y rechaza
-duplicados también entre un listado y una playlist. No guarda tags/URLs en JSON.
+duplicados también entre un listado y una playlist. No guarda URLs en el M3U.
 `AddToPlaylist` es un selector Sheet reutilizado por Tracks/Remember;
 `PlaylistSidebar` muestra nombres/contadores/enlaces de gestión. Ambos hacen HTTP
 en code-behind con `HttpClientResultExtensions` (GET/POST/PUT/DELETE).
@@ -210,6 +218,7 @@ actualice el nombre sin recargar. Recargar actualiza cambios de otras ventanas; 
 ni sincronización automática entre circuitos en esta fase. `/playlists` en la
 cabecera mantiene la gestión accesible cuando el lateral se oculta en móvil.
 La cola sigue en memoria: editar/borrar una playlist no modifica la cola ya cargada.
+
 
 | Elemento | Nombre | Namespace |
 |---|---|---|

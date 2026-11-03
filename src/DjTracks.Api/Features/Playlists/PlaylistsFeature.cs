@@ -13,7 +13,7 @@ namespace DjTracks.Api.Features.Playlists;
 public static class PlaylistsFeature
 {
     public static IServiceCollection AddPlaylistsFeature(this IServiceCollection services) =>
-        services.AddSingleton<JsonPlaylistStore>()
+        services.AddSingleton<M3uPlaylistStore>()
             .AddScoped<PlaylistTrackResolver>()
             .AddScoped<GetPlaylistsHandler>().AddScoped<GetPlaylistHandler>()
             .AddScoped<CreatePlaylistHandler>().AddScoped<RenamePlaylistHandler>()

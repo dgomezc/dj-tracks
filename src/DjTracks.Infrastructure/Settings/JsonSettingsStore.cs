@@ -106,10 +106,10 @@ public sealed class JsonSettingsStore(string filePath, ILogger<JsonSettingsStore
             var settings = await JsonSerializer.DeserializeAsync<PathSettings>(
                 stream, JsonOptions, cancellationToken);
             if (settings is null || new[] { settings.Tracks, settings.Sessions, settings.Remember,
-                    settings.Playlists, settings.M3uRoot }
+                    settings.Playlists }
                 .Any(path => string.IsNullOrWhiteSpace(path) || !Path.IsPathFullyQualified(path)))
             {
-                throw new JsonException("El JSON de ajustes debe contener las cinco rutas absolutas.");
+                throw new JsonException("El JSON de ajustes debe contener las cuatro rutas absolutas.");
             }
 
             return settings;
