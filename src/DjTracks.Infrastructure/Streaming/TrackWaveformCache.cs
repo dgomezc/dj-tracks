@@ -12,7 +12,7 @@ public sealed class TrackWaveformCache(string cacheDirectory, IWaveformGenerator
     ILogger<TrackWaveformCache> logger)
 {
     private const int PeakCount = 1024;
-    private const int CacheVersion = 1;
+    private const int CacheVersion = 2;
     private static readonly JsonSerializerOptions JsonOptions = new(JsonSerializerDefaults.Web);
 
     public async Task<Result<TrackWaveform>> GetAsync(FileInfo file, CancellationToken cancellationToken,

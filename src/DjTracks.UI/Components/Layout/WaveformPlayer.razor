@@ -22,6 +22,7 @@
 
 @code {
     [Parameter] public string? WaveformUrl { get; set; }
+    [Parameter] public EventCallback<bool> UnavailableChanged { get; set; }
 
     private ElementReference _canvas;
     private static readonly JsonSerializerOptions JsonOptions = new(JsonSerializerDefaults.Web);
@@ -103,8 +104,8 @@
                     chunk.StartIndex, chunk.Peaks, chunk.TotalPeakCount, chunk.DurationSeconds);
                 _progress = chunk.IsComplete ? 100
                     : chunk.TotalPeakCount > 0
-                        ? Math.Min(99, (chunk.StartIndex + chunk.Peaks.Length) * 100d
-                            / chunk.TotalPeakCount)
+                        ? Math.Min(99, Math.Floor((chunk.StartIndex + chunk.Peaks.Length) * 100d
+                            / chunk.TotalPeakCount))
                         : 0;
                 completed = chunk.IsComplete;
                 await InvokeAsync(StateHasChanged);
@@ -130,7 +131,11 @@
             if (!_disposed && _requestedUrl == url)
             {
                 _loading = false;
-                await InvokeAsync(StateHasChanged);
+                await InvokeAsync(async () =>
+                {
+                    await UnavailableChanged.InvokeAsync(_error is not null);
+                    StateHasChanged();
+                });
             }
         }
     }

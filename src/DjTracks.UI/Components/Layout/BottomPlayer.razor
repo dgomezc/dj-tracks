@@ -1,0 +1,83 @@
+@implements IAsyncDisposable
+@using DjTracks.UI.Shared
+
+<footer class="player-bar" @ref="_root" aria-label="Reproductor">
+    <div class="player-information">
+        <NowPlaying Compact="true" />
+        <div class="player-time" aria-label="Tiempo de reproducción">
+            <div><strong data-player-elapsed>0:00</strong><span> / </span><span data-player-duration>—</span></div>
+            <div class="player-remaining"><span data-player-remaining>—</span> restante</div>
+        </div>
+    </div>
+    <div class="player-wave-area">
+        @if (Player.Current is { } current)
+        {
+            <div @key="Player.PlaybackVersion">
+                @if (current.WaveformUrl is not null)
+                {
+                    <WaveformPlayer WaveformUrl="@current.WaveformUrl" UnavailableChanged="OnWaveformUnavailable" />
+                }
+                else
+                {
+                    <span class="text-muted text-small">Forma de onda no disponible</span>
+                }
+                <audio id="djtracks-audio" @ref="_audio" preload="metadata"
+                       src="@current.AudioUrl"></audio>
+            </div>
+            <div class="player-wave-ruler" aria-hidden="true">
+                @for (var index = 0; index <= 5; index++)
+                {
+                    <span data-player-tick="@index">—</span>
+                }
+            </div>
+            <input class="player-seek-fallback" type="range" min="0" max="100" step="0.1"
+                   value="0" data-player-seek aria-label="Posición de reproducción"
+                   hidden="@(!_waveformUnavailable && current.WaveformUrl is not null)"
+                   title="Buscar en la canción (también disponible si la onda no carga)" />
+        }
+        else
+        {
+            <div class="player-wave-empty">La forma de onda aparecerá al reproducir</div>
+        }
+    </div>
+    <div class="player-actions">
+        <div class="player-buttons">
+            <IconButton Label="@(PlaylistReference is null ? "Añadir a playlist (solo Tracks y Remember)" : "Añadir a playlist")"
+                        Icon="plus" Disabled="@(PlaylistReference is null)" OnClick="AddToPlaylistAsync" />
+            <IconButton Label="@(Player.Shuffle ? "Desactivar reproducción aleatoria" : "Activar reproducción aleatoria")"
+                        Icon="shuffle" OnClick="Player.ToggleShuffle"
+                        class="@(Player.Shuffle ? "player-toggle-active" : null)"
+                        aria-pressed="@Player.Shuffle.ToString().ToLowerInvariant()" />
+            <IconButton Label="Canción anterior" Icon="skip-back" OnClick="Player.Previous"
+                        Disabled="@(!Player.CanPrevious)" />
+            <IconButton Label="@(_paused ? "Reproducir" : "Pausar")" Icon="@(_paused ? "play" : "pause")"
+                        class="player-play-button" OnClick="TogglePlaybackAsync"
+                        Disabled="@(Player.Current is null || _module is null)" />
+            <IconButton Label="Canción siguiente" Icon="skip-forward" OnClick="Player.Next"
+                        Disabled="@(!Player.CanNext)" />
+            <IconButton Label="@RepeatLabel" Icon="@(Player.Repeat == QueueRepeatMode.One ? "repeat-1" : "repeat")"
+                        OnClick="Player.CycleRepeat"
+                        class="@(Player.Repeat != QueueRepeatMode.Off ? "player-toggle-active" : null)"
+                        aria-pressed="@((Player.Repeat != QueueRepeatMode.Off).ToString().ToLowerInvariant())" />
+            <div class="player-queue-button">
+                <IconButton Label="@(QueueOpen ? "Cerrar cola" : "Abrir cola")" Icon="list-music"
+                            OnClick="OnToggleQueue" aria-expanded="@QueueOpen.ToString().ToLowerInvariant()" />
+                <span class="player-queue-count" aria-hidden="true">@Player.Queue.Count</span>
+            </div>
+        </div>
+        <div class="player-volume">
+            <IconButton Label="@(IsSilent ? "Restaurar sonido" : "Silenciar")"
+                        Icon="@(IsSilent ? "volume-x" : "volume-2")" OnClick="ToggleMuteAsync"
+                        aria-pressed="@IsSilent.ToString().ToLowerInvariant()" />
+            <BbSlider Value="@_volume" ValueChanged="SetVolumeAsync" Min="0" Max="100" Step="1"
+                      Class="player-volume-slider" TrackClass="player-volume-track"
+                      ThumbClass="player-volume-thumb" aria-label="Volumen" />
+            <span class="player-volume-value">@(IsSilent ? "0" : _volume.ToString("0")) %</span>
+        </div>
+    </div>
+    @if (_playbackError is not null)
+    {
+        <div class="player-playback-error" role="alert">@_playbackError</div>
+    }
+</footer>
+<AddToPlaylist @ref="_addToPlaylist" />

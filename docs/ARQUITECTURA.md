@@ -68,7 +68,7 @@ src/DjTracks.UI/
 ```
 
 La forma de onda de Tracks se genera en Infrastructure mediante `IWaveformGenerator`
-y FFMpegCore. El slice `Streaming/GetTrackWaveform` envía los picos en bloques
+y FFMpegCore. El slice `Streaming/GetTrackWaveform` envía los valores de la envolvente en bloques
 NDJSON durante la primera generación y la UI los dibuja al recibirlos; después
 entrega la caché JSON de `Api/App_Data/Waveforms` en un solo bloque. La UI controla
 el seek en `WaveformPlayer`; no accede al sistema de ficheros ni invoca FFmpeg.
@@ -218,6 +218,60 @@ actualice el nombre sin recargar. Recargar actualiza cambios de otras ventanas; 
 ni sincronización automática entre circuitos en esta fase. `/playlists` en la
 cabecera mantiene la gestión accesible cuando el lateral se oculta en móvil.
 La cola sigue en memoria: editar/borrar una playlist no modifica la cola ya cargada.
+
+F4.2a sustituye los controles nativos del pie por `BottomPlayer` (Razor,
+code-behind y módulo JS aislado). `MainLayout` conserva la ficha grande, el
+tracklist y el panel de cola; pasa al reproductor el estado de apertura de la cola.
+La barra usa `NowPlaying Compact` para reutilizar la lectura HTTP de la carátula,
+el descarte de respuestas atrasadas y los datos de la entrada activa.
+`IconButton` y `BbSlider` presentan los controles; añadir a playlist reutiliza
+`AddToPlaylist` con referencias de Tracks/Remember, nunca de Sessions.
+
+`BottomPlayer` mantiene volumen/mute durante el circuito y enlaza un único
+`audio` por `PlaybackVersion`. El módulo JS escucha eventos reales del audio,
+actualiza los tiempos y la regla de la onda en el navegador y solo notifica a
+.NET play/pausa, fallos y fin de pista. La cola sigue usando `AudioPlayerState`,
+con el mismo control de versiones para descartar eventos atrasados; abrir
+paneles, navegar y cambiar shuffle/bucle no recrean el audio.
+Los errores de autoplay/audio se muestran y registran, sin convertir un inicio
+bloqueado en éxito. Se desconectan listeners y observadores al liberar la barra.
+Un `ResizeObserver` ajusta `--player-height` para reservar espacio bajo el contenido.
+La onda agrupa los valores RMS por ancho visible para mantener barras separadas y
+pinta una línea de posición; `UnavailableChanged` permite mostrar el seek
+alternativo solo si la onda falla. No hay endpoints, persistencia ni paquetes nuevos.
+El generador calcula 1024 valores RMS estéreo: media de los cuadrados de ambos
+canales PCM normalizados a [-1, 1) y de todas las tramas del intervalo, seguida de
+raíz cuadrada. Acumula en `double` y no mezcla los canales antes de elevar al
+cuadrado, evitando cancelación de fase. Frente al máximo absoluto anterior,
+un bombo breve no llena de amplitud máxima todo el tramo. Es una envolvente
+de energía, no una medición de loudness perceptual ni una copia del algoritmo de
+Beatport; no usa filtros de graves, ganancia automática ni normalización por canción.
+Al reducir la onda al ancho del canvas se promedia la energía (cuadrados RMS),
+ponderando el solapamiento temporal de cada intervalo, y se toma su raíz; no
+se vuelven a escoger máximos.
+Tras agrupar, el dibujo aplica a `rms` una curva visual fija:
+`level * (1 + 0.75 * (1 - level))`, con `level = min(1, rms)`.
+Da más presencia a niveles bajos/medios sin multiplicar toda la señal por una
+ganancia que recorte los altos. Es creciente en 0–1 y conserva cero y uno:
+no usa el máximo de la pista ni los bloques recibidos, y no aplica raíz adicional.
+El límite de dibujo sigue en el 88 % de la altura y el silencio en una línea
+mínima de 1 px. Esta escala visual ya no es lineal ni representa una medición
+proporcional de amplitud; no altera el cálculo RMS, el audio ni la caché v2.
+Solo se dibujan barras cuyo intervalo está cargado por completo: permanecen
+estables mientras llegan los siguientes datos.
+
+Se conservan los nombres `Peaks`/`TotalPeakCount` en los contratos NDJSON/JSON;
+desde esta revisión sus valores representan RMS, no picos absolutos.
+La caché usa versión **2**: una entrada v1 se regenera y sustituye al abrirla,
+también en Tracks, Sessions y Remember. No depende del borrado manual de archivos.
+El generador finaliza cada intervalo antes de enviarlo en bloques de 16;
+retiene el último hasta terminar el PCM, incluso si la duración de los tags
+subestima la decodificada. El resultado se calcula también sin callback.
+
+Tracks, Sessions
+y Remember desactivan el buffering de respuesta antes del primer bloque NDJSON
+y hacen flush tras cada línea. El progreso visual usa porcentajes enteros para
+evitar decimales con coma en atributos/estilos del componente Blueprint.
 
 
 | Elemento | Nombre | Namespace |

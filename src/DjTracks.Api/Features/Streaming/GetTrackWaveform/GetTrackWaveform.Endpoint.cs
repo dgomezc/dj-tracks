@@ -1,6 +1,7 @@
 using System.Text.Json;
 using DjTracks.Api.Shared;
 using DjTracks.Domain;
+using Microsoft.AspNetCore.Http.Features;
 
 namespace DjTracks.Api.Features.Streaming.GetTrackWaveform;
 
@@ -20,6 +21,7 @@ public static class GetTrackWaveformEndpoint
         {
             if (!context.Response.HasStarted)
             {
+                context.Features.Get<IHttpResponseBodyFeature>()?.DisableBuffering();
                 context.Response.ContentType = "application/x-ndjson; charset=utf-8";
                 context.Response.Headers.CacheControl = "no-store";
             }

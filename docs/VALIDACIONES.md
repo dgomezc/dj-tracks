@@ -7,6 +7,15 @@ Consultar siempre el estado real de GitHub antes de actuar sobre un PR.
 
 ## Estado actual
 
+- **F4.2a validada globalmente por el usuario el 03/11/2026**:
+  «Ok, damos esto por validado. Mezcla el PR». Incluye el reproductor B y
+  las revisiones de onda RMS/realce visual. Autorizado el merge del
+  PR [#17](https://github.com/dgomezc/dj-tracks/pull/17) hacia `develop`;
+  consultar GitHub para su estado final y commit de integración.
+  Esta aceptación sustituye los estados pendientes históricos de abajo,
+  sin atribuir pruebas individuales adicionales al usuario o al agente.
+  F4.3 es la siguiente fase; todavía no iniciada. El usuario solicita una
+  recomendación de sesión, no ha pedido empezar la implementación.
 - Planificación: PR #1 mergeado.
 - F0.1: validada por el usuario el 26/10/2026, incluido el inicio conjunto; PR [#2](https://github.com/dgomezc/dj-tracks/pull/2) mergeado en `develop` (estado comprobado en GitHub).
 - Continuación anterior autorizada el 26/10/2026: "Validado. Continua". Sustituida por la pausa explícita de F1.2 indicada abajo.
@@ -44,14 +53,40 @@ Consultar siempre el estado real de GitHub antes de actuar sobre un PR.
 - F4.1 playlists manuales validada por el usuario el 02/11/2026 («Perfecto, sigue
   con el siguiente punto») y mergeada en `develop` mediante PR
   [#15](https://github.com/dgomezc/dj-tracks/pull/15), commit
-  `b5990820ddb692e46052b636873f34a511f2d0ed`. F4.2 es la fase actual en
+  `b5990820ddb692e46052b636873f34a511f2d0ed`. F4.2 se desarrolló en
   `fase/f4-2-export-m3u`, PR [#16](https://github.com/dgomezc/dj-tracks/pull/16)
-  abierto hacia `develop`. Revisada el 03/11/2026 (guardado automático solo en
+  hacia `develop`. Revisada el 03/11/2026 (guardado automático solo en
   M3U, sin botón de exportar ni «Raíz M3U») y validada globalmente por el usuario
-  ese día. Pendiente de autorización de merge; pausa hasta que el usuario
-  defina un paso extra. F2.3 aplazada al final.
+  ese día. PR #16 **mergeado** el 03/11/2026 a las 08:20:29 UTC,
+  commit `43b4d734235643bb994bc82176dbde28616001e8` (comprobado en GitHub).
+  F2.3 aplazada al final.
   Decisión confirmada: cargar añade al final, sin duplicados ni interrumpir
   audio; no sustituye la cola.
+- **F4.2a extra: reproductor inferior, opción B**, autorizada el 03/11/2026:
+  «Me gusta más la opción B. Realiza la implementación lo más parecido posible
+  a esta opción». Rama `dgomezc-disenos-del-reproductor`, desde `develop`
+  con F4.2 integrada. Implementada y pendiente de validación del usuario;
+  PR [#17](https://github.com/dgomezc/dj-tracks/pull/17) abierto hacia `develop`.
+  No autoriza merge ni continuar con F4.3.
+  La elección de maqueta no equivale a validar la implementación.
+- Revisión F4.2a del 03/11/2026: el usuario reporta que la onda aparece solo al
+  terminar de generarse y que los valores se ven saturados. Se refuerza el
+  streaming sin buffering en las tres bibliotecas, se corrige el progreso a
+  enteros y se elimina la amplificación visual por normalización/raíz cuadrada.
+  **Pendiente de nueva comprobación del usuario; no validada ni autorizada para merge.**
+- Segunda revisión F4.2a: el usuario sigue viendo la onda amplificada con bajos
+  potentes y pide revisar el algoritmo y borrar la caché. Se sustituyen los
+  máximos absolutos por RMS estéreo, también al agrupar barras en pantalla.
+  Caché v2 y cinco JSON de ondas eliminados en este workspace.
+  **Pendiente de nueva validación con música real; PR #17 sin autorización de merge.**
+- Tercera revisión F4.2a: el usuario indica «ahora las ondas han quedado un poco
+  pequeñas». Se conserva RMS/caché v2 y se añade únicamente un realce visual
+  suave fijo de niveles bajos/medios, sin normalización por canción ni recorte
+  de los niveles altos. **Pendiente de validación; no autoriza merge ni F4.3.**
+- El 03/11/2026 el usuario confirma «ahora está perfecto» tras el ajuste visual
+  de la onda. **Tamaño/aspecto de la onda aceptados**. La confirmación no detalla
+  pruebas de carga, caché, bibliotecas, cola o móvil y no se extiende a ellas.
+  Pregunta qué queda por hacer/probar: no autoriza merge ni iniciar F4.3.
 - Revisión de F4.1 pedida el 28/10/2026: «Pon tooltips a los botones que sólo tienen
   icono… Para crear o editar un playlist creo que es mejor hacerlo desde una ventana
   modal con opciones de aceptar y cancelar». Aplicada y validada dentro del PR #15.
@@ -69,6 +104,234 @@ Consultar siempre el estado real de GitHub antes de actuar sobre un PR.
 - **Refactor transversal Vertical Slices: validado por el usuario el 27/10/2026** con "Perfecto, documenta toda la arquitectura actual… Después mezcla el PR y sigue con el siguiente paso". Arquitectura documentada en `ARQUITECTURA.md`. PR [#6](https://github.com/dgomezc/dj-tracks/pull/6) mergeado en `develop` (`c7c1508`). Diseño validado en `arquitectura/flujo-get-tracks.html` ("Cambia todas las llamadas").
 - Port F1.2 recibido de `dgomezc-fase-f1-2-filtros` (`1354305` código, `c38cddb` documentación). Se integra mediante merge en la rama original: se conservan ambos historiales y se resuelven los conflictos de código con la versión adaptada a Result/FluentValidation. Sin PR duplicado ni reescritura de ramas. Cambios preexistentes y JSON privado conservados; no se borran worktrees.
 - Comprobación de integración en checkout original (27/10/2026): `src` coincide con el port recibido; compilación completa con 0 errores y advertencias. API/UI aisladas con MP3 sintéticos: multiaño/multigrupo/multisubestilo, alias, ausencia de duplicados, resultados vacíos, explorador, errores 400/404, opciones, carga de ajustes y página Tracks correctos. No equivale a validación visual de biblioteca real. Servicios y fixtures temporales retirados después de comprobar.
+
+## F4.2a: reproductor inferior, opción B (validada globalmente por el usuario)
+
+Aceptación global y autorización de merge el 03/11/2026: «Ok, damos esto por
+validado. Mezcla el PR». Se conserva la checklist como registro del alcance;
+sus casillas no afirman ejecuciones individuales no detalladas por el usuario.
+
+Barra fija con información/carátula a la izquierda, onda/seek en el centro
+y botones a la derecha. Volumen horizontal y mute siempre visibles bajo
+los botones, sin controles nativos duplicados. Play/pausa, anterior/siguiente,
+shuffle, bucle desactivado/cola/canción, contador/abrir cola y añadir a playlist.
+La ficha grande y el tracklist siguen disponibles. Los colores usan las
+variables del tema seleccionado; en tablet la onda pasa debajo y en móvil
+información, onda y controles se apilan. Se reserva automáticamente la altura
+del pie para que el contenido pueda desplazarse por encima de él.
+
+### Arranque y checklist del usuario
+
+Visual Studio 2026 (.NET 10), abrir `DjTracks.slnx` **en esta rama**,
+perfil **DJ Tracks (Api + UI)** y F5. Reiniciar API/UI y recargar completamente.
+UI `http://localhost:5050/tracks`, API `http://localhost:5247`.
+Configurar las cuatro rutas existentes en `/settings`; usar MP3 reales de
+Tracks (`Año\Estilo`), Sessions (`Año\Sesión`, opcional TXT compatible) y
+Remember (`Cortas`/`Largas`). Para guardar playlists, su carpeta debe permitir
+escritura. FFmpeg en PATH o `Waveform__BinaryFolder` para generar ondas.
+No requiere BD, Docker, configuración nueva ni modificar MP3.
+
+- [ ] **Diseño y datos:** reproducir un Track con tags/carátula. En escritorio
+  ancho (>1100 px), ver información a la izquierda, onda central y botones
+  a la derecha, con volumen debajo como en la propuesta B. Título, artista,
+  estilo/año y portada corresponden al archivo; tiempos transcurrido/total/
+  restante cambian con el audio. Sin tags/carátula hay mensajes, no datos inventados.
+- [ ] **Reproducción y seek:** play/pausa cambia icono y sonido sin perder
+  posición. Clic en la onda salta al punto elegido; con foco, flechas buscan
+  ±5 s y Home/End al inicio/final. La línea sigue la posición, verde lo
+  reproducido y neutro lo pendiente. Probar también una sesión larga.
+- [ ] **Volumen/mute:** arrastrar el slider y usar flechas/Home/End cambia
+  volumen/porcentaje. Mute silencia sin pausar ni perder la posición; restaurar
+  recupera el nivel. Llevar el slider a cero y restaurar recupera el último nivel
+  audible. Cambiar canción conserva volumen y mute; ajustar el slider desactiva mute.
+- [ ] **Cola y modos:** encolar al menos tres canciones; anterior/siguiente
+  cambian pista/datos/onda sin duplicar audio. Shuffle se ilumina al activarlo;
+  bucle recorre desactivado → cola → canción → desactivado, con tooltip e icono
+  distintos. Al terminar se respeta cada modo. Abrir/cerrar cola desde el pie
+  muestra el contador correcto; quitar la activa o vaciar la cola actualiza el pie.
+- [ ] **Bibliotecas y playlists:** navegar mientras suena mantiene audio/
+  posición; probar Play desde Tracks, Remember y Sessions, también desde cola
+  y playlists. «+» guarda la activa de Tracks/Remember en la playlist elegida
+  sin interrumpir sonido ni duplicar entradas. En Sessions está deshabilitado;
+  la ficha grande conserva su tracklist y la opción de recargarlo.
+- [ ] **Responsive, temas y accesibilidad:** comprobar escritorio, tablet
+  y móvil (390 px); todos los controles siguen accesibles y el pie no genera
+  scroll horizontal. Hacer scroll hasta la última fila: puede quedar por encima
+  del pie. Probar claro/oscuro y otro tema. Tabular: tooltips en español,
+  foco visible y controles de volumen/onda manejables por teclado.
+- [ ] **Errores:** si el navegador bloquea autoplay, aparece un aviso y
+  Reproducir permite reintentarlo. Un audio ausente/ilegible da error visible.
+  Si FFmpeg/onda falla, se muestra el error y un seek alternativo utilizable
+  cuando el audio tiene duración; no se detiene un audio válido.
+
+### Comprobaciones del agente y límites
+
+- `dotnet build DjTracks.slnx`: 0 errores y 0 advertencias.
+- API/UI reales en puertos aislados 5347/5150 con MP3 sintéticos propios,
+  portada y playlist temporales, sin usar rutas/archivos personales.
+- Navegador: play/pausa, tiempo real, seek en onda al 40 % (≈30 s/75 s),
+  anterior/siguiente, shuffle/bucle e inicio desde cero en bucle de canción;
+  volumen 70 % → cero → restaurar 70 %, mute conservado al cambiar de pista.
+- Sin tags ni portada: nombre de fichero, «Sin datos» y «Sin carátula»;
+  portada incrustada mostrada en el pie. Remember se guardó en una playlist
+  desde el «+» del pie; Sessions conserva tracklist y deshabilita ese botón.
+- Navegación conservó el mismo elemento de audio, pausa y posición.
+  Capturas inspeccionadas de escritorio (1440 px, pie 112 px) y móvil
+  (390 px, pie 248 px), sin desbordamiento horizontal del pie/documento.
+  Modo claro comprobado con variables del tema. Autoplay bloqueado mostró aviso.
+- Un MP3 sintético inválido mostró errores explícitos de audio, onda y carátula.
+  Se hizo visible el seek alternativo, deshabilitado al no haber duración válida.
+- Pendientes del usuario: sonido/UX con biblioteca real, sesiones de 1 h+,
+  recorrido completo de los modos de cola, arrastre táctil, otros temas y
+  fallos reales de almacenamiento/FFmpeg. No se han generado tests.
+- Volumen/mute se mantienen durante el circuito, no tras recarga completa.
+  BPM y tonalidad de la maqueta eran ilustrativos y no existen en el contrato
+  actual; no se añaden datos ficticios ni lectura nueva de tags. La ficha grande
+  se conserva para no perder álbum, archivo, avisos ni tracklist.
+
+### Tercera revisión de onda: aceptada en la validación global de F4.2a
+
+Confirmación del usuario el 03/11/2026: «ahora está perfecto». Se acepta el
+tamaño/aspecto final de la onda; no se presupone que se haya recorrido el resto
+de la checklist ni que esté autorizado el merge del PR #17.
+
+Arranque: Visual Studio 2026 (.NET 10), abrir `DjTracks.slnx` en la rama del
+PR #17, perfil **DJ Tracks (Api + UI)** y F5. UI
+`http://localhost:5050/tracks`, API `http://localhost:5247`, rutas de biblioteca
+configuradas y FFmpeg disponible para ondas nuevas. Reiniciar UI y recargar
+completamente para cargar el módulo JS nuevo; la API conserva el algoritmo
+RMS. **No borrar ni regenerar caché v2**: el ajuste se aplica también a las
+ondas ya guardadas. Si todavía hay v1 se regenera automáticamente como antes.
+
+El RMS lineal se veía demasiado pequeño. Se realza solo el dibujo con la curva
+fija `level * (1 + 0.75 * (1 - level))`, después de agrupar la energía RMS.
+El incremento es mayor en niveles bajos/medios y disminuye hacia los altos:
+no hay normalización por canción ni un multiplicador que recorte los niveles
+altos al techo. Conserva cero, uno y el orden de amplitudes. No es una escala
+de medida lineal; es una decisión de legibilidad visual. Sin cambios en MP3,
+datos RMS, generación progresiva, caché, dimensiones del reproductor o controles.
+
+- [x] **Tamaño/aspecto aceptados por el usuario** («ahora está perfecto»).
+  No consta desglose individual de pasajes o dispositivos.
+- [ ] **Cobertura adicional de contraste:** reproducir las mismas pistas que se veían
+  pequeñas y comparar partes suaves, bombos y bajos sostenidos. Las barras
+  bajas/medias deben verse más altas; las fuertes deben conservar diferencias,
+  sin convertirse todas en una banda al máximo. Silencio como línea mínima.
+- [ ] **Repetir — caché/responsive:** abrir una onda RMS ya cacheada en Tracks,
+  Sessions y Remember, en escritorio y móvil. El realce debe verse sin regenerar,
+  sin desbordamientos ni nueva saturación al reducir el ancho.
+- [ ] **Repetir — carga/seek:** con una onda aún no generada, comprobar aparición
+  progresiva y altura estable de barras terminadas. Clic y flechas deben seguir
+  buscando; cambiar de pista durante la carga no recupera bloques de la anterior.
+  No hace falta repetir volumen/mute ni la checklist general por este ajuste.
+
+Comprobaciones del agente:
+
+- `dotnet build DjTracks.slnx`: 0 errores y 0 advertencias.
+- Navegador real con el módulo JS del repositorio y datos sintéticos, sin iniciar
+  API/UI ni usar música personal: comparación visual antes/después y ancho móvil.
+  En canvas de 100 px, RMS 0,05 / 0,1 / 0,2 / 0,5 / 0,8 pasa de
+  **4,4 / 8,8 / 17,6 / 44 / 70,4 px** a
+  **7,535 / 14,74 / 28,16 / 60,5 / 80,96 px**.
+  RMS 1 conserva 88 px; silencio conserva 1 px.
+- 1001 niveles entre cero y uno medidos en el dibujo real: todos finitos,
+  no decrecientes, sin meseta de recorte superior (solo mínimo de silencio).
+  Primera barra terminada estable al recibir el siguiente bloque.
+- La comparación fue aislada, no una prueba nueva del reproductor integrado
+  ni de música real. La aceptación del tamaño sigue pendiente del usuario.
+  Servicio y script temporal de comparación retirados; sin tests nuevos.
+
+### Segunda revisión de onda: RMS y caché (histórico; dibujo ajustado en revisión 3)
+
+Mismo arranque de F4.2a: Visual Studio 2026, perfil **DJ Tracks (Api + UI)**,
+UI `http://localhost:5050/tracks`, API `http://localhost:5247`, FFmpeg disponible.
+Reiniciar **ambos** proyectos y recargar completamente para cargar también el JS.
+Las entradas antiguas (v1) se regeneran automáticamente al abrirlas; no hace
+falta cambiar de nombre los MP3 ni borrar datos manualmente. Se han eliminado
+los **cinco JSON de ondas** de `src/DjTracks.Api/App_Data/Waveforms` de este
+workspace y la carpeta ha quedado vacía. No se ha accedido al checkout principal
+ni a sus cachés; allí la versión nueva invalida las anteriores al reproducir.
+No se han borrado MP3, playlists ni ajustes.
+
+El máximo absoluto de cada tramo se sustituye por RMS de ambos canales:
+los golpes breves no elevan todo el tramo al pico más alto. El dibujo agrega
+energía, no máximos, y mantiene escala lineal fija, sin autoganancia, filtros
+de graves ni modificación del audio. La raíz forma parte del cálculo RMS,
+no de una amplificación visual como la retirada en la primera revisión.
+
+- [ ] **Repetir — generación sin caché:** reproducir un Track largo; antes
+  de finalizar FFmpeg deben aparecer barras desde la izquierda y avanzar el
+  indicador, dejando vacía la zona aún no generada. El audio sigue sonando;
+  no debe esperarse al 100 % para ver la primera parte.
+- [ ] **Nuevo — electrónica/RMS:** comparar una parte con bombos/bajos breves,
+  otra sostenida y un pasaje suave de la misma pista. Deben reflejar su energía
+  media, no rellenar cada tramo por su pico más alto. No se eleva cada canción
+  al máximo; el silencio queda como una línea mínima y las barras terminadas
+  mantienen su altura al llegar nuevos bloques. Probar escritorio y móvil:
+  reducir ancho no debe volver a inflar la onda al agrupar barras.
+- [ ] **Repetir — bibliotecas/caché:** probar también Sessions (incluida una
+  sesión de 1 h+) y Remember, incluidas pistas que tenían onda anterior:
+  primera reproducción regenera; volver a una ya generada mantiene la misma
+  amplitud y carga completa inmediata desde caché.
+- [ ] **Repetir — seek y continuidad:** clic/flechas en la onda, pausa/continuar
+  y cambio de pista durante la generación; audio/posición/onda corresponden a
+  la activa, sin reaparecer los bloques de la anterior. Volumen/mute y resto
+  de controles no cambian en esta revisión; no hace falta repetir su checklist completa.
+
+Comprobaciones del agente de la segunda revisión:
+
+- Compilación completa: 0 errores y 0 advertencias.
+- Medición temporal con el generador real y MP3 sintético propio de 80 s
+  (seno estéreo, un solo canal, oposición de fase, bombo/bajo y silencio).
+  Primer bloque a **0,558 s**, final a **1,020 s**, 64 bloques de datos;
+  arrays emitido/final idénticos. Diferencia máxima frente al RMS calculado
+  independientemente sobre el PCM decodificado: **2,978 × 10⁻⁸**.
+- Seno de amplitud 0,8: RMS medio **0,565654**; un solo canal **0,399967**;
+  oposición de fase **0,565614** (sin cancelación). Bombo/bajo transitorio:
+  promedio de máximos anterior **0,159820**, RMS medio **0,052207**.
+  Silencio **0**. No son mediciones de archivos personales.
+- Llamada sin callback: misma onda, sin bloqueo. Cancelación tras el primer
+  bloque propagada. Caché v1 con valores antiguos forzados: regeneración en
+  65 bloques (incluido final), versión 2 y valores idénticos; lectura siguiente:
+  un bloque completo con 1024 valores idénticos.
+- Módulo JS real ejecutado con canvas instrumentado, no navegador visual:
+  escala 0,1 / 0,5 / 1 → **8,8 / 44 / 88 px** en 100 px.
+  Agrupación fraccionaria `[0; 0,5; 1]` en dos barras → **25,403 / 76,210 px**,
+  coincide con RMS ponderado, no con máximos. La primera no cambia al completar
+  la segunda. Con 1024 valores/692 barras: 10 barras al recibir el primer bloque
+  de 16, 692 al completar; altura inicial conservada.
+- Sin tests añadidos al repositorio. Scripts, audio y caché de medición temporales
+  retirados. Esta revisión no incluye nueva validación visual en navegador ni
+  escucha de música real: corresponde al usuario. RMS representa energía;
+  una señal sostenida realmente fuerte seguirá mostrando barras altas.
+- Referencia consultada mediante Context7: [manual oficial de FFmpeg](https://ffmpeg.org/ffmpeg-all.html),
+  `astats` distingue niveles pico/RMS; `showwavespic` ofrece agregación average/peak
+  y escala lineal. Se elige RMS estéreo por conservar energía y evitar que un
+  transitorio domine el intervalo, no una atenuación arbitraria del dibujo.
+
+### Primera revisión de onda (histórico, sustituida por RMS)
+
+El primer ajuste retiró `sqrt(peak / maxPeak)`, reforzó el streaming y corrigió
+el progreso entero. Seguía guardando máximos absolutos, por eso no resolvía
+el nuevo fallo reportado con electrónica. Estas mediciones anteriores no
+sustituyen la validación de la revisión RMS:
+
+- Navegador real + API/UI aisladas, MP3 propio de una hora sin caché:
+  onda parcial visible a los **1,507 s** (3 %, 22/692 px) y crecimiento a
+  **6,008 s** (18 %, 131/692 px), aún generándose; no es solo comprobar HTTP 200.
+- El flujo local previo ya entregaba bloques: no se reprodujo el bloqueo total
+  reportado. Se desactiva explícitamente buffering del host en Tracks/Sessions/
+  Remember además del flush existente. Falta confirmar el resultado en el
+  arranque real del usuario; no se atribuye el fallo a una infraestructura no comprobada.
+- Medición del dibujo real con picos 0,1 / 0,5 / 1 en canvas de 100 px:
+  alturas **8,8 / 44 / 88 px**. La primera mantiene 8,8 px después de
+  recibir el pico mayor; antes se normalizaba al máximo y se amplificaba con raíz.
+- Progreso entero en DOM (1 %, 3 %, …), sin comas decimales en estilos/atributos.
+  Datos temporales propios; sin tests nuevos ni cambios en el audio.
+- Medición adicional de NDJSON sin caché: primer bloque con 16 picos a
+  **0,696 s**, `IsComplete=false`; final a **30,316 s**, 65 bloques.
+  Siguiente lectura cacheada: un bloque con 1024 picos y `IsComplete=true`.
+  En navegador la carga llegó al final y la flecha derecha siguió buscando +5 s.
 
 ## F4.1: playlists manuales (validada por el usuario)
 
