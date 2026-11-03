@@ -57,7 +57,8 @@ Consultar siempre el estado real de GitHub antes de actuar sobre un PR.
   «Me gusta más la opción B. Realiza la implementación lo más parecido posible
   a esta opción». Rama `dgomezc-disenos-del-reproductor`, desde `develop`
   con F4.2 integrada. Implementada y pendiente de validación del usuario;
-  PR pendiente de creación. No autoriza merge ni continuar con F4.3.
+  PR [#17](https://github.com/dgomezc/dj-tracks/pull/17) abierto hacia `develop`.
+  No autoriza merge ni continuar con F4.3.
   La elección de maqueta no equivale a validar la implementación.
 - Revisión de F4.1 pedida el 28/10/2026: «Pon tooltips a los botones que sólo tienen
   icono… Para crear o editar un playlist creo que es mejor hacerlo desde una ventana
