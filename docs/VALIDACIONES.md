@@ -7,6 +7,15 @@ Consultar siempre el estado real de GitHub antes de actuar sobre un PR.
 
 ## Estado actual
 
+- **F4.2a validada globalmente por el usuario el 03/11/2026**:
+  «Ok, damos esto por validado. Mezcla el PR». Incluye el reproductor B y
+  las revisiones de onda RMS/realce visual. Autorizado el merge del
+  PR [#17](https://github.com/dgomezc/dj-tracks/pull/17) hacia `develop`;
+  consultar GitHub para su estado final y commit de integración.
+  Esta aceptación sustituye los estados pendientes históricos de abajo,
+  sin atribuir pruebas individuales adicionales al usuario o al agente.
+  F4.3 es la siguiente fase; todavía no iniciada. El usuario solicita una
+  recomendación de sesión, no ha pedido empezar la implementación.
 - Planificación: PR #1 mergeado.
 - F0.1: validada por el usuario el 26/10/2026, incluido el inicio conjunto; PR [#2](https://github.com/dgomezc/dj-tracks/pull/2) mergeado en `develop` (estado comprobado en GitHub).
 - Continuación anterior autorizada el 26/10/2026: "Validado. Continua". Sustituida por la pausa explícita de F1.2 indicada abajo.
@@ -96,7 +105,11 @@ Consultar siempre el estado real de GitHub antes de actuar sobre un PR.
 - Port F1.2 recibido de `dgomezc-fase-f1-2-filtros` (`1354305` código, `c38cddb` documentación). Se integra mediante merge en la rama original: se conservan ambos historiales y se resuelven los conflictos de código con la versión adaptada a Result/FluentValidation. Sin PR duplicado ni reescritura de ramas. Cambios preexistentes y JSON privado conservados; no se borran worktrees.
 - Comprobación de integración en checkout original (27/10/2026): `src` coincide con el port recibido; compilación completa con 0 errores y advertencias. API/UI aisladas con MP3 sintéticos: multiaño/multigrupo/multisubestilo, alias, ausencia de duplicados, resultados vacíos, explorador, errores 400/404, opciones, carga de ajustes y página Tracks correctos. No equivale a validación visual de biblioteca real. Servicios y fixtures temporales retirados después de comprobar.
 
-## F4.2a: reproductor inferior, opción B (pendiente de validación)
+## F4.2a: reproductor inferior, opción B (validada globalmente por el usuario)
+
+Aceptación global y autorización de merge el 03/11/2026: «Ok, damos esto por
+validado. Mezcla el PR». Se conserva la checklist como registro del alcance;
+sus casillas no afirman ejecuciones individuales no detalladas por el usuario.
 
 Barra fija con información/carátula a la izquierda, onda/seek en el centro
 y botones a la derecha. Volumen horizontal y mute siempre visibles bajo
@@ -176,7 +189,7 @@ No requiere BD, Docker, configuración nueva ni modificar MP3.
   actual; no se añaden datos ficticios ni lectura nueva de tags. La ficha grande
   se conserva para no perder álbum, archivo, avisos ni tracklist.
 
-### Tercera revisión de onda: tamaño visual aceptado; comprobaciones restantes pendientes
+### Tercera revisión de onda: aceptada en la validación global de F4.2a
 
 Confirmación del usuario el 03/11/2026: «ahora está perfecto». Se acepta el
 tamaño/aspecto final de la onda; no se presupone que se haya recorrido el resto
