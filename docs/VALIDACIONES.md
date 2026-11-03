@@ -9,8 +9,9 @@ Consultar siempre el estado real de GitHub antes de actuar sobre un PR.
 
 - **F4.4 implementada, pendiente de validación del usuario**:
   rama `fase/f4-4-playlists-vivos`, desde `develop` con F4.3 integrada.
-  PR pendiente de publicación hacia `develop`. No avanzar a F5.1 ni hacer
-  merge sin confirmación. Checklist y comprobaciones de esta entrega abajo.
+  PR [#19](https://github.com/dgomezc/dj-tracks/pull/19) abierto hacia
+  `develop`. No avanzar a F5.1 ni hacer merge sin confirmación.
+  Checklist y comprobaciones de esta entrega abajo.
   Decisión confirmada: actualizar al abrir o volver a cargar, sin cambios
   espontáneos de la pantalla ni de la cola existente.
 - **F4.3 validada globalmente por el usuario** (03/11/2026):
