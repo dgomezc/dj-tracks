@@ -27,7 +27,7 @@ public sealed class FfmpegWaveformGenerator
         if (!double.IsFinite(duration) || duration <= 0)
             throw new InvalidDataException("El MP3 no contiene una duración válida.");
 
-        var sink = new PeakPipeSink(peakCount, Math.Max(1, (long)(duration * SampleRate)),
+        var sink = new RmsPipeSink(peakCount, Math.Max(1, (long)(duration * SampleRate)),
             duration, onChunk);
         await FFMpegArguments.FromFileInput(file.FullName)
             .OutputToPipe(sink, options => options
@@ -43,11 +43,14 @@ public sealed class FfmpegWaveformGenerator
         return new TrackWaveform(duration, sink.Peaks);
     }
 
-    private sealed class PeakPipeSink(int peakCount, long expectedFrames, double durationSeconds,
+    private sealed class RmsPipeSink(int peakCount, long expectedFrames, double durationSeconds,
         Func<TrackWaveformChunk, CancellationToken, ValueTask>? onChunk) : IPipeSink
     {
         private const int ChunkSize = 16;
         private int _nextPeak;
+        private int _currentBucket;
+        private double _sumSquares;
+        private long _bucketFrames;
 
         public float[] Peaks { get; } = new float[peakCount];
         public long FramesRead { get; private set; }
@@ -69,16 +72,25 @@ public sealed class FfmpegWaveformGenerator
                     var left = BinaryPrimitives.ReadInt16LittleEndian(buffer.AsSpan(offset, sizeof(short)));
                     var right = BinaryPrimitives.ReadInt16LittleEndian(
                         buffer.AsSpan(offset + sizeof(short), sizeof(short)));
-                    var peak = Math.Max(Math.Abs((int)left), Math.Abs((int)right)) / 32768f;
                     var bucket = (int)Math.Min(Peaks.Length - 1,
                         FramesRead * Peaks.Length / expectedFrames);
-                    Peaks[bucket] = Math.Max(Peaks[bucket], peak);
+                    if (bucket != _currentBucket)
+                    {
+                        CompleteBucket();
+                        _currentBucket = bucket;
+                        _sumSquares = 0;
+                        _bucketFrames = 0;
+                    }
+
+                    // Energía de ambos canales, sin cancelación de fase ni amplificación de picos aislados.
+                    var normalizedLeft = left / 32768d;
+                    var normalizedRight = right / 32768d;
+                    _sumSquares += (normalizedLeft * normalizedLeft + normalizedRight * normalizedRight) / 2;
+                    _bucketFrames++;
                     FramesRead++;
                 }
 
-                var completedBuckets = (int)Math.Min(Peaks.Length,
-                    FramesRead * Peaks.Length / expectedFrames);
-                await EmitCompletedChunksAsync(completedBuckets, cancellationToken);
+                await EmitCompletedChunksAsync(_currentBucket, cancellationToken);
 
                 bufferedBytes = totalBytes - completeBytes;
                 if (bufferedBytes > 0)
@@ -89,8 +101,15 @@ public sealed class FfmpegWaveformGenerator
                 throw new InvalidDataException("FFmpeg devolvió una trama PCM incompleta.");
         }
 
-        public ValueTask FlushRemainingAsync(CancellationToken cancellationToken) =>
-            EmitChunkAsync(Peaks.Length, cancellationToken);
+        public ValueTask FlushRemainingAsync(CancellationToken cancellationToken)
+        {
+            CompleteBucket();
+            return EmitChunkAsync(Peaks.Length, cancellationToken);
+        }
+
+        private void CompleteBucket() =>
+            Peaks[_currentBucket] = _bucketFrames > 0
+                ? (float)Math.Sqrt(_sumSquares / _bucketFrames) : 0;
 
         private async ValueTask EmitCompletedChunksAsync(int completedBuckets,
             CancellationToken cancellationToken)
@@ -101,12 +120,15 @@ public sealed class FfmpegWaveformGenerator
 
         private async ValueTask EmitChunkAsync(int endIndex, CancellationToken cancellationToken)
         {
-            if (onChunk is null || endIndex <= _nextPeak)
+            if (endIndex <= _nextPeak)
                 return;
 
             var startIndex = _nextPeak;
-            var peaks = Peaks[startIndex..endIndex];
             _nextPeak = endIndex;
+            if (onChunk is null)
+                return;
+
+            var peaks = Peaks[startIndex..endIndex];
             await onChunk(new TrackWaveformChunk(startIndex, peaks, Peaks.Length,
                 durationSeconds, IsComplete: false), cancellationToken);
         }

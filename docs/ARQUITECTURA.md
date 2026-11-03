@@ -68,7 +68,7 @@ src/DjTracks.UI/
 ```
 
 La forma de onda de Tracks se genera en Infrastructure mediante `IWaveformGenerator`
-y FFMpegCore. El slice `Streaming/GetTrackWaveform` envía los picos en bloques
+y FFMpegCore. El slice `Streaming/GetTrackWaveform` envía los valores de la envolvente en bloques
 NDJSON durante la primera generación y la UI los dibuja al recibirlos; después
 entrega la caché JSON de `Api/App_Data/Waveforms` en un solo bloque. La UI controla
 el seek en `WaveformPlayer`; no accede al sistema de ficheros ni invoca FFmpeg.
@@ -236,12 +236,32 @@ paneles, navegar y cambiar shuffle/bucle no recrean el audio.
 Los errores de autoplay/audio se muestran y registran, sin convertir un inicio
 bloqueado en éxito. Se desconectan listeners y observadores al liberar la barra.
 Un `ResizeObserver` ajusta `--player-height` para reservar espacio bajo el contenido.
-La onda agrupa los picos por ancho visible para mantener barras separadas y
+La onda agrupa los valores RMS por ancho visible para mantener barras separadas y
 pinta una línea de posición; `UnavailableChanged` permite mostrar el seek
 alternativo solo si la onda falla. No hay endpoints, persistencia ni paquetes nuevos.
-La amplitud se dibuja en escala lineal fija respecto al PCM (0–1), sin normalizar
-al máximo recibido ni aplicar raíz cuadrada: los pasajes suaves no crecen al
-principio ni cambian de altura al llegar bloques posteriores. Tracks, Sessions
+El generador calcula 1024 valores RMS estéreo: media de los cuadrados de ambos
+canales PCM normalizados a [-1, 1) y de todas las tramas del intervalo, seguida de
+raíz cuadrada. Acumula en `double` y no mezcla los canales antes de elevar al
+cuadrado, evitando cancelación de fase. Frente al máximo absoluto anterior,
+un bombo breve no llena de amplitud máxima todo el tramo. Es una envolvente
+de energía, no una medición de loudness perceptual ni una copia del algoritmo de
+Beatport; no usa filtros de graves, ganancia automática ni normalización por canción.
+La amplitud RMS se dibuja en escala lineal fija respecto al PCM (0–1).
+Al reducir la onda al ancho del canvas se promedia la energía (cuadrados RMS),
+ponderando el solapamiento temporal de cada intervalo, y se toma su raíz; no
+se vuelven a escoger máximos ni se aplica una raíz adicional a la amplitud.
+Solo se dibujan barras cuyo intervalo está cargado por completo: permanecen
+estables mientras llegan los siguientes datos.
+
+Se conservan los nombres `Peaks`/`TotalPeakCount` en los contratos NDJSON/JSON;
+desde esta revisión sus valores representan RMS, no picos absolutos.
+La caché usa versión **2**: una entrada v1 se regenera y sustituye al abrirla,
+también en Tracks, Sessions y Remember. No depende del borrado manual de archivos.
+El generador finaliza cada intervalo antes de enviarlo en bloques de 16;
+retiene el último hasta terminar el PCM, incluso si la duración de los tags
+subestima la decodificada. El resultado se calcula también sin callback.
+
+Tracks, Sessions
 y Remember desactivan el buffering de respuesta antes del primer bloque NDJSON
 y hacen flush tras cada línea. El progreso visual usa porcentajes enteros para
 evitar decimales con coma en atributos/estilos del componente Blueprint.

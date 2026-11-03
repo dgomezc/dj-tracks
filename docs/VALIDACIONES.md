@@ -65,6 +65,11 @@ Consultar siempre el estado real de GitHub antes de actuar sobre un PR.
   streaming sin buffering en las tres bibliotecas, se corrige el progreso a
   enteros y se elimina la amplificación visual por normalización/raíz cuadrada.
   **Pendiente de nueva comprobación del usuario; no validada ni autorizada para merge.**
+- Segunda revisión F4.2a: el usuario sigue viendo la onda amplificada con bajos
+  potentes y pide revisar el algoritmo y borrar la caché. Se sustituyen los
+  máximos absolutos por RMS estéreo, también al agrupar barras en pantalla.
+  Caché v2 y cinco JSON de ondas eliminados en este workspace.
+  **Pendiente de nueva validación con música real; PR #17 sin autorización de merge.**
 - Revisión de F4.1 pedida el 28/10/2026: «Pon tooltips a los botones que sólo tienen
   icono… Para crear o editar un playlist creo que es mejor hacerlo desde una ventana
   modal con opciones de aceptar y cancelar». Aplicada y validada dentro del PR #15.
@@ -163,36 +168,81 @@ No requiere BD, Docker, configuración nueva ni modificar MP3.
   actual; no se añaden datos ficticios ni lectura nueva de tags. La ficha grande
   se conserva para no perder álbum, archivo, avisos ni tracklist.
 
-### Revisión de onda: pasos que deben repetirse
+### Segunda revisión de onda: RMS y caché (validación actual pendiente)
 
 Mismo arranque de F4.2a: Visual Studio 2026, perfil **DJ Tracks (Api + UI)**,
 UI `http://localhost:5050/tracks`, API `http://localhost:5247`, FFmpeg disponible.
 Reiniciar **ambos** proyectos y recargar completamente para cargar también el JS.
-No se cambia el formato ni se necesita borrar la caché existente para ajustar
-la amplitud. Para ver generación progresiva, elegir un MP3 largo que aún no
-tenga onda cacheada (o una copia de prueba con otro nombre, sin tocar el original).
-Una onda cacheada debe aparecer completa de inmediato: eso es intencionado.
+Las entradas antiguas (v1) se regeneran automáticamente al abrirlas; no hace
+falta cambiar de nombre los MP3 ni borrar datos manualmente. Se han eliminado
+los **cinco JSON de ondas** de `src/DjTracks.Api/App_Data/Waveforms` de este
+workspace y la carpeta ha quedado vacía. No se ha accedido al checkout principal
+ni a sus cachés; allí la versión nueva invalida las anteriores al reproducir.
+No se han borrado MP3, playlists ni ajustes.
+
+El máximo absoluto de cada tramo se sustituye por RMS de ambos canales:
+los golpes breves no elevan todo el tramo al pico más alto. El dibujo agrega
+energía, no máximos, y mantiene escala lineal fija, sin autoganancia, filtros
+de graves ni modificación del audio. La raíz forma parte del cálculo RMS,
+no de una amplificación visual como la retirada en la primera revisión.
 
 - [ ] **Repetir — generación sin caché:** reproducir un Track largo; antes
   de finalizar FFmpeg deben aparecer barras desde la izquierda y avanzar el
   indicador, dejando vacía la zona aún no generada. El audio sigue sonando;
   no debe esperarse al 100 % para ver la primera parte.
-- [ ] **Nuevo — escala real:** comparar un pasaje suave con uno fuerte.
-  Las alturas reflejan picos PCM en escala lineal fija, sin elevar toda canción
-  al máximo. Las barras ya dibujadas no cambian de altura al llegar otras mayores.
-  El silencio queda como una línea mínima. Una pista realmente limitada puede
-  seguir teniendo picos altos: no se comprime ni modifica el audio.
+- [ ] **Nuevo — electrónica/RMS:** comparar una parte con bombos/bajos breves,
+  otra sostenida y un pasaje suave de la misma pista. Deben reflejar su energía
+  media, no rellenar cada tramo por su pico más alto. No se eleva cada canción
+  al máximo; el silencio queda como una línea mínima y las barras terminadas
+  mantienen su altura al llegar nuevos bloques. Probar escritorio y móvil:
+  reducir ancho no debe volver a inflar la onda al agrupar barras.
 - [ ] **Repetir — bibliotecas/caché:** probar también Sessions (incluida una
-  sesión de 1 h+) y Remember sin caché; volver a reproducir una ya generada:
-  misma amplitud y carga completa inmediata desde caché.
+  sesión de 1 h+) y Remember, incluidas pistas que tenían onda anterior:
+  primera reproducción regenera; volver a una ya generada mantiene la misma
+  amplitud y carga completa inmediata desde caché.
 - [ ] **Repetir — seek y continuidad:** clic/flechas en la onda, pausa/continuar
   y cambio de pista durante la generación; audio/posición/onda corresponden a
   la activa, sin reaparecer los bloques de la anterior. Volumen/mute y resto
   de controles no cambian en esta revisión; no hace falta repetir su checklist completa.
 
-Comprobaciones del agente de esta revisión:
+Comprobaciones del agente de la segunda revisión:
 
 - Compilación completa: 0 errores y 0 advertencias.
+- Medición temporal con el generador real y MP3 sintético propio de 80 s
+  (seno estéreo, un solo canal, oposición de fase, bombo/bajo y silencio).
+  Primer bloque a **0,558 s**, final a **1,020 s**, 64 bloques de datos;
+  arrays emitido/final idénticos. Diferencia máxima frente al RMS calculado
+  independientemente sobre el PCM decodificado: **2,978 × 10⁻⁸**.
+- Seno de amplitud 0,8: RMS medio **0,565654**; un solo canal **0,399967**;
+  oposición de fase **0,565614** (sin cancelación). Bombo/bajo transitorio:
+  promedio de máximos anterior **0,159820**, RMS medio **0,052207**.
+  Silencio **0**. No son mediciones de archivos personales.
+- Llamada sin callback: misma onda, sin bloqueo. Cancelación tras el primer
+  bloque propagada. Caché v1 con valores antiguos forzados: regeneración en
+  65 bloques (incluido final), versión 2 y valores idénticos; lectura siguiente:
+  un bloque completo con 1024 valores idénticos.
+- Módulo JS real ejecutado con canvas instrumentado, no navegador visual:
+  escala 0,1 / 0,5 / 1 → **8,8 / 44 / 88 px** en 100 px.
+  Agrupación fraccionaria `[0; 0,5; 1]` en dos barras → **25,403 / 76,210 px**,
+  coincide con RMS ponderado, no con máximos. La primera no cambia al completar
+  la segunda. Con 1024 valores/692 barras: 10 barras al recibir el primer bloque
+  de 16, 692 al completar; altura inicial conservada.
+- Sin tests añadidos al repositorio. Scripts, audio y caché de medición temporales
+  retirados. Esta revisión no incluye nueva validación visual en navegador ni
+  escucha de música real: corresponde al usuario. RMS representa energía;
+  una señal sostenida realmente fuerte seguirá mostrando barras altas.
+- Referencia consultada mediante Context7: [manual oficial de FFmpeg](https://ffmpeg.org/ffmpeg-all.html),
+  `astats` distingue niveles pico/RMS; `showwavespic` ofrece agregación average/peak
+  y escala lineal. Se elige RMS estéreo por conservar energía y evitar que un
+  transitorio domine el intervalo, no una atenuación arbitraria del dibujo.
+
+### Primera revisión de onda (histórico, sustituida por RMS)
+
+El primer ajuste retiró `sqrt(peak / maxPeak)`, reforzó el streaming y corrigió
+el progreso entero. Seguía guardando máximos absolutos, por eso no resolvía
+el nuevo fallo reportado con electrónica. Estas mediciones anteriores no
+sustituyen la validación de la revisión RMS:
+
 - Navegador real + API/UI aisladas, MP3 propio de una hora sin caché:
   onda parcial visible a los **1,507 s** (3 %, 22/692 px) y crecimiento a
   **6,008 s** (18 %, 131/692 px), aún generándose; no es solo comprobar HTTP 200.
@@ -204,7 +254,7 @@ Comprobaciones del agente de esta revisión:
   alturas **8,8 / 44 / 88 px**. La primera mantiene 8,8 px después de
   recibir el pico mayor; antes se normalizaba al máximo y se amplificaba con raíz.
 - Progreso entero en DOM (1 %, 3 %, …), sin comas decimales en estilos/atributos.
-  Datos temporales propios; sin tests nuevos ni cambios en el audio/JSON de picos.
+  Datos temporales propios; sin tests nuevos ni cambios en el audio.
 - Medición adicional de NDJSON sin caché: primer bloque con 16 picos a
   **0,696 s**, `IsComplete=false`; final a **30,316 s**, 65 bloques.
   Siguiente lectura cacheada: un bloque con 1024 picos y `IsComplete=true`.

@@ -137,14 +137,18 @@ function draw(instance) {
     const barWidth = width / barCount;
 
     for (let index = 0; index < barCount; index++) {
-        const start = Math.floor(index * peaks.length / barCount);
+        const start = index * peaks.length / barCount;
         if (start >= instance.loadedCount) break;
-        const end = Math.min(instance.loadedCount, Math.ceil((index + 1) * peaks.length / barCount));
-        let peak = 0;
-        for (let sample = start; sample < end; sample++)
-            peak = Math.max(peak, peaks[sample]);
+        const end = (index + 1) * peaks.length / barCount;
+        if (end > instance.loadedCount) break;
+        let energy = 0;
+        for (let sample = Math.floor(start); sample < Math.ceil(end); sample++) {
+            const weight = Math.min(end, sample + 1) - Math.max(start, sample);
+            energy += peaks[sample] * peaks[sample] * weight;
+        }
+        const rms = Math.sqrt(energy / (end - start));
         const x = (index + 0.5) * barWidth;
-        const amplitude = Math.max(0.5, Math.min(1, peak) * (height * 0.88) / 2);
+        const amplitude = Math.max(0.5, Math.min(1, rms) * (height * 0.88) / 2);
         context.strokeStyle = x / width <= progress ? primary : muted;
         context.lineWidth = Math.max(1, barWidth * 0.65);
         context.beginPath();
