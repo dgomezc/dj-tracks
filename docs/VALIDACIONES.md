@@ -7,8 +7,9 @@ Consultar siempre el estado real de GitHub antes de actuar sobre un PR.
 
 ## Estado actual
 
-- **F6.1 implementada, pendiente de validación del usuario**:
+- **F6.1 entregada, pendiente de validación del usuario**:
   rama `fase/f6-1-docker`, desde `develop` con F5.2 integrada.
+  PR [#22](https://github.com/dgomezc/dj-tracks/pull/22) abierto hacia `develop`.
   Decisiones del 12/11/2026: PostgreSQL nuevo junto a API/UI, una única URL
   pública para interfaz/audio y API/BD internas. No avanzar a F6.2 ni a F2.3.
 - **F5.2 validada globalmente por el usuario el 12/11/2026**:
@@ -152,7 +153,7 @@ Consultar siempre el estado real de GitHub antes de actuar sobre un PR.
 - Port F1.2 recibido de `dgomezc-fase-f1-2-filtros` (`1354305` código, `c38cddb` documentación). Se integra mediante merge en la rama original: se conservan ambos historiales y se resuelven los conflictos de código con la versión adaptada a Result/FluentValidation. Sin PR duplicado ni reescritura de ramas. Cambios preexistentes y JSON privado conservados; no se borran worktrees.
 - Comprobación de integración en checkout original (27/10/2026): `src` coincide con el port recibido; compilación completa con 0 errores y advertencias. API/UI aisladas con MP3 sintéticos: multiaño/multigrupo/multisubestilo, alias, ausencia de duplicados, resultados vacíos, explorador, errores 400/404, opciones, carga de ajustes y página Tracks correctos. No equivale a validación visual de biblioteca real. Servicios y fixtures temporales retirados después de comprobar.
 
-## F6.1: Docker en Ubuntu (pendiente de validación del usuario)
+## F6.1: Docker en Ubuntu (PR #22; pendiente de validación del usuario)
 
 Tres servicios: PostgreSQL 17 nuevo, API con FFmpeg y UI con proxy de audio.
 Solo UI publica el puerto 5050, configurable con `UI_PORT`. No modifica la BD
