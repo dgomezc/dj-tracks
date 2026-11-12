@@ -2,6 +2,7 @@ using DjTracks.Api.Features.Library;
 using DjTracks.Api.Features.Playlists;
 using DjTracks.Api.Features.Settings;
 using DjTracks.Api.Features.Streaming;
+using DjTracks.Api.Features.Stats;
 using DjTracks.Api.Shared;
 using FluentValidation;
 
@@ -16,6 +17,7 @@ builder.Services.AddSettingsFeature();
 builder.Services.AddLibraryFeature();
 builder.Services.AddStreamingFeature();
 builder.Services.AddPlaylistsFeature();
+builder.Services.AddStatsFeature();
 
 var app = builder.Build();
 
@@ -32,5 +34,6 @@ api.MapSettingsFeature();
 api.MapLibraryFeature();
 api.MapStreamingFeature();
 api.MapPlaylistsFeature();
+api.MapStatsFeature();
 
 app.Run();

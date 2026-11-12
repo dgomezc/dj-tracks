@@ -79,5 +79,9 @@
     {
         <div class="player-playback-error" role="alert">@_playbackError</div>
     }
+    @if (_statisticsError is not null)
+    {
+        <div class="player-playback-error" role="alert">@_statisticsError</div>
+    }
 </footer>
 <AddToPlaylist @ref="_addToPlaylist" />

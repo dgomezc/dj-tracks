@@ -9,12 +9,18 @@ export function observePlayer(root) {
     players.set(root, player);
 }
 
-export function attachPlayer(root, audio, reference, version, volume, muted) {
+export function attachPlayer(root, audio, reference, version, volume, muted, playbackRecord) {
     const player = players.get(root);
     detachAudio(player);
     player.audio = audio;
     player.reference = reference;
     player.version = version;
+    player.playbackRecord = playbackRecord;
+    player.listenedSeconds = 0;
+    player.playbackReported = false;
+    player.trackingPlayback = false;
+    player.lastMediaTime = null;
+    player.lastSampleTime = null;
     player.error = null;
     updateTime(player);
     if (!audio) return;
@@ -26,9 +32,34 @@ export function attachPlayer(root, audio, reference, version, volume, muted) {
     };
     for (const event of ["timeupdate", "loadedmetadata", "durationchange", "seeked"])
         listen(audio, event, () => updateTime(player));
-    listen(audio, "play", () => { player.error = null; notify(player); });
-    listen(audio, "pause", () => notify(player));
+    listen(audio, "playing", () => {
+        player.error = null;
+        player.trackingPlayback = true;
+        resetPlaybackSample(player);
+        notify(player);
+    });
+    listen(audio, "timeupdate", () => samplePlayback(player));
+    listen(audio, "pause", () => {
+        samplePlayback(player, true);
+        player.trackingPlayback = false;
+        notify(player);
+    });
+    listen(audio, "waiting", () => {
+        samplePlayback(player, true);
+        player.trackingPlayback = false;
+    });
+    listen(audio, "seeking", () => {
+        player.trackingPlayback = false;
+        resetPlaybackSample(player);
+    });
+    listen(audio, "seeked", () => {
+        resetPlaybackSample(player);
+        player.trackingPlayback = !audio.paused;
+        updateTime(player);
+    });
     listen(audio, "ended", () => {
+        samplePlayback(player, true);
+        player.trackingPlayback = false;
         notify(player);
         invoke(player, "OnPlaybackEnded", version);
     });
@@ -98,6 +129,30 @@ function invoke(player, method, ...args) {
 
 function notify(player) {
     invoke(player, "OnPlaybackState", player.version, player.audio.paused, player.error);
+}
+
+function resetPlaybackSample(player) {
+    player.lastMediaTime = player.audio?.currentTime ?? null;
+    player.lastSampleTime = performance.now();
+}
+
+function samplePlayback(player, includeFinalProgress = false) {
+    const audio = player.audio;
+    const now = performance.now();
+    const mediaTime = audio?.currentTime ?? 0;
+    if (player.trackingPlayback && (!audio.paused || includeFinalProgress)
+        && !audio.seeking && player.lastMediaTime !== null && player.lastSampleTime !== null) {
+        const mediaDelta = mediaTime - player.lastMediaTime;
+        const wallDelta = (now - player.lastSampleTime) / 1000;
+        if (mediaDelta > 0 && mediaDelta <= wallDelta + 0.25)
+            player.listenedSeconds += mediaDelta;
+    }
+    player.lastMediaTime = mediaTime;
+    player.lastSampleTime = now;
+    if (!player.playbackReported && player.listenedSeconds >= 30 && player.playbackRecord) {
+        player.playbackReported = true;
+        invoke(player, "OnPlaybackThreshold", player.version, player.playbackRecord);
+    }
 }
 
 function formatTime(seconds) {
