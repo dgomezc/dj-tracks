@@ -9,8 +9,9 @@ Consultar siempre el estado real de GitHub antes de actuar sobre un PR.
 
 - **F5.1 en implementación, pendiente de validación del usuario**:
   rama `fase/f5-1-estadisticas-reproducciones`, desde `develop` con F4.4
-  integrada. El PR se enlazará al abrirlo. No avanzar a F5.2 ni marcar F5.1
-  como validada sin confirmación posterior. Decisión confirmada: una escucha
+  integrada. PR [#20](https://github.com/dgomezc/dj-tracks/pull/20) abierto
+  hacia `develop`. No avanzar a F5.2 ni marcar F5.1 como validada sin
+  confirmación posterior. Decisión confirmada: una escucha
   se registra al acumular 30 segundos efectivos; es un umbral fijo, sin
   excepción para pistas más cortas.
 - **F4.4 validada globalmente por el usuario**:
@@ -131,7 +132,7 @@ Consultar siempre el estado real de GitHub antes de actuar sobre un PR.
 - Port F1.2 recibido de `dgomezc-fase-f1-2-filtros` (`1354305` código, `c38cddb` documentación). Se integra mediante merge en la rama original: se conservan ambos historiales y se resuelven los conflictos de código con la versión adaptada a Result/FluentValidation. Sin PR duplicado ni reescritura de ramas. Cambios preexistentes y JSON privado conservados; no se borran worktrees.
 - Comprobación de integración en checkout original (27/10/2026): `src` coincide con el port recibido; compilación completa con 0 errores y advertencias. API/UI aisladas con MP3 sintéticos: multiaño/multigrupo/multisubestilo, alias, ausencia de duplicados, resultados vacíos, explorador, errores 400/404, opciones, carga de ajustes y página Tracks correctos. No equivale a validación visual de biblioteca real. Servicios y fixtures temporales retirados después de comprobar.
 
-## F5.1: PostgreSQL y registro de reproducciones (pendiente de validación del usuario)
+## F5.1: PostgreSQL y registro de reproducciones (PR #20; pendiente de validación del usuario)
 
 La reproducción genera un evento al llegar a 30 segundos efectivos de escucha
 por pista: pausar/reanudar conserva el progreso; los saltos no cuentan y las
