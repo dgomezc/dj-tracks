@@ -7,11 +7,13 @@ Consultar siempre el estado real de GitHub antes de actuar sobre un PR.
 
 ## Estado actual
 
-- **F4.4 implementada, pendiente de validación del usuario**:
+- **F4.4 validada globalmente por el usuario**:
   rama `fase/f4-4-playlists-vivos`, desde `develop` con F4.3 integrada.
   PR [#19](https://github.com/dgomezc/dj-tracks/pull/19) abierto hacia
-  `develop`. No avanzar a F5.1 ni hacer merge sin confirmación.
-  Checklist y comprobaciones de esta entrega abajo.
+  `develop`, merge autorizado por la confirmación del 12/11/2026:
+  «Ok, todo correcto. Continúa». Esta aceptación global no atribuye pruebas
+  individuales adicionales al usuario. Integración y continuación con F5.1
+  autorizadas; no marcar F5.1 como validada sin una confirmación posterior.
   Decisión confirmada: actualizar al abrir o volver a cargar, sin cambios
   espontáneos de la pantalla ni de la cola existente.
 - **F4.3 validada globalmente por el usuario** (03/11/2026):
