@@ -1,0 +1,81 @@
+name: dj-tracks
+
+services:
+  db:
+    image: postgres:17-bookworm
+    environment:
+      POSTGRES_DB: djtracks
+      POSTGRES_USER: djtracks
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Define POSTGRES_PASSWORD en .env}
+    volumes:
+      - statistics:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U djtracks -d djtracks"]
+      interval: 5s
+      timeout: 5s
+      retries: 12
+    restart: unless-stopped
+
+  api:
+    build:
+      context: .
+      dockerfile: src/DjTracks.Api/Dockerfile
+    environment:
+      ASPNETCORE_ENVIRONMENT: Production
+      ConnectionStrings__Statistics: Host=db;Database=djtracks;Username=djtracks;Password=${POSTGRES_PASSWORD:?Define POSTGRES_PASSWORD en .env}
+      Settings__FilePath: /app/App_Data/settings.json
+    volumes:
+      - api-data:/app/App_Data
+      - type: bind
+        source: ${TRACKS_PATH:?Define TRACKS_PATH en .env}
+        target: /music/Tracks
+        read_only: true
+        bind:
+          create_host_path: false
+      - type: bind
+        source: ${SESSIONS_PATH:?Define SESSIONS_PATH en .env}
+        target: /music/Sessions
+        read_only: true
+        bind:
+          create_host_path: false
+      - type: bind
+        source: ${REMEMBER_PATH:?Define REMEMBER_PATH en .env}
+        target: /music/Remember
+        read_only: true
+        bind:
+          create_host_path: false
+      - type: bind
+        source: ${PLAYLISTS_PATH:?Define PLAYLISTS_PATH en .env}
+        target: /music/Playlists
+        bind:
+          create_host_path: false
+    depends_on:
+      db:
+        condition: service_healthy
+    restart: unless-stopped
+
+  ui:
+    build:
+      context: .
+      dockerfile: src/DjTracks.UI/Dockerfile
+    environment:
+      ASPNETCORE_ENVIRONMENT: Production
+      ApiBaseUrl: http://api:8080/
+      StreamingProxy__Enabled: "true"
+      ReverseProxy__Routes__streaming__ClusterId: api
+      ReverseProxy__Routes__streaming__Match__Path: /api/streaming/{**path}
+      ReverseProxy__Routes__streaming__Match__Methods__0: GET
+      ReverseProxy__Clusters__api__Destinations__api__Address: http://api:8080/
+    ports:
+      - "${UI_PORT:-5050}:8080"
+    volumes:
+      - ui-keys:/home/app/.aspnet/DataProtection-Keys
+    depends_on:
+      api:
+        condition: service_started
+    restart: unless-stopped
+
+volumes:
+  statistics:
+  api-data:
+  ui-keys:

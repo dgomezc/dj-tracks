@@ -22,7 +22,7 @@
                     <span class="text-muted text-small">Forma de onda no disponible</span>
                 }
                 <audio id="djtracks-audio" @ref="_audio" preload="metadata"
-                       src="@current.AudioUrl"></audio>
+                       src="@BrowserAudioUrl(current.AudioUrl)"></audio>
             </div>
             <div class="player-wave-ruler" aria-hidden="true">
                 @for (var index = 0; index <= 5; index++)

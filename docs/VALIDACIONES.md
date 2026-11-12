@@ -7,9 +7,15 @@ Consultar siempre el estado real de GitHub antes de actuar sobre un PR.
 
 ## Estado actual
 
+- **F6.1 implementada, pendiente de validación del usuario**:
+  rama `fase/f6-1-docker`, desde `develop` con F5.2 integrada.
+  Decisiones del 12/11/2026: PostgreSQL nuevo junto a API/UI, una única URL
+  pública para interfaz/audio y API/BD internas. No avanzar a F6.2 ni a F2.3.
 - **F5.2 validada globalmente por el usuario el 12/11/2026**:
   rama `fase/f5-2-dashboard`, desde `develop` con F5.1 integrada.
-  PR [#21](https://github.com/dgomezc/dj-tracks/pull/21) abierto hacia `develop`.
+  PR [#21](https://github.com/dgomezc/dj-tracks/pull/21) mergeado en `develop`
+  el 12/11/2026 a las 13:11:17 UTC, commit
+  `06b96d763e7e3428598000e7a853f804ff908efa` (comprobado en GitHub).
   Decisiones confirmadas el 12/11/2026: selector de últimos 7 días, 30 días
   o todo el historial; 10 entradas por lista. Inicio muestra el dashboard.
   Confirmación: «todo ok, continua». Autoriza integrar el PR y continuar
@@ -145,6 +151,187 @@ Consultar siempre el estado real de GitHub antes de actuar sobre un PR.
 - **Refactor transversal Vertical Slices: validado por el usuario el 27/10/2026** con "Perfecto, documenta toda la arquitectura actual… Después mezcla el PR y sigue con el siguiente paso". Arquitectura documentada en `ARQUITECTURA.md`. PR [#6](https://github.com/dgomezc/dj-tracks/pull/6) mergeado en `develop` (`c7c1508`). Diseño validado en `arquitectura/flujo-get-tracks.html` ("Cambia todas las llamadas").
 - Port F1.2 recibido de `dgomezc-fase-f1-2-filtros` (`1354305` código, `c38cddb` documentación). Se integra mediante merge en la rama original: se conservan ambos historiales y se resuelven los conflictos de código con la versión adaptada a Result/FluentValidation. Sin PR duplicado ni reescritura de ramas. Cambios preexistentes y JSON privado conservados; no se borran worktrees.
 - Comprobación de integración en checkout original (27/10/2026): `src` coincide con el port recibido; compilación completa con 0 errores y advertencias. API/UI aisladas con MP3 sintéticos: multiaño/multigrupo/multisubestilo, alias, ausencia de duplicados, resultados vacíos, explorador, errores 400/404, opciones, carga de ajustes y página Tracks correctos. No equivale a validación visual de biblioteca real. Servicios y fixtures temporales retirados después de comprobar.
+
+## F6.1: Docker en Ubuntu (pendiente de validación del usuario)
+
+Tres servicios: PostgreSQL 17 nuevo, API con FFmpeg y UI con proxy de audio.
+Solo UI publica el puerto 5050, configurable con `UI_PORT`. No modifica la BD
+del NAS ni importa sus escuchas; al principio, el nuevo historial está vacío.
+Visual Studio 2026 sigue usando el perfil **DJ Tracks (Api + UI)** y sus URLs
+habituales 5050/5247; detener esa ejecución antes de usar el mismo puerto en Docker.
+
+### Preparación y arranque en Ubuntu Server
+
+Requiere Docker Engine y plugin Docker Compose instalados según la
+[documentación de Ubuntu de Docker](https://docs.docker.com/engine/install/ubuntu/),
+Git, acceso al repositorio y las carpetas de música montadas en el host.
+Los comandos de esta sección son para Linux, no PowerShell.
+
+1. Obtener la rama `fase/f6-1-docker` del PR en el servidor. Si las bibliotecas
+   están en el NAS, montarlas primero en Ubuntu y comprobar que el montaje
+   está activo y contiene la música esperada. No arrancar con el directorio
+   vacío que pueda quedar bajo un montaje de red fallido. Los contenedores
+   no montan SMB/NFS ni reciben sus credenciales.
+2. Elegir carpetas de host para Tracks, Sessions, Remember y playlists.
+   Tracks/Sessions conservan sus dos niveles; Remember contiene exactamente
+   `Cortas` y `Largas`. Linux distingue mayúsculas/minúsculas.
+   Para una carpeta de playlists **nueva**, se puede preparar:
+
+   ```bash
+   sudo install -d -o 1654 -g 1654 -m 0770 /srv/dj-tracks/Playlists
+   ```
+
+   Las tres bibliotecas solo requieren lectura y recorrido para UID 1654;
+   playlists requiere escritura también sobre sus M3U existentes. Revisar ACL
+   del NAS y opciones del montaje si procede; no ejecutar `chmod 777` sobre la
+   biblioteca ni cambiar recursivamente el propietario de la música.
+3. En la raíz del checkout:
+
+   ```bash
+   docker version
+   docker compose version
+   cp .env.example .env
+   chmod 600 .env
+   openssl rand -hex 32
+   ```
+
+   Editar `.env`: las cuatro variables `*_PATH` son rutas absolutas del
+   **host Ubuntu**, deben existir. Pegar los 64 caracteres hexadecimales
+   generados como `POSTGRES_PASSWORD`, sin espacios ni punto y coma. `UI_PORT`
+   vale 5050 por defecto. No guardar `.env` en Git ni compartir su contenido.
+   No usar `docker compose config` sin `--quiet` en informes: imprime secretos.
+4. Construir y arrancar:
+
+   ```bash
+   docker compose config --quiet
+   docker compose up -d --build
+   docker compose ps
+   docker compose logs --tail=80 api ui
+   ```
+
+   Esperar `db` saludable y el mensaje de migración correcta de la API.
+   Los bind mounts ausentes deben impedir el arranque en vez de crearse vacíos.
+   Abrir `http://IP_DEL_SERVIDOR:5050/settings` desde un equipo de la LAN/VPN
+   (sustituir puerto si cambió). Las rutas que se guardan **en la aplicación**
+   son las del contenedor, no las del host:
+
+   | Campo | Ruta |
+   |---|---|
+   | Tracks | `/music/Tracks` |
+   | Sessions | `/music/Sessions` |
+   | Remember | `/music/Remember` |
+   | Playlists | `/music/Playlists` |
+
+   Guardar y pulsar «Probar conexión»: debe conectar y mostrar la migración
+   inicial aplicada, sin pendientes. API/BD no publican 5247/5432 en el host.
+   No usar `localhost`, una letra de unidad Windows ni `api` en el navegador
+   de otro equipo. Único acceso público: la URL de UI.
+
+### Datos, compatibilidad y operación
+
+- Los ajustes y ondas se conservan en `api-data`; escuchas en `statistics`;
+  claves de Blazor en `ui-keys`; M3U en la carpeta de host elegida. El nombre de
+  proyecto Compose predeterminado es `dj-tracks`: cambiarlo crea otro conjunto
+  de volúmenes. No equivale a migrar la base de datos del NAS.
+- Las playlists M3U relativas son portables **si conservan la relación de
+  carpetas**. En el contenedor Tracks/Remember/Playlists son carpetas hermanas.
+  Trabajar primero con copias: rutas absolutas Windows, diferencias de
+  mayúsculas o una distribución distinta requieren adaptar las rutas de los
+  M3U copiados. No hay conversión automática de esas rutas ni de ajustes
+  Windows. No sobrescribir los originales para esta validación.
+- La vigilancia y el reescaneo siguen siendo los de F4.4. Si el montaje de
+  red no notifica cambios, el índice se actualiza con el respaldo horario;
+  regenerar una automática fuerza el reescaneo inmediato. Recargar la
+  pantalla no fuerza por sí solo un escaneo del NAS.
+- `docker compose restart` reinicia sin borrar datos; `docker compose down`
+  elimina contenedores/red pero conserva los volúmenes. Para actualizar,
+  comprobar copias de seguridad y ejecutar `docker compose up -d --build`.
+  **No utilizar `down -v`, `volume prune` ni borrar los volúmenes** si se
+  quieren conservar datos. La cola/circuito de UI se pierde al reiniciarla,
+  igual que en Visual Studio; las playlists y escuchas no.
+- Antes de actualizar, respaldar los M3U, ajustes/ondas, claves privadas y BD.
+  Para un dump PostgreSQL, redirigir fuera del repositorio:
+
+  ```bash
+  docker compose exec -T db pg_dump -U djtracks -d djtracks > /ruta/privada/estadisticas.sql
+  ```
+
+  Proteger también los backups y `.env`. Cambiar solo `POSTGRES_PASSWORD` en
+  `.env` **no cambia** la contraseña de un volumen PostgreSQL ya inicializado:
+  rotarla en PostgreSQL y después actualizar el entorno/recrear la API.
+- Despliegue HTTP sin autenticación, solo LAN/VPN. No abrir el puerto al
+  exterior ni publicar API/BD. TLS/autenticación no se añaden en esta fase.
+
+### Checklist pendiente del usuario
+
+- [ ] **Arranque Ubuntu:** construir/arrancar con carpetas de prueba; `db`
+  saludable, migración aplicada y «Probar conexión» sin pendientes.
+  Solo UI tiene puerto publicado; entrar desde otro equipo de la LAN/VPN.
+- [ ] **Bibliotecas y rutas:** guardar las cuatro rutas de contenedor y
+  navegar por Tracks, Sessions y Remember; tags y tracklist se mantienen.
+  Música de solo lectura y playlists escribibles para UID 1654.
+- [ ] **Audio de mismo origen:** reproducir las tres bibliotecas desde otro
+  equipo; suena sin resolver el nombre interno `api`. Buscar en el audio
+  funciona con respuestas Range/206; onda progresiva/cacheada y carátula
+  siguen disponibles. Revisar una sesión larga y controles de cola/volumen.
+- [ ] **Playlists:** crear/editar manual y automática en carpeta de prueba;
+  M3U visible en host, carga sin duplicados ni interrupción. Añadir una copia
+  MP3 válida y recargar la automática cuando el índice se haya actualizado
+  refleja el cambio (regenerar si el NAS no avisa); sin recargar no
+  cambia sola la pantalla ni la cola. Verificar compatibilidad de M3U copiados.
+- [ ] **Escuchas y persistencia:** escuchar al menos 30 segundos, comprobar
+  Inicio y recrear con `docker compose up -d --force-recreate`. Ajustes,
+  playlists, ondas y escuchas permanecen; cola/circuito no se conservan.
+- [ ] **Regresión Visual Studio:** detener Compose si usa 5050; arrancar
+  perfil DJ Tracks (Api + UI) en VS 2026, UI 5050/API 5247. Biblioteca,
+  reproducción/seek/onda y prueba de conexión a la BD de desarrollo siguen
+  funcionando sin activar el proxy ni alterar sus user-secrets.
+
+### Comprobaciones del agente y límites
+
+- `dotnet build DjTracks.slnx`: 0 errores y advertencias; imágenes API/UI
+  construidas y ejecutadas como Linux con .NET 10 y FFmpeg. Compose aislado
+  `djtracks-f61-check`, UI en 5153, sin modificar contenedores preexistentes.
+  Sin tests nuevos ni cambios de esquema o del registro de escuchas.
+- La primera publicación de UI no incluía `_framework/blazor.web.js` y la
+  página solo se renderizaba sin interactividad. Corregido el Dockerfile para
+  publicar/restaurar con los componentes Razor presentes; reconstrucción
+  verificada con script disponible, circuito Blazor y formularios funcionando.
+- PostgreSQL nuevo saludable; migración inicial aplicada automáticamente,
+  «Probar conexión» muestra una aplicada y ninguna pendiente. Guardado de
+  las cuatro rutas de contenedor desde el navegador correcto.
+  Solo UI tiene puerto publicado; la ruta pública `/api/stats/dashboard`
+  devuelve 404, no retransmite la API de estadísticas.
+- API/UI ejecutan como UID 1654. Bibliotecas montadas en solo lectura y
+  playlists escribibles. Origen bind **Linux** inexistente rechazado por
+  Docker sin crear el directorio. Docker Desktop sí llegó a crear una ruta
+  Windows inexistente pese a `create_host_path: false`; no asumir que esta
+  protección sustituye a verificar los montajes reales del NAS en Ubuntu.
+- MP3 sintéticos propios: Tracks 1, Sessions 1 y Remember 2. Streaming
+  Range por UI en las tres bibliotecas devuelve 206; bytes 128–255 de Tracks
+  coinciden exactamente con el MP3 original (128 bytes) y un rango fuera
+  del archivo devuelve 416.
+- Navegador: el audio de Tracks usa `/api/streaming/...` del mismo origen;
+  reproducción silenciada de 36 segundos, sin error, con avance de tiempo y
+  onda. Se registra una escucha tras 30 segundos, solo en la BD de prueba.
+  Onda Remember: 65 bloques NDJSON hasta completar; segunda lectura desde
+  caché: un bloque completo con 1024 valores. Sin modificar algoritmo/escala.
+- Manual creada con una canción y automática con tres desde sus modales;
+  los dos M3U aparecen en la carpeta de host. Tras recrear **los tres
+  contenedores**, hashes de ajustes, ondas, claves y M3U coinciden y sigue
+  existiendo la escucha. Inicio muestra 1/1/2 MP3, dos playlists y una escucha;
+  la cola se vacía al reiniciar UI, como corresponde al estado de circuito.
+- API/UI locales aisladas en 5353/5154 con los binarios Debug compilados:
+  navegador interactivo, reproducción sintética silenciada con avance y URL
+  absoluta `http://localhost:5353/api/streaming/...`; ruta de proxy en UI: 404.
+  Estadísticas desactivadas para no escribir en la BD de desarrollo.
+- Servicios locales detenidos. Contenedores, imágenes, volúmenes exclusivamente
+  sintéticos, credencial temporal y fixtures de esta comprobación retirados;
+  contenedores preexistentes y cachés de música del usuario conservados.
+- No se ha desplegado en Ubuntu/NAS real ni escuchado audio físico; VPN,
+  permisos/montajes reales,
+  sesiones largas y validación completa desde Visual Studio siguen
+  pendientes del usuario. La BD del NAS y sus user-secrets no se han modificado.
 
 ## F5.2: dashboard de Inicio (PR #21; validada globalmente por el usuario)
 
