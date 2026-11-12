@@ -7,10 +7,24 @@ Consultar siempre el estado real de GitHub antes de actuar sobre un PR.
 
 ## Estado actual
 
+- **F5.1 validada globalmente por el usuario el 12/11/2026**:
+  rama `fase/f5-1-estadisticas-reproducciones`, desde `develop` con F4.4
+  integrada. PR [#20](https://github.com/dgomezc/dj-tracks/pull/20) abierto
+  hacia `develop`, pendiente de integrar tras comprobar su estado.
+  Confirmación: «Todo Ok, continúa». Incluye la revisión de conexión desde
+  Configuración; autoriza integración y continuación con F5.2.
+  Aceptación global, sin atribuir pruebas individuales adicionales al usuario
+  ni ampliar las comprobaciones del agente. Decisión confirmada: una escucha
+  se registra al acumular 30 segundos efectivos; es un umbral fijo, sin
+  excepción para pistas más cortas.
+  Revisión del 12/11/2026: endpoint y sección en Configuración para probar
+  conexión e historial de migraciones, incluida en esta aceptación global.
 - **F4.4 validada globalmente por el usuario**:
   rama `fase/f4-4-playlists-vivos`, desde `develop` con F4.3 integrada.
-  PR [#19](https://github.com/dgomezc/dj-tracks/pull/19) abierto hacia
-  `develop`, merge autorizado por la confirmación del 12/11/2026:
+  PR [#19](https://github.com/dgomezc/dj-tracks/pull/19) mergeado en
+  `develop` el 12/11/2026 a las 09:48:38 UTC, commit
+  `0e1b5938562e20bd11e5a24a0e037038950eef3a` (comprobado en GitHub).
+  Merge autorizado por la confirmación del 12/11/2026:
   «Ok, todo correcto. Continúa». Esta aceptación global no atribuye pruebas
   individuales adicionales al usuario. Integración y continuación con F5.1
   autorizadas; no marcar F5.1 como validada sin una confirmación posterior.
@@ -123,7 +137,150 @@ Consultar siempre el estado real de GitHub antes de actuar sobre un PR.
 - Port F1.2 recibido de `dgomezc-fase-f1-2-filtros` (`1354305` código, `c38cddb` documentación). Se integra mediante merge en la rama original: se conservan ambos historiales y se resuelven los conflictos de código con la versión adaptada a Result/FluentValidation. Sin PR duplicado ni reescritura de ramas. Cambios preexistentes y JSON privado conservados; no se borran worktrees.
 - Comprobación de integración en checkout original (27/10/2026): `src` coincide con el port recibido; compilación completa con 0 errores y advertencias. API/UI aisladas con MP3 sintéticos: multiaño/multigrupo/multisubestilo, alias, ausencia de duplicados, resultados vacíos, explorador, errores 400/404, opciones, carga de ajustes y página Tracks correctos. No equivale a validación visual de biblioteca real. Servicios y fixtures temporales retirados después de comprobar.
 
-## F4.4: playlists vivas (pendiente de validación del usuario)
+## F5.1: PostgreSQL y registro de reproducciones (PR #20; validada globalmente por el usuario)
+
+Confirmación del 12/11/2026: «Todo Ok, continúa», incluida la revisión de
+conexión en Configuración. Sustituye los estados pendientes de la entrega
+histórica de abajo; no atribuye pruebas individuales adicionales.
+
+La reproducción genera un evento al llegar a 30 segundos efectivos de escucha
+por pista: pausar/reanudar conserva el progreso; los saltos no cuentan y las
+pistas de menos de 30 segundos no se registran. El evento guarda biblioteca,
+ruta relativa, nombre de fichero, tags visibles y fecha UTC en PostgreSQL.
+La migración se intenta al arrancar en segundo plano. Sin conexión configurada
+o disponible, la API/reproductor siguen arrancando; al fallar el registro, la
+UI muestra un aviso y el audio continúa.
+
+### Arranque y checklist del usuario
+
+Abrir `DjTracks.slnx` en Visual Studio 2026 (.NET 10), rama
+`fase/f5-1-estadisticas-reproducciones`, seleccionar el perfil
+**DJ Tracks (Api + UI)** y pulsar F5. UI: `http://localhost:5050`;
+API: `http://localhost:5247`. PostgreSQL solo se usa para estadísticas.
+No se incluyen credenciales en el repositorio. Para Desarrollo, configurar
+un secreto local con la cadena de conexión propia:
+
+```powershell
+dotnet user-secrets set "ConnectionStrings:Statistics" "Host=<servidor>;Database=djtracks;Username=<usuario>;Password=<contraseña>" --project src\DjTracks.Api
+```
+
+La API ya declara el ID de user-secrets `dj-tracks-api-local`. No compartir ni
+añadir la cadena real a archivos versionados o mensajes.
+
+- [ ] **Sin PostgreSQL:** borrar temporalmente el secreto local (o probar en
+  un perfil sin la variable de conexión) y arrancar. La API y la UI deben
+  iniciar; el log indica que estadísticas están desactivadas. Reproducir
+  durante 30 segundos: aparece un aviso de guardado, pero el audio no se para.
+  Volver a configurar el secreto después de esta comprobación.
+- [ ] **Migración:** con el secreto propio configurado y PostgreSQL accesible,
+  reiniciar el perfil. El log confirma la migración y PostgreSQL contiene
+  `playback_events` con índices de fecha y biblioteca/ruta. No debe aparecer
+  la cadena de conexión en logs.
+- [ ] **Umbral y datos:** reproducir un MP3 de más de 30 segundos. Al superar
+  el umbral debe aparecer una sola fila nueva con biblioteca/ruta, nombre,
+  título/artista si existen y hora UTC. Comprobarla, por ejemplo, con:
+  `SELECT "EventId", "Library", "RelativePath", "PlayedAtUtc" FROM playback_events ORDER BY "PlayedAtUtc" DESC LIMIT 20;`.
+- [ ] **Pausa, reanudación y saltos:** escuchar aproximadamente 15 segundos,
+  pausar un rato y reanudar hasta superar 30 segundos efectivos: se registra
+  una fila. En otra pista, saltar hacia delante no debe alcanzar el umbral por
+  sí mismo; solo cuenta el tiempo escuchado efectivamente.
+- [ ] **Pista corta:** reproducir una pista que termine antes de los 30 segundos;
+  no debe producir fila, incluso si llega al final.
+- [ ] **Fallo de PostgreSQL:** con API y UI en marcha, dejar inaccesible la BD y
+  escuchar otra pista hasta el umbral. El aviso debe indicar que no se guardó,
+  sin detener/interrumpir el audio ni mostrar una confirmación falsa.
+- [ ] Probar Tracks, Sessions y Remember: cada biblioteca debe generar la
+  referencia relativa correcta. Una nueva selección/reproducción cualificada
+  genera su propio evento, sin duplicados por los eventos `timeupdate`.
+
+### Comprobaciones del agente y límites
+
+- `dotnet tool restore`: `dotnet-ef` 10.0.4 restaurado y alineado con
+  `Microsoft.EntityFrameworkCore.Design` y runtime EF Core 10.0.4.
+- `dotnet build DjTracks.slnx`: correcto, 0 errores y 0 advertencias.
+- `dotnet-ef migrations list` reconoce `20261112095729_InitialStatistics`.
+  La conexión local `localhost:5432` no está disponible, así que EF no pudo
+  determinar migraciones aplicadas. No se validaron migración ni escritura
+  contra PostgreSQL real, ni se consultaron secretos del usuario.
+- Sin pruebas nuevas, conforme a las instrucciones del proyecto. Pendientes
+  del usuario: configuración segura de la conexión, migración y checklist
+  funcional con PostgreSQL, pistas y audio reales.
+
+### Revisión del 12/11/2026: comprobar PostgreSQL desde Configuración
+
+Petición del usuario: comprobar en pgAdmin que la migración se aplicó y añadir
+un endpoint y un apartado de prueba de conexión en Configuración.
+
+`GET /api/stats/connection` usa exclusivamente la conexión configurada en la API.
+Abre la conexión y lee el historial EF; devuelve listas `appliedMigrations` y
+`pendingMigrations`. No crea bases, migra ni escribe reproducciones. Una conexión
+correcta con pendientes no se presenta como migración completada. Falta de
+configuración, conexión fallida o lectura denegada del historial devuelven 503
+con mensaje seguro, sin cadena de conexión ni credenciales. Espera máxima de
+10 segundos mediante cancelación; no hay reintentos silenciosos.
+
+Arranque: Visual Studio 2026 (.NET 10), perfil **DJ Tracks (Api + UI)**,
+API `http://localhost:5247`, UI `http://localhost:5050/settings`.
+La conexión del NAS se configura en user-secrets de la API, como arriba.
+Reiniciar ambos proyectos y recargar completamente después de actualizar.
+
+Checklist nueva (pendiente del usuario):
+
+- [ ] En Configuración, sección **Base de datos de estadísticas**, pulsar
+  **Probar conexión**: aparece el indicador de carga y el botón se desactiva.
+  Con PostgreSQL disponible e historial actualizado, muestra conexión correcta,
+  cero pendientes y `20261112095729_InitialStatistics` entre las aplicadas.
+- [ ] Abrir `http://localhost:5247/api/stats/connection`: devuelve HTTP 200 y
+  los identificadores aplicados/pendientes, sin credenciales. Con una base de
+  pruebas que tenga migraciones pendientes, debe mostrarlas como pendientes,
+  no aplicarlas. La migración automática al arrancar puede completar el esquema
+  antes de consultar: no deshacer una migración ni borrar tablas reales para
+  fabricar esta situación.
+- [ ] Sin configuración o con BD inaccesible, probar de nuevo: mensaje explícito
+  de error en esta sección, sin resultado correcto anterior ni bloqueo del botón.
+  Restaurar conexión/reiniciar y repetir recupera el resultado. No deben cambiar
+  rutas sin guardar, tema, cola o audio por pulsar el botón.
+- [ ] Revisar el nuevo apartado en escritorio/móvil y modos claro/oscuro.
+
+En **pgAdmin**, abrir la base indicada por `Database` en el secreto de la API,
+no una base distinta del mismo servidor. Actualizar **Schemas → public → Tables**:
+deben existir `playback_events` y `__EFMigrationsHistory`.
+En **Query Tool**:
+
+```sql
+SELECT "MigrationId", "ProductVersion"
+FROM public."__EFMigrationsHistory"
+ORDER BY "MigrationId";
+```
+
+Resultado esperado: `20261112095729_InitialStatistics`, versión EF `10.0.4`.
+Si no aparece el historial, revisar que se usa la misma base y el log de arranque.
+La fila confirma el historial aplicado, no que la tabla se haya mantenido intacta
+después de cambios manuales. Abrir **playback_events → Columns** para comprobar
+sus columnas, e **Indexes** para ver los índices. Una tabla inicialmente vacía
+es normal: no se inserta ninguna fila hasta una escucha cualificada.
+
+Comprobaciones del agente de esta revisión:
+
+- Compilación completa correcta, 0 errores y advertencias; sin tests nuevos.
+  Context7 consultado para apertura de conexión e historial EF. Se reutilizan
+  los componentes Blueprint existentes; su servidor MCP no está expuesto entre
+  las herramientas disponibles de esta sesión.
+- API aislada sin user-secrets: conexión ausente y PostgreSQL inaccesible
+  devuelven 503 con mensajes diferenciados; ajustes siguen respondiendo 200.
+  Respuestas sin servidor, usuario ni cadena de conexión de la fixture.
+- Navegador con API aislada: ambos errores aparecen en la nueva sección y el
+  botón vuelve a estar habilitado. Un cambio de ruta sin guardar se conserva
+  tras repetir la prueba. Capturas de escritorio revisadas en claro y oscuro,
+  sin desbordamiento horizontal. No se comprobó reproducción con audio real
+  ni viewport móvil en esta revisión.
+- PostgreSQL real, éxito con migraciones aplicadas/pendientes y permisos de
+  escritura siguen pendientes del usuario. La prueba solo certifica conexión
+  e historial; no garantiza permisos de INSERT ni detecta cambios manuales.
+- Se mantiene pendiente toda la checklist original de F5.1. No hace falta
+  repetir fases previas; esta revisión no cambia el cómputo de escuchas.
+
+## F4.4: playlists vivas (validada globalmente por el usuario)
 
 Índice en memoria sin tags, watcher con agrupación de eventos y reescaneo
 horario de respaldo. Listar, abrir y cargar una automática resuelven sus filtros

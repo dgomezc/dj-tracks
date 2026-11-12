@@ -24,6 +24,9 @@ public partial class Settings : IAsyncDisposable
     private bool Disabled => _busy || !_loaded;
     private IJSObjectReference? _module;
     private string? _theme;
+    private bool _testingStatistics;
+    private StatisticsConnectionStatus? _statisticsStatus;
+    private string? _statisticsError;
 
     protected override Task OnInitializedAsync() => LoadAsync();
 
@@ -47,6 +50,28 @@ public partial class Settings : IAsyncDisposable
     }
 
     private Task LoadAsync() => SendAsync(save: false);
+
+    private async Task TestStatisticsConnectionAsync()
+    {
+        if (_testingStatistics)
+            return;
+
+        _testingStatistics = true;
+        _statisticsStatus = null;
+        _statisticsError = null;
+        try
+        {
+            var result = await Http.GetForResultAsync<StatisticsConnectionStatus>("api/stats/connection", Logger);
+            if (result.IsFailed)
+                _statisticsError = result.Errors[0].Message;
+            else
+                _statisticsStatus = result.Value;
+        }
+        finally
+        {
+            _testingStatistics = false;
+        }
+    }
 
     private Task SaveAsync() => Disabled ? Task.CompletedTask : SendAsync(save: true);
 

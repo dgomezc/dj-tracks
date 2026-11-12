@@ -168,3 +168,17 @@ Content-Type: application/json
 {"name": "Day con recuerdos", "filters": {"years": [], "styles": ["Night Instrumental"], "includeRemember": false}}
 
 ###
+
+# El reproductor envía el evento al alcanzar 30 segundos efectivos de escucha.
+POST {{DjTracks.Api_HostAddress}}/api/stats/plays
+Content-Type: application/json
+
+{"playback": {"eventId": "11111111-1111-1111-1111-111111111111", "library": "Tracks", "fileName": "Artist - Track.mp3", "year": "2025", "style": "Day Instrumental", "title": "Track", "artists": ["Artist"]}}
+
+###
+
+# Solo lectura: comprueba conexión e historial, sin aplicar migraciones ni insertar eventos.
+GET {{DjTracks.Api_HostAddress}}/api/stats/connection
+Accept: application/json
+
+###

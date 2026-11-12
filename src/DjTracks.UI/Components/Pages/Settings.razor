@@ -83,6 +83,70 @@
 <BbCard Class="settings-theme-card">
     <BbCardContent Class="settings-card">
         <BbField>
+            <BbFieldLabel>Base de datos de estadísticas</BbFieldLabel>
+            <BbFieldContent>
+                <BbFieldDescription>
+                    Comprueba la conexión de la API a PostgreSQL y el historial de migraciones.
+                    La conexión se configura en el servidor mediante ConnectionStrings:Statistics
+                    (user-secrets en Desarrollo). Esta prueba no guarda datos ni aplica migraciones.
+                </BbFieldDescription>
+                <div class="button-row">
+                    <BbButton Variant="ButtonVariant.Outline" OnClick="TestStatisticsConnectionAsync"
+                              Disabled="@_testingStatistics">
+                        Probar conexión
+                    </BbButton>
+                </div>
+                @if (_testingStatistics)
+                {
+                    <div class="busy-indicator" role="status">
+                        <BbSpinner Size="SpinnerSize.Small" AriaLabel="Comprobando PostgreSQL" />
+                        <span>Comprobando conexión y migraciones…</span>
+                    </div>
+                }
+                @if (_statisticsError is not null)
+                {
+                    <BbAlert Variant="AlertVariant.Danger" Class="page-alert" role="alert">
+                        <BbAlertDescription>@_statisticsError</BbAlertDescription>
+                    </BbAlert>
+                }
+                @if (_statisticsStatus is { } status)
+                {
+                    <BbAlert Variant="@(status.PendingMigrations.Length == 0 ? AlertVariant.Success : AlertVariant.Warning)"
+                             Class="page-alert" role="status">
+                        <BbAlertDescription>
+                            Conexión a PostgreSQL correcta.
+                            @if (status.PendingMigrations.Length == 0)
+                            {
+                                <span>Todas las migraciones de esta versión están aplicadas.</span>
+                            }
+                            else
+                            {
+                                <span>Hay migraciones pendientes. Revisa el log de arranque de la API antes de registrar reproducciones.</span>
+                            }
+                        </BbAlertDescription>
+                    </BbAlert>
+                    <p>Migraciones aplicadas: @status.AppliedMigrations.Length.
+                        Pendientes: @status.PendingMigrations.Length.</p>
+                    @foreach (var migration in status.AppliedMigrations)
+                    {
+                        <div>Aplicada: <code>@migration</code></div>
+                    }
+                    @foreach (var migration in status.PendingMigrations)
+                    {
+                        <div>Pendiente: <code>@migration</code></div>
+                    }
+                    <BbTypographyMuted>
+                        El historial no comprueba permisos de escritura ni cambios manuales en las tablas.
+                    </BbTypographyMuted>
+                }
+            </BbFieldContent>
+        </BbField>
+    </BbCardContent>
+</BbCard>
+
+<BbCard Class="settings-theme-card">
+    <BbCardContent Class="settings-card">
+        <BbField>
             <BbFieldLabel>Tema de la interfaz</BbFieldLabel>
             <BbFieldContent>
                 <BbSelect TValue="string" Value="@_theme" ValueChanged="ChangeThemeAsync" Options="@ThemeOptions"
