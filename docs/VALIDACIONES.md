@@ -7,15 +7,18 @@ Consultar siempre el estado real de GitHub antes de actuar sobre un PR.
 
 ## Estado actual
 
-- **F5.1 en implementación, pendiente de validación del usuario**:
+- **F5.1 validada globalmente por el usuario el 12/11/2026**:
   rama `fase/f5-1-estadisticas-reproducciones`, desde `develop` con F4.4
   integrada. PR [#20](https://github.com/dgomezc/dj-tracks/pull/20) abierto
-  hacia `develop`. No avanzar a F5.2 ni marcar F5.1 como validada sin
-  confirmación posterior. Decisión confirmada: una escucha
+  hacia `develop`, pendiente de integrar tras comprobar su estado.
+  Confirmación: «Todo Ok, continúa». Incluye la revisión de conexión desde
+  Configuración; autoriza integración y continuación con F5.2.
+  Aceptación global, sin atribuir pruebas individuales adicionales al usuario
+  ni ampliar las comprobaciones del agente. Decisión confirmada: una escucha
   se registra al acumular 30 segundos efectivos; es un umbral fijo, sin
   excepción para pistas más cortas.
   Revisión del 12/11/2026: endpoint y sección en Configuración para probar
-  conexión e historial de migraciones, también pendientes de validación.
+  conexión e historial de migraciones, incluida en esta aceptación global.
 - **F4.4 validada globalmente por el usuario**:
   rama `fase/f4-4-playlists-vivos`, desde `develop` con F4.3 integrada.
   PR [#19](https://github.com/dgomezc/dj-tracks/pull/19) mergeado en
@@ -134,7 +137,11 @@ Consultar siempre el estado real de GitHub antes de actuar sobre un PR.
 - Port F1.2 recibido de `dgomezc-fase-f1-2-filtros` (`1354305` código, `c38cddb` documentación). Se integra mediante merge en la rama original: se conservan ambos historiales y se resuelven los conflictos de código con la versión adaptada a Result/FluentValidation. Sin PR duplicado ni reescritura de ramas. Cambios preexistentes y JSON privado conservados; no se borran worktrees.
 - Comprobación de integración en checkout original (27/10/2026): `src` coincide con el port recibido; compilación completa con 0 errores y advertencias. API/UI aisladas con MP3 sintéticos: multiaño/multigrupo/multisubestilo, alias, ausencia de duplicados, resultados vacíos, explorador, errores 400/404, opciones, carga de ajustes y página Tracks correctos. No equivale a validación visual de biblioteca real. Servicios y fixtures temporales retirados después de comprobar.
 
-## F5.1: PostgreSQL y registro de reproducciones (PR #20; pendiente de validación del usuario)
+## F5.1: PostgreSQL y registro de reproducciones (PR #20; validada globalmente por el usuario)
+
+Confirmación del 12/11/2026: «Todo Ok, continúa», incluida la revisión de
+conexión en Configuración. Sustituye los estados pendientes de la entrega
+histórica de abajo; no atribuye pruebas individuales adicionales.
 
 La reproducción genera un evento al llegar a 30 segundos efectivos de escucha
 por pista: pausar/reanudar conserva el progreso; los saltos no cuentan y las
