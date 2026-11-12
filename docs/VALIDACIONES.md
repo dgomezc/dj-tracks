@@ -7,8 +7,9 @@ Consultar siempre el estado real de GitHub antes de actuar sobre un PR.
 
 ## Estado actual
 
-- **F5.2 implementada, pendiente de validación del usuario**:
+- **F5.2 entregada, pendiente de validación del usuario**:
   rama `fase/f5-2-dashboard`, desde `develop` con F5.1 integrada.
+  PR [#21](https://github.com/dgomezc/dj-tracks/pull/21) abierto hacia `develop`.
   Decisiones confirmadas el 12/11/2026: selector de últimos 7 días, 30 días
   o todo el historial; 10 entradas por lista. Inicio muestra el dashboard.
   No avanzar a F6.1 sin validar e integrar F5.2.
@@ -143,7 +144,7 @@ Consultar siempre el estado real de GitHub antes de actuar sobre un PR.
 - Port F1.2 recibido de `dgomezc-fase-f1-2-filtros` (`1354305` código, `c38cddb` documentación). Se integra mediante merge en la rama original: se conservan ambos historiales y se resuelven los conflictos de código con la versión adaptada a Result/FluentValidation. Sin PR duplicado ni reescritura de ramas. Cambios preexistentes y JSON privado conservados; no se borran worktrees.
 - Comprobación de integración en checkout original (27/10/2026): `src` coincide con el port recibido; compilación completa con 0 errores y advertencias. API/UI aisladas con MP3 sintéticos: multiaño/multigrupo/multisubestilo, alias, ausencia de duplicados, resultados vacíos, explorador, errores 400/404, opciones, carga de ajustes y página Tracks correctos. No equivale a validación visual de biblioteca real. Servicios y fixtures temporales retirados después de comprobar.
 
-## F5.2: dashboard de Inicio (pendiente de validación del usuario)
+## F5.2: dashboard de Inicio (PR #21; pendiente de validación del usuario)
 
 Inicio deja de mostrar el marcador de F5.2 e incorpora los recuentos de MP3 de
 Tracks/Sessions/Remember y playlists manuales/automáticas, total de escuchas,
@@ -260,6 +261,7 @@ exacto de corte que devuelve `untilUtc` del endpoint. Endpoints nuevos:
   cambios de tags y bordes de 7/30 días quedan en la checklist del usuario.
   Los recuentos son una lectura al cargar, no un índice sincronizado en pantalla;
   NAS/red y audio reales también requieren confirmación del usuario.
+- Servicios y fixtures temporales de esta comprobación detenidos y retirados.
 
 ## F5.1: PostgreSQL y registro de reproducciones (PR #20; validada globalmente por el usuario)
 
