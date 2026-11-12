@@ -225,6 +225,20 @@ El estado de entrega y las checklists se mantienen en `VALIDACIONES.md`. Una imp
   migraciones aplicadas/pendientes mediante un endpoint de solo lectura, sin editar
   credenciales, aplicar migraciones ni generar reproducciones de prueba.
 - **F5.2 Dashboard**: más reproducidas, últimas reproducidas, resumen de biblioteca y playlists.
+  Inicio muestra un selector de últimos 7 días, 30 días (inicial) o todo el
+  historial y hasta 10 entradas por lista, decisiones del 12/11/2026.
+  El período es una ventana móvil UTC, no semanas/meses naturales, y solo
+  afecta a las escuchas. «Más reproducidas» agrupa por biblioteca/ruta:
+  número de escuchas descendente, última escucha descendente y biblioteca/ruta
+  para desempatar. Muestra los últimos metadatos guardados de cada archivo.
+  «Últimas» lista eventos individuales, pudiendo repetir un archivo.
+  Fechas explícitas en UTC; no se eliminan del historial archivos retirados.
+  Recuentos actuales de MP3 de Tracks, Sessions y Remember, sin leer tags;
+  playlists M3U manuales/automáticas sin regenerarlas desde el endpoint de
+  resumen. Errores independientes por origen, nunca ceros fingidos.
+  Actualización al abrir Inicio o pulsar «Volver a cargar», sin polling,
+  modificar la cola ni ampliar el registro de F5.1. Sin gráficas ni nuevas
+  migraciones; no registra una escucha por cargar estadísticas.
 
 ### Bloque 6 — Cierre
 - **F6.1 Docker**: Dockerfiles (con ffmpeg si se usa), `docker-compose` (db, api, ui), despliegue en Ubuntu Server.

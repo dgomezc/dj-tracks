@@ -1,4 +1,5 @@
 using DjTracks.Api.Features.Stats.RecordPlayback;
+using DjTracks.Api.Features.Stats.GetPlaybackStatistics;
 using DjTracks.Api.Features.Stats.TestStatisticsConnection;
 using DjTracks.Infrastructure.Stats;
 using Microsoft.EntityFrameworkCore;
@@ -17,6 +18,7 @@ public static class StatsFeature
                 options.UseNpgsql(connectionString);
         });
         return services.AddScoped<RecordPlaybackHandler>()
+            .AddScoped<GetPlaybackStatisticsHandler>()
             .AddScoped<TestStatisticsConnectionHandler>()
             .AddHostedService<InitializeStatisticsDatabase>();
     }
@@ -24,6 +26,7 @@ public static class StatsFeature
     public static void MapStatsFeature(this RouteGroupBuilder api)
     {
         api.MapRecordPlayback();
+        api.MapGetPlaybackStatistics();
         api.MapTestStatisticsConnection();
     }
 }
