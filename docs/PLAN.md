@@ -221,6 +221,9 @@ El estado de entrega y las checklists se mantienen en `VALIDACIONES.md`. Una imp
 
 ### Bloque 5 — Estadísticas
 - **F5.1 PostgreSQL y registro de reproducciones**: migración EF Core y conexión de desarrollo al NAS mediante user-secrets. Cada pista cuenta una sola vez al acumular 30 segundos efectivos de reproducción; pausar y reanudar conserva el progreso, los saltos no cuentan y no hay excepción para pistas más cortas.
+  Configuración incluye «Probar conexión»: comprueba acceso a PostgreSQL y muestra
+  migraciones aplicadas/pendientes mediante un endpoint de solo lectura, sin editar
+  credenciales, aplicar migraciones ni generar reproducciones de prueba.
 - **F5.2 Dashboard**: más reproducidas, últimas reproducidas, resumen de biblioteca y playlists.
 
 ### Bloque 6 — Cierre

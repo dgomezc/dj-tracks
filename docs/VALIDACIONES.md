@@ -14,6 +14,8 @@ Consultar siempre el estado real de GitHub antes de actuar sobre un PR.
   confirmación posterior. Decisión confirmada: una escucha
   se registra al acumular 30 segundos efectivos; es un umbral fijo, sin
   excepción para pistas más cortas.
+  Revisión del 12/11/2026: endpoint y sección en Configuración para probar
+  conexión e historial de migraciones, también pendientes de validación.
 - **F4.4 validada globalmente por el usuario**:
   rama `fase/f4-4-playlists-vivos`, desde `develop` con F4.3 integrada.
   PR [#19](https://github.com/dgomezc/dj-tracks/pull/19) mergeado en
@@ -196,6 +198,80 @@ añadir la cadena real a archivos versionados o mensajes.
 - Sin pruebas nuevas, conforme a las instrucciones del proyecto. Pendientes
   del usuario: configuración segura de la conexión, migración y checklist
   funcional con PostgreSQL, pistas y audio reales.
+
+### Revisión del 12/11/2026: comprobar PostgreSQL desde Configuración
+
+Petición del usuario: comprobar en pgAdmin que la migración se aplicó y añadir
+un endpoint y un apartado de prueba de conexión en Configuración.
+
+`GET /api/stats/connection` usa exclusivamente la conexión configurada en la API.
+Abre la conexión y lee el historial EF; devuelve listas `appliedMigrations` y
+`pendingMigrations`. No crea bases, migra ni escribe reproducciones. Una conexión
+correcta con pendientes no se presenta como migración completada. Falta de
+configuración, conexión fallida o lectura denegada del historial devuelven 503
+con mensaje seguro, sin cadena de conexión ni credenciales. Espera máxima de
+10 segundos mediante cancelación; no hay reintentos silenciosos.
+
+Arranque: Visual Studio 2026 (.NET 10), perfil **DJ Tracks (Api + UI)**,
+API `http://localhost:5247`, UI `http://localhost:5050/settings`.
+La conexión del NAS se configura en user-secrets de la API, como arriba.
+Reiniciar ambos proyectos y recargar completamente después de actualizar.
+
+Checklist nueva (pendiente del usuario):
+
+- [ ] En Configuración, sección **Base de datos de estadísticas**, pulsar
+  **Probar conexión**: aparece el indicador de carga y el botón se desactiva.
+  Con PostgreSQL disponible e historial actualizado, muestra conexión correcta,
+  cero pendientes y `20261112095729_InitialStatistics` entre las aplicadas.
+- [ ] Abrir `http://localhost:5247/api/stats/connection`: devuelve HTTP 200 y
+  los identificadores aplicados/pendientes, sin credenciales. Con una base de
+  pruebas que tenga migraciones pendientes, debe mostrarlas como pendientes,
+  no aplicarlas. La migración automática al arrancar puede completar el esquema
+  antes de consultar: no deshacer una migración ni borrar tablas reales para
+  fabricar esta situación.
+- [ ] Sin configuración o con BD inaccesible, probar de nuevo: mensaje explícito
+  de error en esta sección, sin resultado correcto anterior ni bloqueo del botón.
+  Restaurar conexión/reiniciar y repetir recupera el resultado. No deben cambiar
+  rutas sin guardar, tema, cola o audio por pulsar el botón.
+- [ ] Revisar el nuevo apartado en escritorio/móvil y modos claro/oscuro.
+
+En **pgAdmin**, abrir la base indicada por `Database` en el secreto de la API,
+no una base distinta del mismo servidor. Actualizar **Schemas → public → Tables**:
+deben existir `playback_events` y `__EFMigrationsHistory`.
+En **Query Tool**:
+
+```sql
+SELECT "MigrationId", "ProductVersion"
+FROM public."__EFMigrationsHistory"
+ORDER BY "MigrationId";
+```
+
+Resultado esperado: `20261112095729_InitialStatistics`, versión EF `10.0.4`.
+Si no aparece el historial, revisar que se usa la misma base y el log de arranque.
+La fila confirma el historial aplicado, no que la tabla se haya mantenido intacta
+después de cambios manuales. Abrir **playback_events → Columns** para comprobar
+sus columnas, e **Indexes** para ver los índices. Una tabla inicialmente vacía
+es normal: no se inserta ninguna fila hasta una escucha cualificada.
+
+Comprobaciones del agente de esta revisión:
+
+- Compilación completa correcta, 0 errores y advertencias; sin tests nuevos.
+  Context7 consultado para apertura de conexión e historial EF. Se reutilizan
+  los componentes Blueprint existentes; su servidor MCP no está expuesto entre
+  las herramientas disponibles de esta sesión.
+- API aislada sin user-secrets: conexión ausente y PostgreSQL inaccesible
+  devuelven 503 con mensajes diferenciados; ajustes siguen respondiendo 200.
+  Respuestas sin servidor, usuario ni cadena de conexión de la fixture.
+- Navegador con API aislada: ambos errores aparecen en la nueva sección y el
+  botón vuelve a estar habilitado. Un cambio de ruta sin guardar se conserva
+  tras repetir la prueba. Capturas de escritorio revisadas en claro y oscuro,
+  sin desbordamiento horizontal. No se comprobó reproducción con audio real
+  ni viewport móvil en esta revisión.
+- PostgreSQL real, éxito con migraciones aplicadas/pendientes y permisos de
+  escritura siguen pendientes del usuario. La prueba solo certifica conexión
+  e historial; no garantiza permisos de INSERT ni detecta cambios manuales.
+- Se mantiene pendiente toda la checklist original de F5.1. No hace falta
+  repetir fases previas; esta revisión no cambia el cómputo de escuchas.
 
 ## F4.4: playlists vivas (validada globalmente por el usuario)
 

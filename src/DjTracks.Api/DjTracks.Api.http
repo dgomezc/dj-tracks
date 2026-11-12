@@ -176,3 +176,9 @@ Content-Type: application/json
 {"playback": {"eventId": "11111111-1111-1111-1111-111111111111", "library": "Tracks", "fileName": "Artist - Track.mp3", "year": "2025", "style": "Day Instrumental", "title": "Track", "artists": ["Artist"]}}
 
 ###
+
+# Solo lectura: comprueba conexión e historial, sin aplicar migraciones ni insertar eventos.
+GET {{DjTracks.Api_HostAddress}}/api/stats/connection
+Accept: application/json
+
+###

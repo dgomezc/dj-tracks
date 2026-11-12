@@ -454,24 +454,6 @@ handler/Infrastructure con `Result` · **imprevisto** → manejador integrado.
   Blueprint lo escribe en línea en `<html>`. Orden en `App.razor`: `theme.css` → `blazorblueprint.css` →
   `app.css`, y el script `theme-init.js` de Blueprint en `<head>` para aplicar el modo antes de pintar.
 
-## 9. Estadísticas de reproducción (F5.1)
-
-`StatsFeature` registra el `StatisticsDbContext` de EF Core con el proveedor Npgsql y
-el slice `Stats/RecordPlayback`; `POST /api/stats/plays` valida el contrato compartido
-`PlaybackRecord` y guarda un evento en `playback_events`. La entidad conserva biblioteca,
-ruta relativa, nombre de archivo, metadatos visibles y fecha UTC, con índices por fecha
-y por biblioteca/ruta. Las migraciones viven en `Infrastructure/Stats/Migrations`.
-
-El reproductor inferior acumula tiempo efectivo por pista: pausas conservan el acumulado,
-los saltos no cuentan y el mismo evento se envía una sola vez al alcanzar 30 segundos.
-No se registran pistas más cortas. Si PostgreSQL no está configurado o falla el guardado,
-la reproducción continúa y la UI muestra el error. La migración se intenta en un
-`BackgroundService` al arrancar; una conexión ausente o un fallo de PostgreSQL se registra
-sin bloquear el inicio del reproductor.
-
-La conexión se configura fuera del repositorio como `ConnectionStrings:Statistics`
-en user-secrets o entorno. En Desarrollo el proyecto API usa el ID de secrets
-`dj-tracks-api-local`. No se guarda la cadena de conexión en `appsettings`.
   Las fuentes de los temas se cargan desde Google Fonts en `App.razor`.
 - Selector de tema en Configuración: `AppThemes` (`Shared/AppThemes.cs`) lista los temas. La elección
   se guarda en la cookie `djt-theme` y `App.razor` la renderiza en el servidor como `data-app-theme`
@@ -495,3 +477,36 @@ en user-secrets o entorno. En Desarrollo el proyecto API usa el ID de secrets
 - Documentación: servidor MCP de Blazor Blueprint configurado en `.mcp.json` (Visual Studio y Copilot).
   Se ejecuta con `npx` dentro de WSL (Ubuntu con Node mediante nvm). Con Node instalado en Windows
   se puede usar `"command": "npx", "args": ["-y", "@blazorblueprint/mcp@latest"]`.
+
+## 9. Estadísticas de reproducción (F5.1)
+
+`StatsFeature` registra el `StatisticsDbContext` de EF Core con el proveedor Npgsql y
+el slice `Stats/RecordPlayback`; `POST /api/stats/plays` valida el contrato compartido
+`PlaybackRecord` y guarda un evento en `playback_events`. La entidad conserva biblioteca,
+ruta relativa, nombre de archivo, metadatos visibles y fecha UTC, con índices por fecha
+y por biblioteca/ruta. Las migraciones viven en `Infrastructure/Stats/Migrations`.
+
+El reproductor inferior acumula tiempo efectivo por pista: pausas conservan el acumulado,
+los saltos no cuentan y el mismo evento se envía una sola vez al alcanzar 30 segundos.
+No se registran pistas más cortas. Si PostgreSQL no está configurado o falla el guardado,
+la reproducción continúa y la UI muestra el error. La migración se intenta en un
+`BackgroundService` al arrancar; una conexión ausente o un fallo de PostgreSQL se registra
+sin bloquear el inicio del reproductor.
+
+La conexión se configura fuera del repositorio como `ConnectionStrings:Statistics`
+en user-secrets o entorno. En Desarrollo el proyecto API usa el ID de secrets
+`dj-tracks-api-local`. No se guarda la cadena de conexión en `appsettings`.
+
+El slice `Stats/TestStatisticsConnection` expone `GET /api/stats/connection`, sin
+parámetros ni credenciales del cliente. Abre la conexión configurada en la API y lee
+`__EFMigrationsHistory`, comparándolo con las migraciones incluidas en la aplicación.
+Devuelve `StatisticsConnectionStatus` con identificadores de migraciones aplicadas y
+pendientes; conexión ausente, inaccesible o historial sin permiso devuelven `AppError`
+(503), sin detalles de conexión. Límite de espera de 10 segundos; nunca crea bases,
+aplica migraciones ni inserta eventos. La comprobación no certifica permisos de escritura
+ni detecta modificaciones manuales del esquema.
+
+Configuración llama a este endpoint desde su code-behind con `GetForResultAsync`.
+Su sección «Base de datos de estadísticas» tiene carga y resultado independientes del
+formulario de rutas: conexión correcta sin pendientes, aviso con pendientes o error.
+Se ejecuta únicamente al pulsar «Probar conexión» y nunca permite editar credenciales.
