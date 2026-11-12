@@ -453,6 +453,25 @@ handler/Infrastructure con `Result` · **imprevisto** → manejador integrado.
   y `:root[data-app-theme="<id>"].dark`. `--radius` lleva `!important` porque el `ThemeService` de
   Blueprint lo escribe en línea en `<html>`. Orden en `App.razor`: `theme.css` → `blazorblueprint.css` →
   `app.css`, y el script `theme-init.js` de Blueprint en `<head>` para aplicar el modo antes de pintar.
+
+## 9. Estadísticas de reproducción (F5.1)
+
+`StatsFeature` registra el `StatisticsDbContext` de EF Core con el proveedor Npgsql y
+el slice `Stats/RecordPlayback`; `POST /api/stats/plays` valida el contrato compartido
+`PlaybackRecord` y guarda un evento en `playback_events`. La entidad conserva biblioteca,
+ruta relativa, nombre de archivo, metadatos visibles y fecha UTC, con índices por fecha
+y por biblioteca/ruta. Las migraciones viven en `Infrastructure/Stats/Migrations`.
+
+El reproductor inferior acumula tiempo efectivo por pista: pausas conservan el acumulado,
+los saltos no cuentan y el mismo evento se envía una sola vez al alcanzar 30 segundos.
+No se registran pistas más cortas. Si PostgreSQL no está configurado o falla el guardado,
+la reproducción continúa y la UI muestra el error. La migración se intenta en un
+`BackgroundService` al arrancar; una conexión ausente o un fallo de PostgreSQL se registra
+sin bloquear el inicio del reproductor.
+
+La conexión se configura fuera del repositorio como `ConnectionStrings:Statistics`
+en user-secrets o entorno. En Desarrollo el proyecto API usa el ID de secrets
+`dj-tracks-api-local`. No se guarda la cadena de conexión en `appsettings`.
   Las fuentes de los temas se cargan desde Google Fonts en `App.razor`.
 - Selector de tema en Configuración: `AppThemes` (`Shared/AppThemes.cs`) lista los temas. La elección
   se guarda en la cookie `djt-theme` y `App.razor` la renderiza en el servidor como `data-app-theme`

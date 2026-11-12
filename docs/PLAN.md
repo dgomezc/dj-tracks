@@ -220,7 +220,7 @@ El estado de entrega y las checklists se mantienen en `VALIDACIONES.md`. Una imp
   la pantalla permanece estable, y recargar no altera el audio ni la cola.
 
 ### Bloque 5 — Estadísticas
-- **F5.1 PostgreSQL y registro de reproducciones** (migración EF Core, conexión de desarrollo en el NAS por user-secrets).
+- **F5.1 PostgreSQL y registro de reproducciones**: migración EF Core y conexión de desarrollo al NAS mediante user-secrets. Cada pista cuenta una sola vez al acumular 30 segundos efectivos de reproducción; pausar y reanudar conserva el progreso, los saltos no cuentan y no hay excepción para pistas más cortas.
 - **F5.2 Dashboard**: más reproducidas, últimas reproducidas, resumen de biblioteca y playlists.
 
 ### Bloque 6 — Cierre

@@ -7,6 +7,12 @@ Consultar siempre el estado real de GitHub antes de actuar sobre un PR.
 
 ## Estado actual
 
+- **F5.1 en implementación, pendiente de validación del usuario**:
+  rama `fase/f5-1-estadisticas-reproducciones`, desde `develop` con F4.4
+  integrada. El PR se enlazará al abrirlo. No avanzar a F5.2 ni marcar F5.1
+  como validada sin confirmación posterior. Decisión confirmada: una escucha
+  se registra al acumular 30 segundos efectivos; es un umbral fijo, sin
+  excepción para pistas más cortas.
 - **F4.4 validada globalmente por el usuario**:
   rama `fase/f4-4-playlists-vivos`, desde `develop` con F4.3 integrada.
   PR [#19](https://github.com/dgomezc/dj-tracks/pull/19) mergeado en
@@ -125,7 +131,72 @@ Consultar siempre el estado real de GitHub antes de actuar sobre un PR.
 - Port F1.2 recibido de `dgomezc-fase-f1-2-filtros` (`1354305` código, `c38cddb` documentación). Se integra mediante merge en la rama original: se conservan ambos historiales y se resuelven los conflictos de código con la versión adaptada a Result/FluentValidation. Sin PR duplicado ni reescritura de ramas. Cambios preexistentes y JSON privado conservados; no se borran worktrees.
 - Comprobación de integración en checkout original (27/10/2026): `src` coincide con el port recibido; compilación completa con 0 errores y advertencias. API/UI aisladas con MP3 sintéticos: multiaño/multigrupo/multisubestilo, alias, ausencia de duplicados, resultados vacíos, explorador, errores 400/404, opciones, carga de ajustes y página Tracks correctos. No equivale a validación visual de biblioteca real. Servicios y fixtures temporales retirados después de comprobar.
 
-## F4.4: playlists vivas (pendiente de validación del usuario)
+## F5.1: PostgreSQL y registro de reproducciones (pendiente de validación del usuario)
+
+La reproducción genera un evento al llegar a 30 segundos efectivos de escucha
+por pista: pausar/reanudar conserva el progreso; los saltos no cuentan y las
+pistas de menos de 30 segundos no se registran. El evento guarda biblioteca,
+ruta relativa, nombre de fichero, tags visibles y fecha UTC en PostgreSQL.
+La migración se intenta al arrancar en segundo plano. Sin conexión configurada
+o disponible, la API/reproductor siguen arrancando; al fallar el registro, la
+UI muestra un aviso y el audio continúa.
+
+### Arranque y checklist del usuario
+
+Abrir `DjTracks.slnx` en Visual Studio 2026 (.NET 10), rama
+`fase/f5-1-estadisticas-reproducciones`, seleccionar el perfil
+**DJ Tracks (Api + UI)** y pulsar F5. UI: `http://localhost:5050`;
+API: `http://localhost:5247`. PostgreSQL solo se usa para estadísticas.
+No se incluyen credenciales en el repositorio. Para Desarrollo, configurar
+un secreto local con la cadena de conexión propia:
+
+```powershell
+dotnet user-secrets set "ConnectionStrings:Statistics" "Host=<servidor>;Database=djtracks;Username=<usuario>;Password=<contraseña>" --project src\DjTracks.Api
+```
+
+La API ya declara el ID de user-secrets `dj-tracks-api-local`. No compartir ni
+añadir la cadena real a archivos versionados o mensajes.
+
+- [ ] **Sin PostgreSQL:** borrar temporalmente el secreto local (o probar en
+  un perfil sin la variable de conexión) y arrancar. La API y la UI deben
+  iniciar; el log indica que estadísticas están desactivadas. Reproducir
+  durante 30 segundos: aparece un aviso de guardado, pero el audio no se para.
+  Volver a configurar el secreto después de esta comprobación.
+- [ ] **Migración:** con el secreto propio configurado y PostgreSQL accesible,
+  reiniciar el perfil. El log confirma la migración y PostgreSQL contiene
+  `playback_events` con índices de fecha y biblioteca/ruta. No debe aparecer
+  la cadena de conexión en logs.
+- [ ] **Umbral y datos:** reproducir un MP3 de más de 30 segundos. Al superar
+  el umbral debe aparecer una sola fila nueva con biblioteca/ruta, nombre,
+  título/artista si existen y hora UTC. Comprobarla, por ejemplo, con:
+  `SELECT "EventId", "Library", "RelativePath", "PlayedAtUtc" FROM playback_events ORDER BY "PlayedAtUtc" DESC LIMIT 20;`.
+- [ ] **Pausa, reanudación y saltos:** escuchar aproximadamente 15 segundos,
+  pausar un rato y reanudar hasta superar 30 segundos efectivos: se registra
+  una fila. En otra pista, saltar hacia delante no debe alcanzar el umbral por
+  sí mismo; solo cuenta el tiempo escuchado efectivamente.
+- [ ] **Pista corta:** reproducir una pista que termine antes de los 30 segundos;
+  no debe producir fila, incluso si llega al final.
+- [ ] **Fallo de PostgreSQL:** con API y UI en marcha, dejar inaccesible la BD y
+  escuchar otra pista hasta el umbral. El aviso debe indicar que no se guardó,
+  sin detener/interrumpir el audio ni mostrar una confirmación falsa.
+- [ ] Probar Tracks, Sessions y Remember: cada biblioteca debe generar la
+  referencia relativa correcta. Una nueva selección/reproducción cualificada
+  genera su propio evento, sin duplicados por los eventos `timeupdate`.
+
+### Comprobaciones del agente y límites
+
+- `dotnet tool restore`: `dotnet-ef` 10.0.4 restaurado y alineado con
+  `Microsoft.EntityFrameworkCore.Design` y runtime EF Core 10.0.4.
+- `dotnet build DjTracks.slnx`: correcto, 0 errores y 0 advertencias.
+- `dotnet-ef migrations list` reconoce `20261112095729_InitialStatistics`.
+  La conexión local `localhost:5432` no está disponible, así que EF no pudo
+  determinar migraciones aplicadas. No se validaron migración ni escritura
+  contra PostgreSQL real, ni se consultaron secretos del usuario.
+- Sin pruebas nuevas, conforme a las instrucciones del proyecto. Pendientes
+  del usuario: configuración segura de la conexión, migración y checklist
+  funcional con PostgreSQL, pistas y audio reales.
+
+## F4.4: playlists vivas (validada globalmente por el usuario)
 
 Índice en memoria sin tags, watcher con agrupación de eventos y reescaneo
 horario de respaldo. Listar, abrir y cargar una automática resuelven sus filtros
