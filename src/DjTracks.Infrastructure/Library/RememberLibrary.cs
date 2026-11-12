@@ -5,6 +5,26 @@ namespace DjTracks.Infrastructure.Library;
 
 public sealed class RememberLibrary
 {
+    public Result<PlaylistTrackReference[]> IndexReferences(string root, CancellationToken ct)
+    {
+        List<PlaylistTrackReference> references = [];
+        foreach (var category in new[] { "Cortas", "Largas" })
+        {
+            ct.ThrowIfCancellationRequested();
+            var directory = ResolveCategory(root, category);
+            if (directory.IsFailed)
+                return directory.ToResult();
+            foreach (var file in TrackLibrary.AudioFiles(directory.Value))
+            {
+                ct.ThrowIfCancellationRequested();
+                var reference = new PlaylistTrackReference("Remember", file.Name, Category: category);
+                if (reference.IsValid())
+                    references.Add(reference);
+            }
+        }
+        return references.ToArray();
+    }
+
     public Result<RememberListing> Browse(string root, string category, CancellationToken ct)
     {
         var directory = ResolveCategory(root, category);

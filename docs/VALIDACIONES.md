@@ -7,10 +7,21 @@ Consultar siempre el estado real de GitHub antes de actuar sobre un PR.
 
 ## Estado actual
 
+- **F4.4 validada globalmente por el usuario**:
+  rama `fase/f4-4-playlists-vivos`, desde `develop` con F4.3 integrada.
+  PR [#19](https://github.com/dgomezc/dj-tracks/pull/19) abierto hacia
+  `develop`, merge autorizado por la confirmación del 12/11/2026:
+  «Ok, todo correcto. Continúa». Esta aceptación global no atribuye pruebas
+  individuales adicionales al usuario. Integración y continuación con F5.1
+  autorizadas; no marcar F5.1 como validada sin una confirmación posterior.
+  Decisión confirmada: actualizar al abrir o volver a cargar, sin cambios
+  espontáneos de la pantalla ni de la cola existente.
 - **F4.3 validada globalmente por el usuario** (03/11/2026):
   rama `fase/f4-3-automaticos`, desde `develop` limpio con F4.2a integrada.
-  PR [#18](https://github.com/dgomezc/dj-tracks/pull/18) abierto hacia
-  `develop`. Confirmación: «todo ok, continua». Autoriza su integración y
+  PR [#18](https://github.com/dgomezc/dj-tracks/pull/18) **mergeado** en
+  `develop` el 03/11/2026 a las 13:05:03 UTC, commit
+  `113987d632084ef5d6666ec2b494363fcf0319a0` (comprobado en GitHub).
+  Confirmación: «todo ok, continua». Autoriza su integración y
   continuación con F4.4; no atribuye pruebas individuales adicionales.
   Decisiones confirmadas en esta sesión: solo cambiar canciones mediante
   filtros/regeneración, estilos completos y todo Remember opcional; detalle abajo.
@@ -112,6 +123,107 @@ Consultar siempre el estado real de GitHub antes de actuar sobre un PR.
 - Port F1.2 recibido de `dgomezc-fase-f1-2-filtros` (`1354305` código, `c38cddb` documentación). Se integra mediante merge en la rama original: se conservan ambos historiales y se resuelven los conflictos de código con la versión adaptada a Result/FluentValidation. Sin PR duplicado ni reescritura de ramas. Cambios preexistentes y JSON privado conservados; no se borran worktrees.
 - Comprobación de integración en checkout original (27/10/2026): `src` coincide con el port recibido; compilación completa con 0 errores y advertencias. API/UI aisladas con MP3 sintéticos: multiaño/multigrupo/multisubestilo, alias, ausencia de duplicados, resultados vacíos, explorador, errores 400/404, opciones, carga de ajustes y página Tracks correctos. No equivale a validación visual de biblioteca real. Servicios y fixtures temporales retirados después de comprobar.
 
+## F4.4: playlists vivas (pendiente de validación del usuario)
+
+Índice en memoria sin tags, watcher con agrupación de eventos y reescaneo
+horario de respaldo. Listar, abrir y cargar una automática resuelven sus filtros
+y actualizan el M3U solo si cambian las referencias. Guardar filtros/regenerar
+fuerza reescaneo inmediato. La pantalla abierta no cambia sola y no se modifica
+la cola ya cargada ni el audio. Las manuales mantienen su comportamiento.
+Un año desaparecido deja cero coincidencias conservando el filtro; una raíz
+desconectada o una categoría Remember ausente dan error sin vaciar el M3U.
+
+### Arranque y checklist del usuario
+
+Visual Studio 2026 (.NET 10), abrir `DjTracks.slnx` en
+`fase/f4-4-playlists-vivos`, perfil **DJ Tracks (Api + UI)** y F5.
+Reiniciar API/UI y recargar completamente. UI
+`http://localhost:5050/playlists`, API `http://localhost:5247`.
+En `/settings`, configurar las cuatro rutas existentes; Playlists necesita
+lectura/escritura. Tracks: `Año\Estilo\MP3`; Remember: `Cortas` y `Largas`.
+FFmpeg en PATH o `Waveform__BinaryFolder` para ondas. Sin BD ni Docker.
+Para altas/bajas, desconexiones y cambios de rutas, usar solo carpetas y MP3
+de prueba, con copia de sus M3U; no mover ni borrar música real.
+
+- [ ] **Altas:** crear una automática con años/estilos conocidos. Copiar un
+  MP3 que cumpla filtros mientras permanece abierta: no cambia sola. Pulsar
+  «Volver a cargar playlists» o salir y volver a abrirla: aparece la canción,
+  se actualizan detalle/contador/lateral y su ruta en M3U, sin duplicados.
+- [ ] **Bajas y renombrados:** con copias, borrar un MP3 no activo y renombrar
+  otro; recargar retira la baja y sustituye el nombre anterior en pantalla/M3U.
+  Retirar un año da cero coincidencias de ese año sin perder el filtro;
+  restaurarlo y recargar recupera sus canciones. Remember incluye altas/bajas
+  de Cortas y Largas solo si está seleccionado; no incluye Sessions.
+- [ ] **Cola y manuales:** con audio sonando y la automática ya encolada,
+  repetir altas/bajas y recargar: mismo audio/posición avanzando y misma cola.
+  Cargar añade solo las coincidencias que faltan al final; repetir añade cero.
+  Una cola vacía no empieza a sonar al cargar. Una manual no cambia por eventos.
+- [ ] **M3U y persistencia:** abrir/recargar sin cambios no reescribe su M3U;
+  los filtros, nombre e ID persisten tras reiniciar API/UI. Solo existe M3U,
+  no JSON adicional. Abrir el M3U actualizado en un reproductor externo
+  resuelve sus rutas; ese reproductor no regenera filtros por su cuenta.
+- [ ] **Errores y recuperación:** desconectar la raíz de prueba o retirar una
+  categoría Remember requerida, y recargar: error visible, M3U previo intacto
+  y cola sin cambios. Restaurar y recargar recupera la automática. Sin Remember
+  seleccionado, su indisponibilidad no bloquea la automática de Tracks.
+- [ ] **Cambiar rutas:** con automáticas de prueba y conservando la carpeta
+  Playlists, guardar otras raíces Tracks/Remember: al abrir se reconstruyen
+  desde filtros con las nuevas canciones, sin reproducir rutas antiguas.
+  Restaurar rutas recupera las coincidencias originales. Las manuales con
+  rutas antiguas siguen exigiendo bibliotecas compatibles; apartar sus M3U
+  de prueba durante esta comprobación para no bloquear el catálogo.
+- [ ] **Respaldo de red:** si el NAS no notifica eventos, esperar el reescaneo
+  horario y volver a cargar; las coincidencias se actualizan. «Editar filtros
+  y regenerar» fuerza un reescaneo sin esperar la hora. Revisar logs ante
+  fallos del watcher; no se promete detección instantánea de redes sin avisos.
+- [ ] **Interfaz:** revisar los avisos de automática viva y el modal en
+  escritorio/móvil, claro/oscuro; botones y textos accesibles. Editar filtros,
+  renombrar, borrar y manuales mantienen las reglas de F4.3.
+
+### Comprobaciones del agente y límites
+
+- `dotnet build DjTracks.slnx`: 0 errores y 0 advertencias; `git diff --check`
+  correcto. Sin tests nuevos.
+  Context7 consultado para FileSystemWatcher/BackgroundService; MCP Blueprint
+  para el marcado. No cambios de paquetes, BD, Docker ni reproductor.
+- API/UI aisladas en 5347/5150, MP3 sintéticos propios y ajustes fuera del
+  repositorio. Altas/bajas/renombrados, Remember, `.MP3` mayúscula, alias y
+  filtros/orden comprobados por HTTP/disco. Evento observado en log antes de
+  consultar; M3U permanece intacto hasta la consulta y las lecturas sin
+  cambios no lo reescriben. Ocho consultas concurrentes sin pérdidas/repetidos.
+- Raíz inaccesible y categoría Remember ausente devuelven 503 sin guardar
+  resultados vacíos/parciales; recuperación comprobada. Año eliminado y
+  restaurado conserva filtros; una automática solo Tracks no depende de
+  Remember. Cambio de raíces con la misma carpeta M3U reconstruye referencias
+  y restaurarlas recupera las originales. Manuales sin cambios por eventos;
+  edición individual de automáticas rechazada y metadatos corruptos protegidos.
+- Comprobación temporal del índice/worker reales: desactivar eventos y añadir
+  archivo deja la caché estable; forzar reescaneo recupera el cambio. Inyectar
+  un error de overflow recrea el watcher y detecta un alta posterior. Cambio
+  de configuración, cancelación y parada del worker comprobados.
+  **No se esperó una hora real**: se ejecutó la misma operación de reescaneo
+  que invoca el timer horario. NAS/SMB real pendiente del usuario.
+- Navegador integrado con audio sintético: alta mientras está abierta no
+  cambia la pantalla; recargar pasa de cinco a seis y vuelve a cinco tras
+  la baja, manteniendo el mismo elemento audio, tiempo avanzando y cola de
+  cinco. Cargar de nuevo añade cero. Raíz desconectada muestra error en la
+  página; restaurar y recargar recupera el detalle sin vaciar la cola.
+- Vista de escritorio de 1440 px: recargar actualiza también el contador del
+  lateral de cinco a seis. Capturas inspeccionadas de escritorio y viewport
+  real de 390 px en iframe: avisos y modal legibles, claro/oscuro y sin
+  desbordamiento horizontal; el modal conserva sus filtros.
+- En una primera pasada hubo un 503 por bloqueo de Windows al reemplazar
+  el M3U (`UnauthorizedAccessException`); el anterior quedó intacto y reintentar
+  funcionó. Corridas completas posteriores sin reproducirlo. No se ocultó
+  el fallo ni se añadieron reintentos silenciosos en producción.
+- Pendientes del usuario: música/sonido reales, NAS/red y espera horaria real,
+  reproductor externo, teclado/lector de pantalla y dispositivos/temas.
+  Si se pierde un evento sin error, se recupera con el respaldo horario o
+  regeneración explícita. Una API por carpeta; sin sincronización de pantalla
+  entre circuitos ni coordinación con editores externos.
+- API/UI de comprobación detenidas; fixtures, MP3/caché sintéticos y programas
+  temporales retirados. Configuración y música del usuario sin tocar.
+
 ## F4.3: playlists automáticas (validada globalmente por el usuario)
 
 Confirmación del 03/11/2026: «todo ok, continua». Aceptación global y
@@ -130,8 +242,9 @@ Un M3U por playlist, con filtros en `#DJTRACKS-AUTO-V1:` y canciones `#EXTINF`
 + ruta relativa (absoluta solo entre unidades). Sin JSON adicional. Solo se
 modifican las canciones editando filtros y regenerando; se sustituyen todas
 las entradas conservando ID/nombre. Se puede renombrar, borrar, reproducir o
-cargar en cola como las manuales. Abrir/recargar no regenera: watcher, índice
-y actualización viva pertenecen a F4.4, no implementada ni iniciada.
+cargar en cola como las manuales. En aquella entrega abrir/recargar conservaba
+el snapshot; F4.4, descrita arriba, sustituye ese comportamiento por resolución
+viva contra índice.
 
 ### Arranque y checklist del usuario
 
@@ -179,8 +292,8 @@ Para provocar errores o altas/bajas, usar exclusivamente copias/datos de prueba.
 
 ### Comprobaciones del agente y límites
 
-PR [#18](https://github.com/dgomezc/dj-tracks/pull/18), hacia `develop`;
-validada globalmente por el usuario; consultar GitHub para su integración.
+PR [#18](https://github.com/dgomezc/dj-tracks/pull/18), validada globalmente
+por el usuario y mergeada en `develop` (datos en Estado actual).
 
 - Compilación de la solución: 0 errores y 0 advertencias; sin tests nuevos.
   Context7 (Minimal API) y MCP Blueprint (Dialog/MultiSelect/Checkbox) consultados.

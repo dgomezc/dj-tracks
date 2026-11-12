@@ -16,7 +16,7 @@ Reproductor autoalojado de música electrónica (Tracks, Sessions, Remember). Se
 | Tags/carátula | TagLibSharp (lectura de tags y carátula incrustada) |
 | Onda | FFMpegCore decodifica PCM por pipe; desde F4.2a calcula una envolvente RMS estéreo, transmite bloques terminados progresivamente y cachea el JSON final (versión 2) bajo `App_Data/Waveforms`. El dibujo usa un realce suave fijo de niveles bajos/medios, sin normalización por canción; requiere FFmpeg disponible en la API. NAudio se comparó y se descartó por menor rendimiento |
 | Autenticación | Ninguna (red local/VPN) |
-| Playlists automáticos | F4.3: filtros y canciones generadas en un único M3U; solo cambian al regenerar explícitamente. F4.4: resolución al abrir contra un índice, refrescado con `FileSystemWatcher` + reescaneo horario (`BackgroundService`) por si el watcher falla en redes compartidas |
+| Playlists automáticos | Filtros y canciones en un único M3U desde F4.3. F4.4: resolución al abrir/recargar/cargar en cola contra un índice, refrescado con `FileSystemWatcher` + reescaneo horario (`BackgroundService`) por si la red no notifica cambios; no cambia sola la pantalla ni la cola existente |
 | Audio | Endpoint con soporte de `Range` (seek) |
 | Tests | No se generan; validación manual por fase |
 
@@ -197,10 +197,27 @@ El estado de entrega y las checklists se mantienen en `VALIDACIONES.md`. Una imp
   entradas conservando ID/nombre; no se permite añadir/quitar canciones a mano.
   Se puede renombrar, borrar, reproducir y cargar en cola con las mismas reglas
   de las manuales. Sin coincidencias se guarda vacía con sus filtros.
-  Abrir/recargar no regenera ni refleja altas/bajas automáticamente en F4.3.
+  En la entrega F4.3, abrir/recargar conservaba el snapshot; F4.4 lo sustituye
+  por resolución viva contra un índice.
   No modifica la cola ni interrumpe el audio al crear o regenerar.
-- **F4.4 Playlists vivos**: índice de biblioteca con watcher + reescaneo horario; los automáticos reflejan altas/bajas.
-  *Prueba*: añadir/borrar un mp3 en carpeta y ver el cambio en el playlist.
+- **F4.4 Playlists vivos**: índice en memoria de referencias de Tracks/Remember,
+  sin leer tags al escanear. `FileSystemWatcher` invalida y un `BackgroundService`
+  agrupa eventos y reindexa; reescaneo horario de respaldo para redes sin avisos.
+  Un error/overflow recrea la vigilancia. Guardar rutas sustituye raíces e índice.
+  Decisión del usuario del 03/11/2026: actualizar **al abrir o volver a cargar**,
+  no mientras la playlist permanece abierta. Listar, abrir y cargar en cola
+  resuelven filtros contra el índice y actualizan el M3U solo si cambian sus
+  referencias; guardar filtros/regenerar fuerza un reescaneo inmediato.
+  Mantiene filtros, ID, nombre y orden, sin duplicados. Un año desaparecido
+  aporta cero coincidencias y conserva su filtro; una raíz inaccesible o una
+  categoría Remember ausente da error sin vaciar ni guardar un resultado parcial.
+  Cambiar raíces reconstruye las automáticas desde filtros, nunca reproduce sus
+  rutas antiguas. Las manuales no se regeneran. La cola ya cargada y el audio
+  no cambian al actualizar; cargar añade lo que falta con las reglas existentes.
+  Sin polling de pantalla, BD ni cambios del reproductor.
+  *Prueba*: con copias de MP3, añadir/borrar/renombrar y volver a abrir o pulsar
+  «Volver a cargar playlists»: canciones y M3U reflejan el cambio; sin recargar
+  la pantalla permanece estable, y recargar no altera el audio ni la cola.
 
 ### Bloque 5 — Estadísticas
 - **F5.1 PostgreSQL y registro de reproducciones** (migración EF Core, conexión de desarrollo en el NAS por user-secrets).
