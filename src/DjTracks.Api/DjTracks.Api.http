@@ -182,3 +182,41 @@ GET {{DjTracks.Api_HostAddress}}/api/stats/connection
 Accept: application/json
 
 ###
+
+# Dashboard: últimos 7/30 días móviles UTC. Omitir days = todo el historial.
+GET {{DjTracks.Api_HostAddress}}/api/stats/dashboard?days=7
+Accept: application/json
+
+###
+
+GET {{DjTracks.Api_HostAddress}}/api/stats/dashboard?days=30
+Accept: application/json
+
+###
+
+GET {{DjTracks.Api_HostAddress}}/api/stats/dashboard
+Accept: application/json
+
+###
+
+# Recuentos actuales sin tags, independientes de PostgreSQL.
+GET {{DjTracks.Api_HostAddress}}/api/library/summary?library=Tracks
+Accept: application/json
+
+###
+
+GET {{DjTracks.Api_HostAddress}}/api/library/summary?library=Sessions
+Accept: application/json
+
+###
+
+GET {{DjTracks.Api_HostAddress}}/api/library/summary?library=Remember
+Accept: application/json
+
+###
+
+# Cuenta manuales/automáticas sin regenerar ni escribir los M3U.
+GET {{DjTracks.Api_HostAddress}}/api/playlists/summary
+Accept: application/json
+
+###

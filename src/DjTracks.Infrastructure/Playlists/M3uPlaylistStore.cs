@@ -32,6 +32,14 @@ public sealed class M3uPlaylistStore(JsonSettingsStore settingsStore, TrackLibra
     private sealed record StoredPlaylist(ManualPlaylist Playlist, string Path,
         Dictionary<PlaylistTrackReference, string> Info, bool SnapshotNeedsRefresh = false);
 
+    public Task<Result<PlaylistSummary>> SummarizeAsync(CancellationToken ct) =>
+        ExecuteAsync<PlaylistSummary>(async settings =>
+        {
+            var all = await ReadAllAsync(settings, ct);
+            return new PlaylistSummary(all.Count(item => item.Playlist.Filters is null),
+                all.Count(item => item.Playlist.Filters is not null));
+        }, ct, migrateLegacy: false);
+
     public Task<Result<ManualPlaylist[]>> ListAsync(CancellationToken ct) =>
         ExecuteAsync<ManualPlaylist[]>(async settings =>
         {
@@ -191,7 +199,8 @@ public sealed class M3uPlaylistStore(JsonSettingsStore settingsStore, TrackLibra
     public static bool IsValidName(string? name) =>
         !string.IsNullOrWhiteSpace(name) && name.Trim().Length <= 120 && !name.Any(char.IsControl);
 
-    private async Task<Result<T>> ExecuteAsync<T>(Func<PathSettings, Task<Result<T>>> operation, CancellationToken ct)
+    private async Task<Result<T>> ExecuteAsync<T>(Func<PathSettings, Task<Result<T>>> operation, CancellationToken ct,
+        bool migrateLegacy = true)
     {
         await _gate.WaitAsync(ct);
         try
@@ -205,7 +214,8 @@ public sealed class M3uPlaylistStore(JsonSettingsStore settingsStore, TrackLibra
             // No crear una carpeta ausente: podría tratarse de almacenamiento desconectado.
             using (var entries = Directory.EnumerateFileSystemEntries(settings.Value.Playlists).GetEnumerator())
                 entries.MoveNext();
-            await MigrateLegacyAsync(settings.Value, ct);
+            if (migrateLegacy)
+                await MigrateLegacyAsync(settings.Value, ct);
             var result = await operation(settings.Value);
             if (result.IsFailed)
                 logger.LogWarning("Operación de playlists rechazada: {Error}", result.Errors[0].Message);

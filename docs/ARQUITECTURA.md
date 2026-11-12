@@ -510,3 +510,42 @@ Configuración llama a este endpoint desde su code-behind con `GetForResultAsync
 Su sección «Base de datos de estadísticas» tiene carga y resultado independientes del
 formulario de rutas: conexión correcta sin pendientes, aviso con pendientes o error.
 Se ejecuta únicamente al pulsar «Probar conexión» y nunca permite editar credenciales.
+
+## 10. Dashboard de Inicio (F5.2)
+
+`Stats/GetPlaybackStatistics` expone `GET /api/stats/dashboard?days=7|30`;
+omitir `days` consulta todo el historial. FluentValidation rechaza otros valores.
+El handler consulta `StatisticsDbContext` con `AsNoTracking`, captura una fecha de
+corte UTC y aplica el intervalo inclusivo desde hace 7/30 días hasta ese instante.
+Sin inicio, incluye todo lo anterior al corte. Las agregaciones y el límite de diez
+se ejecutan en PostgreSQL, sin descargar el historial completo. Orden del ranking:
+recuento descendente, fecha de última escucha descendente, biblioteca y ruta.
+Los tags del ranking proceden del último evento del grupo; a igual fecha,
+`EventId` desempata. Las últimas escuchas son eventos, no archivos únicos.
+`PlaybackStatistics` incluye total, archivos distintos por biblioteca/ruta,
+intervalo consultado, ranking y últimas diez. Sin cambios de esquema ni escritura.
+Los fallos de conexión/esquema se devuelven como `AppError` (503), no estadísticas
+vacías; el tiempo de consulta queda acotado mediante cancelación a diez segundos.
+
+`Library/GetLibrarySummary` expone `GET /api/library/summary?library=Tracks|Sessions|Remember`.
+Cada biblioteca se consulta de forma independiente, con request validado y errores
+propios. Reutiliza el escaneo de referencias de `TrackLibrary` para las estructuras
+de dos niveles de Tracks/Sessions y el de `RememberLibrary` para Cortas/Largas;
+no lee tags, ondas ni archivos de tracklist. Cuenta MP3 válidos dentro de la
+estructura, no carpetas de sesión ni archivos fuera de nivel.
+
+`Playlists/GetPlaylistSummary` expone `GET /api/playlists/summary` y delega en
+`M3uPlaylistStore.SummarizeAsync`. Usa su lector M3U y el bloqueo existentes,
+sin regenerar automáticas ni ejecutar la conversión de JSON antiguos.
+`ExecuteAsync` conserva la conversión por defecto para el resto de operaciones.
+Un M3U inválido falla explícitamente; no se contabiliza parcialmente como correcto.
+Este endpoint no cambia los M3U, pero el lateral conserva su consulta habitual
+de playlists vivas de F4.4 al iniciarse el layout.
+
+`Home.razor.cs` llama por HTTP con `GetForResultAsync`; consulta en paralelo las
+tres bibliotecas, playlists y escuchas. Cada tarjeta conserva su error en vez de
+mostrar cero. Sin PostgreSQL, los recuentos de ficheros siguen disponibles.
+Cambiar el selector solo vuelve a consultar estadísticas; «Volver a cargar»
+actualiza también los resúmenes. Sin timer ni acceso a disco desde la UI.
+El marcado usa tarjetas/select Blueprint y listas adaptables al ancho disponible,
+con fechas UTC explícitas y sin acciones nuevas sobre audio, cola o playlists.

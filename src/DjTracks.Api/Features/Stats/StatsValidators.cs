@@ -1,8 +1,16 @@
 using DjTracks.Api.Features.Stats.RecordPlayback;
+using DjTracks.Api.Features.Stats.GetPlaybackStatistics;
 using DjTracks.Domain;
 using FluentValidation;
 
 namespace DjTracks.Api.Features.Stats;
+
+public sealed class GetPlaybackStatisticsRequestValidator : AbstractValidator<GetPlaybackStatisticsRequest>
+{
+    public GetPlaybackStatisticsRequestValidator() =>
+        RuleFor(request => request.Days).Must(days => days is null or 7 or 30)
+            .WithMessage("Elige los últimos 7 días, 30 días o todo el historial.");
+}
 
 public sealed class RecordPlaybackRequestValidator : AbstractValidator<RecordPlaybackRequest>
 {

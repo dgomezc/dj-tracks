@@ -1,4 +1,5 @@
 using DjTracks.Api.Features.Library.GetTracks;
+using DjTracks.Api.Features.Library.GetLibrarySummary;
 using DjTracks.Api.Features.Library.GetSessions;
 using DjTracks.Api.Features.Library.GetSessionTracklist;
 using DjTracks.Api.Features.Library.GetRemember;
@@ -14,6 +15,7 @@ public static class LibraryFeature
         .AddSingleton<TrackLibrary>()
         .AddSingleton<SessionLibrary>()
         .AddSingleton<RememberLibrary>()
+        .AddScoped<GetLibrarySummaryHandler>()
         .AddScoped<GetRememberHandler>()
         .AddScoped<GetSessionsHandler>()
         .AddScoped<GetSessionTracklistHandler>()
@@ -24,6 +26,7 @@ public static class LibraryFeature
     public static RouteGroupBuilder MapLibraryFeature(this RouteGroupBuilder api)
     {
         api.MapGetTracks();
+        api.MapGetLibrarySummary();
         api.MapGetSessions();
         api.MapGetRemember();
         api.MapGetSessionTracklist();

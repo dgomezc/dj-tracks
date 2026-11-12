@@ -131,6 +131,60 @@ body {
 }
 
 /* Páginas */
+.dashboard-toolbar {
+    margin-bottom: 24px;
+}
+
+.dashboard-summary,
+.dashboard-lists {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 220px), 1fr));
+    gap: 16px;
+    margin: 16px 0 24px;
+}
+
+.dashboard-lists {
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 360px), 1fr));
+}
+
+.dashboard-card {
+    padding: 20px;
+    min-width: 0;
+    overflow-wrap: anywhere;
+}
+
+.dashboard-number {
+    display: block;
+    font-size: 2rem;
+    line-height: 1.4;
+}
+
+.dashboard-history {
+    margin: 16px 0 0;
+    padding-left: 24px;
+}
+
+.dashboard-history li {
+    padding: 12px 0;
+    border-bottom: 1px solid var(--border);
+}
+
+.dashboard-history li:last-child {
+    border-bottom: 0;
+}
+
+.dashboard-history-heading {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    gap: 4px 12px;
+}
+
+.dashboard-play-count {
+    color: var(--muted-foreground);
+    white-space: nowrap;
+}
+
 .page-title {
     margin-bottom: 8px;
 }

@@ -1,4 +1,5 @@
 using DjTracks.Api.Features.Library.GetTracks;
+using DjTracks.Api.Features.Library.GetLibrarySummary;
 using DjTracks.Api.Features.Library.GetSessions;
 using DjTracks.Api.Features.Library.GetSessionTracklist;
 using DjTracks.Api.Features.Library.GetRemember;
@@ -6,6 +7,13 @@ using DjTracks.Api.Features.Library.GetFilteredTracks;
 using FluentValidation;
 
 namespace DjTracks.Api.Features.Library;
+
+public sealed class GetLibrarySummaryRequestValidator : AbstractValidator<GetLibrarySummaryRequest>
+{
+    public GetLibrarySummaryRequestValidator() =>
+        RuleFor(request => request.Library).Must(library => library is "Tracks" or "Sessions" or "Remember")
+            .WithMessage("Elige Tracks, Sessions o Remember.");
+}
 
 public sealed class GetRememberRequestValidator : AbstractValidator<GetRememberRequest>
 {

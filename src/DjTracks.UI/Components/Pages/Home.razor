@@ -1,6 +1,147 @@
 @page "/"
+@using DjTracks.Domain
 
 <PageTitle>Inicio - DJ Tracks</PageTitle>
 
 <BbTypographyH2 Class="page-title">Inicio</BbTypographyH2>
-<BbTypographyMuted>Aquí se mostrarán las estadísticas (fase F5.2).</BbTypographyMuted>
+<BbTypographyMuted Class="page-intro">
+    Tu biblioteca y las escuchas de al menos 30 segundos. Los datos se actualizan al abrir Inicio o volver a cargar.
+</BbTypographyMuted>
+
+<div class="button-row dashboard-toolbar">
+    <BbSelect TValue="int" Value="@_days" ValueChanged="ChangePeriodAsync" Options="@PeriodOptions"
+              AriaLabel="Período de estadísticas" Disabled="@(_loadingStatistics || _loadingSummary)" />
+    <BbButton Variant="ButtonVariant.Outline" OnClick="ReloadAsync"
+              Disabled="@(_loadingStatistics || _loadingSummary)">Volver a cargar</BbButton>
+</div>
+
+<h3 class="section-title">Biblioteca y playlists</h3>
+<BbTypographyMuted>Recuento actual de archivos MP3 y playlists M3U; no depende del período seleccionado ni de PostgreSQL.</BbTypographyMuted>
+@if (_loadingSummary)
+{
+    <div class="busy-indicator" role="status">
+        <BbSpinner Size="SpinnerSize.Small" AriaLabel="Contando biblioteca y playlists" />
+        <span>Contando biblioteca y playlists…</span>
+    </div>
+}
+<div class="dashboard-summary">
+    @foreach (var library in _libraries)
+    {
+        <BbCard>
+            <BbCardContent Class="dashboard-card">
+                <h4><BbLink Href="@library.Url">@library.Name</BbLink></h4>
+                @if (library.Error is not null)
+                {
+                    <p class="text-warning" role="alert">@library.Error</p>
+                }
+                else if (library.Count is { } count)
+                {
+                    <strong class="dashboard-number">@count.ToString("N0")</strong>
+                    <span class="text-muted">@(library.Name == "Sessions" ? "MP3 de sesiones" : "MP3")</span>
+                }
+            </BbCardContent>
+        </BbCard>
+    }
+    <BbCard>
+        <BbCardContent Class="dashboard-card">
+            <h4><BbLink Href="/playlists">Playlists</BbLink></h4>
+            @if (_playlistsError is not null)
+            {
+                <p class="text-warning" role="alert">@_playlistsError</p>
+            }
+            else if (_playlists is { } playlists)
+            {
+                <strong class="dashboard-number">@((playlists.ManualCount + playlists.AutomaticCount).ToString("N0"))</strong>
+                <span class="text-muted">
+                    @playlists.ManualCount @(playlists.ManualCount == 1 ? "manual" : "manuales") ·
+                    @playlists.AutomaticCount @(playlists.AutomaticCount == 1 ? "automática" : "automáticas")
+                </span>
+            }
+        </BbCardContent>
+    </BbCard>
+</div>
+
+<h3 class="section-title">Reproducciones</h3>
+@if (_loadingStatistics)
+{
+    <div class="busy-indicator" role="status">
+        <BbSpinner Size="SpinnerSize.Small" AriaLabel="Cargando estadísticas" />
+        <span>Cargando estadísticas…</span>
+    </div>
+}
+@if (_statisticsError is not null)
+{
+    <BbAlert Variant="AlertVariant.Danger" Class="page-alert" role="alert">
+        <BbAlertDescription>@_statisticsError</BbAlertDescription>
+    </BbAlert>
+    <BbLink Href="/settings">Comprobar conexión en Configuración</BbLink>
+}
+else if (_statistics is { } statistics)
+{
+    <p role="status">
+        <strong>@statistics.TotalPlays.ToString("N0")</strong> @(statistics.TotalPlays == 1 ? "escucha" : "escuchas") ·
+        <strong>@statistics.UniqueFiles.ToString("N0")</strong>
+        @(statistics.UniqueFiles == 1 ? "archivo diferente" : "archivos diferentes") en el período.
+    </p>
+    <BbTypographyMuted>
+        @(statistics.FromUtc is { } from ? $"Desde {Date(from)}" : "Todo el historial")
+        · hasta @Date(statistics.UntilUtc).
+        Las referencias y los metadatos son los guardados al escuchar, aunque después se mueva o retire el archivo.
+    </BbTypographyMuted>
+    <div class="dashboard-lists">
+        <BbCard>
+            <BbCardContent Class="dashboard-card">
+                <h4 class="section-title">Más reproducidas</h4>
+                <BbTypographyMuted>Hasta 10 archivos, agrupados por biblioteca y ruta.</BbTypographyMuted>
+                @if (statistics.MostPlayed.Length == 0)
+                {
+                    <p>No hay reproducciones registradas en este período.</p>
+                }
+                else
+                {
+                    <ol class="dashboard-history">
+                        @foreach (var item in statistics.MostPlayed)
+                        {
+                            var track = item.LatestPlay;
+                            <li @key="(track.Library, track.RelativePath)">
+                                <div class="dashboard-history-heading">
+                                    <strong>@Title(track)</strong>
+                                    <span class="dashboard-play-count">
+                                        @item.PlayCount.ToString("N0") @(item.PlayCount == 1 ? "escucha" : "escuchas")
+                                    </span>
+                                </div>
+                                <div>@Artist(track)</div>
+                                <div class="text-muted text-small">@track.Library · @track.RelativePath</div>
+                                <div class="text-muted text-small">Última: @Date(track.PlayedAtUtc)</div>
+                            </li>
+                        }
+                    </ol>
+                }
+            </BbCardContent>
+        </BbCard>
+        <BbCard>
+            <BbCardContent Class="dashboard-card">
+                <h4 class="section-title">Últimas reproducidas</h4>
+                <BbTypographyMuted>Hasta 10 escuchas recientes; un archivo puede repetirse.</BbTypographyMuted>
+                @if (statistics.RecentPlays.Length == 0)
+                {
+                    <p>No hay reproducciones registradas en este período.</p>
+                }
+                else
+                {
+                    <ol class="dashboard-history">
+                        @foreach (var track in statistics.RecentPlays)
+                        {
+                            <li @key="track.EventId">
+                                <strong>@Title(track)</strong>
+                                <div>@Artist(track)</div>
+                                <div class="text-muted text-small">@track.Library · @track.RelativePath</div>
+                                <div class="text-muted text-small">@Date(track.PlayedAtUtc)</div>
+                            </li>
+                        }
+                    </ol>
+                }
+            </BbCardContent>
+        </BbCard>
+    </div>
+}

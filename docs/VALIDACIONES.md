@@ -7,10 +7,16 @@ Consultar siempre el estado real de GitHub antes de actuar sobre un PR.
 
 ## Estado actual
 
+- **F5.2 implementada, pendiente de validación del usuario**:
+  rama `fase/f5-2-dashboard`, desde `develop` con F5.1 integrada.
+  Decisiones confirmadas el 12/11/2026: selector de últimos 7 días, 30 días
+  o todo el historial; 10 entradas por lista. Inicio muestra el dashboard.
+  No avanzar a F6.1 sin validar e integrar F5.2.
 - **F5.1 validada globalmente por el usuario el 12/11/2026**:
   rama `fase/f5-1-estadisticas-reproducciones`, desde `develop` con F4.4
-  integrada. PR [#20](https://github.com/dgomezc/dj-tracks/pull/20) abierto
-  hacia `develop`, pendiente de integrar tras comprobar su estado.
+  integrada. PR [#20](https://github.com/dgomezc/dj-tracks/pull/20) mergeado
+  en `develop` el 12/11/2026 a las 12:48:49 UTC, commit
+  `e089cead40869faaaba1234fb11c8f7089d82fc9` (comprobado en GitHub).
   Confirmación: «Todo Ok, continúa». Incluye la revisión de conexión desde
   Configuración; autoriza integración y continuación con F5.2.
   Aceptación global, sin atribuir pruebas individuales adicionales al usuario
@@ -136,6 +142,124 @@ Consultar siempre el estado real de GitHub antes de actuar sobre un PR.
 - **Refactor transversal Vertical Slices: validado por el usuario el 27/10/2026** con "Perfecto, documenta toda la arquitectura actual… Después mezcla el PR y sigue con el siguiente paso". Arquitectura documentada en `ARQUITECTURA.md`. PR [#6](https://github.com/dgomezc/dj-tracks/pull/6) mergeado en `develop` (`c7c1508`). Diseño validado en `arquitectura/flujo-get-tracks.html` ("Cambia todas las llamadas").
 - Port F1.2 recibido de `dgomezc-fase-f1-2-filtros` (`1354305` código, `c38cddb` documentación). Se integra mediante merge en la rama original: se conservan ambos historiales y se resuelven los conflictos de código con la versión adaptada a Result/FluentValidation. Sin PR duplicado ni reescritura de ramas. Cambios preexistentes y JSON privado conservados; no se borran worktrees.
 - Comprobación de integración en checkout original (27/10/2026): `src` coincide con el port recibido; compilación completa con 0 errores y advertencias. API/UI aisladas con MP3 sintéticos: multiaño/multigrupo/multisubestilo, alias, ausencia de duplicados, resultados vacíos, explorador, errores 400/404, opciones, carga de ajustes y página Tracks correctos. No equivale a validación visual de biblioteca real. Servicios y fixtures temporales retirados después de comprobar.
+
+## F5.2: dashboard de Inicio (pendiente de validación del usuario)
+
+Inicio deja de mostrar el marcador de F5.2 e incorpora los recuentos de MP3 de
+Tracks/Sessions/Remember y playlists manuales/automáticas, total de escuchas,
+archivos diferentes y listas de más/últimas reproducidas. Selector confirmado:
+últimos 7 días, 30 días (inicial) o todo el historial; hasta 10 entradas por
+lista. El período afecta solo a las escuchas, no al tamaño de la biblioteca.
+Se actualiza al abrir Inicio o pulsar «Volver a cargar»; no hay polling.
+
+Las más reproducidas agrupan por biblioteca y ruta relativa, con los últimos
+metadatos registrados. Orden por número de escuchas descendente, última fecha
+descendente y biblioteca/ruta; eventos de igual fecha se desempatan por ID.
+Las últimas son eventos individuales, pudiendo repetirse un archivo.
+Se conservan referencias históricas aunque el MP3 haya desaparecido o cambiado
+de nombre. Las fechas y el intervalo móvil de 7/30 días se muestran en UTC.
+
+### Arranque y checklist del usuario
+
+Visual Studio 2026 (.NET 10), abrir `DjTracks.slnx` en
+`fase/f5-2-dashboard`, perfil **DJ Tracks (Api + UI)** y F5.
+Reiniciar API/UI y recargar completamente. Inicio:
+`http://localhost:5050/`; API: `http://localhost:5247`.
+Conservar `ConnectionStrings:Statistics` en user-secrets de la API y las
+cuatro rutas de `/settings`. La migración de F5.1 debe estar aplicada y la BD
+tener escuchas cualificadas para mostrar listas; F5.2 no añade migraciones.
+Remember requiere Cortas/Largas; para comprobar altas/bajas, usar copias de MP3
+y carpetas de prueba, sin mover ni borrar música real.
+
+- [ ] **Inicio y períodos:** inicialmente «Últimos 30 días». Cambiar a 7 días
+  y todo el historial actualiza totales/listas e intervalo UTC; los recuentos
+  de biblioteca/playlists no cambian por el selector. No aparecen fechas
+  futuras. Si todos los registros son recientes, los tres resultados pueden
+  coincidir; si no hay registros en el período, se muestran cero escuchas
+  y mensajes de listas vacías, no un fallo de conexión.
+- [ ] **Ranking:** escuchar dos veces un archivo durante al menos 30 segundos
+  por reproducción y una vez otro; volver a Inicio o cargar. El primero suma
+  dos escuchas y aparece antes del segundo. Se agrupa por biblioteca/ruta,
+  no por título: canciones con el mismo título de bibliotecas/rutas distintas
+  no se fusionan. Máximo 10 archivos; desempate por última escucha y referencia.
+  Los tags del ranking corresponden a su último evento del período.
+- [ ] **Últimas y SQL:** las últimas escuchas están ordenadas de más reciente
+  a más antigua, con fechas UTC y máximo 10 eventos; un mismo MP3 puede repetirse.
+  Contrastar en pgAdmin contra `playback_events` (consulta orientativa abajo).
+  Un registro de un archivo retirado permanece en las listas históricas;
+  no hay botones de reproducción de referencias históricas.
+- [ ] **Recuentos y recarga:** comparar Tracks, MP3 de Sessions y Remember con
+  las estructuras de carpetas configuradas. Sessions cuenta archivos, no
+  carpetas; Remember incluye Cortas/Largas, y no se cuentan otros niveles.
+  Playlists distingue M3U manuales/automáticas. Con copias, añadir un MP3
+  válido o crear una playlist no cambia sola la pantalla; «Volver a cargar»
+  actualiza los recuentos. El endpoint de resumen no regenera M3U; el lateral
+  mantiene su comportamiento de playlists vivas de F4.4 al iniciar el layout.
+- [ ] **Errores y recuperación:** con PostgreSQL inaccesible, se muestra un error
+  de estadísticas con enlace a Configuración, no cero escuchas; los resúmenes
+  de biblioteca/playlists siguen disponibles. Una ruta inaccesible o una
+  categoría Remember ausente falla solo en su tarjeta, sin fingir cero ni
+  ocultar las demás. Restaurar y volver a cargar recupera los datos.
+- [ ] **Audio e interfaz:** navegar a Inicio, cambiar período y volver a cargar
+  con audio sonando conserva cola/posición y no registra escuchas por consultar.
+  Revisar ambos temas y móvil/escritorio; selector, tarjetas, listas y enlaces
+  deben ser legibles y no desbordar horizontalmente. No repetir fases anteriores
+  salvo comprobar aquí la continuidad de audio y navegación.
+
+En pgAdmin, para comparar el ranking de los últimos 7 días:
+
+```sql
+SELECT "Library", "RelativePath", COUNT(*) AS escuchas,
+       MAX("PlayedAtUtc") AS ultima
+FROM public.playback_events
+WHERE "PlayedAtUtc" >= NOW() - INTERVAL '7 days'
+  AND "PlayedAtUtc" <= NOW()
+GROUP BY "Library", "RelativePath"
+ORDER BY escuchas DESC, ultima DESC, "Library", "RelativePath"
+LIMIT 10;
+```
+
+Cambiar a `30 days` o quitar el límite inferior para los otros períodos.
+Comparar dentro de un margen razonable: `NOW()` de pgAdmin no es el instante
+exacto de corte que devuelve `untilUtc` del endpoint. Endpoints nuevos:
+`GET /api/stats/dashboard?days=7|30` (sin `days`, todo),
+`GET /api/library/summary?library=Tracks|Sessions|Remember` y
+`GET /api/playlists/summary`.
+
+### Comprobaciones del agente y límites
+
+- `dotnet build DjTracks.slnx`: 0 errores y advertencias; `git diff --check`
+  correcto. Sin tests nuevos, cambios de paquetes, migraciones ni Docker.
+  Context7 consultado para agregaciones/GroupBy de EF Core. Se reutilizan
+  tarjetas/select de Blueprint; su MCP no está expuesto entre las herramientas
+  disponibles de esta sesión.
+- API/UI aisladas en 5350/5351 y 5152. MP3 sintéticos propios y ajustes fuera
+  del repositorio: Tracks 2 (incluida extensión `.MP3`), Sessions 1 y Remember 2,
+  una playlist manual y una automática. Archivos fuera del nivel admitido
+  ignorados. Resumen M3U comparado por hash antes/después: sin escritura ni
+  regeneración de una automática cuyo snapshot estaba vacío.
+- Parámetros de período no admitidos y parámetro `library` ausente/desconocido:
+  HTTP 400. Sin conexión de estadísticas configurada: HTTP 503 explícito.
+  Categoría Remember retirada en la fixture: 404 mientras Tracks sigue
+  respondiendo; restaurar recupera su recuento.
+- Con la configuración de Desarrollo existente, PostgreSQL respondió HTTP 200
+  a las consultas de 7 días, 30 días y todo el historial. Agregación y metadatos
+  ejecutados por Npgsql/EF contra el evento disponible: una escucha y un archivo
+  en cada período, una entrada en cada lista. No se leyeron ni mostraron
+  credenciales y no se insertaron/modificaron escuchas para las comprobaciones.
+- Navegador: datos reales de estadísticas y resúmenes sintéticos visibles;
+  cambiar a 7 días modifica el intervalo UTC. Capturas revisadas de listas y
+  tarjetas, incluido iframe con viewport real de 390 px: una columna en móvil
+  y sin desbordamiento horizontal. Modo claro revisado con estadísticas
+  desactivadas: las cuatro tarjetas de resumen siguen disponibles y se muestra
+  el error de conexión con enlace a Configuración, sin falsas listas vacías.
+  No equivale a probar un dispositivo móvil
+  físico ni sonido real.
+- No había un corpus de más de diez archivos ni escuchas antiguas en los
+  límites temporales: ranking con repetidos/empates, truncado de listas grandes,
+  cambios de tags y bordes de 7/30 días quedan en la checklist del usuario.
+  Los recuentos son una lectura al cargar, no un índice sincronizado en pantalla;
+  NAS/red y audio reales también requieren confirmación del usuario.
 
 ## F5.1: PostgreSQL y registro de reproducciones (PR #20; validada globalmente por el usuario)
 
