@@ -9,10 +9,10 @@ public static class StreamTrackEndpoint
     public static void MapStreamTrack(this RouteGroupBuilder api) =>
         api.MapGet("streaming/tracks", Handle).WithTags("Streaming");
 
-    private static async Task<IResult> Handle([AsParameters] StreamTrackRequest request,
+    private static IResult Handle([AsParameters] StreamTrackRequest request,
         StreamTrackHandler handler, CancellationToken ct)
     {
-        var result = await handler.HandleAsync(request, ct);
+        var result = handler.Handle(request, ct);
         return result.IsSuccess
             ? Results.File(result.Value, "audio/mpeg", enableRangeProcessing: true)
             : result.ToHttpResult();

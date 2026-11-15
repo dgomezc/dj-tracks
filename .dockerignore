@@ -9,6 +9,7 @@
 **/bin
 **/obj
 **/App_Data
+**/dj-tracks-data
 **/*.user
 **/*.http
 **/appsettings.Development.json

@@ -11,7 +11,7 @@ namespace DjTracks.Infrastructure.Playlists;
 
 // Cada playlist es un `<nombre>.m3u` (UTF-8) en la carpeta de playlists, con rutas relativas a ella.
 // `#PLAYLIST` guarda el nombre visible y `#DJTRACKS-ID` el identificador estable.
-public sealed class M3uPlaylistStore(JsonSettingsStore settingsStore, TrackLibrary tracks,
+public sealed class M3uPlaylistStore(PathSettings paths, TrackLibrary tracks,
     RememberLibrary remember, PlaylistLibraryIndex index, ILogger<M3uPlaylistStore> logger)
 {
     private const string NamePrefix = "#PLAYLIST:";
@@ -205,18 +205,12 @@ public sealed class M3uPlaylistStore(JsonSettingsStore settingsStore, TrackLibra
         await _gate.WaitAsync(ct);
         try
         {
-            var settings = await settingsStore.LoadAsync(ct);
-            if (settings.IsFailed)
-                return settings.ToResult();
-            if (string.IsNullOrWhiteSpace(settings.Value.Playlists))
-                return new AppError(ErrorKind.Conflict, "Configura las playlists.",
-                    "Abre Configuración y guarda las rutas antes de usar playlists.");
             // No crear una carpeta ausente: podría tratarse de almacenamiento desconectado.
-            using (var entries = Directory.EnumerateFileSystemEntries(settings.Value.Playlists).GetEnumerator())
+            using (var entries = Directory.EnumerateFileSystemEntries(paths.Playlists).GetEnumerator())
                 entries.MoveNext();
             if (migrateLegacy)
-                await MigrateLegacyAsync(settings.Value, ct);
-            var result = await operation(settings.Value);
+                await MigrateLegacyAsync(paths, ct);
+            var result = await operation(paths);
             if (result.IsFailed)
                 logger.LogWarning("Operación de playlists rechazada: {Error}", result.Errors[0].Message);
             return result;

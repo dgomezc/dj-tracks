@@ -29,7 +29,7 @@ public sealed class SessionMarkStore(ILogger<SessionMarkStore> logger)
         {
             if (!Directory.Exists(root))
                 return new AppError(ErrorKind.Unavailable, "Carpeta de marcas no disponible.",
-                    "Comprueba la carpeta de marcas y sus permisos en Configuración.");
+                    "Comprueba session-marks dentro de Paths:Data, sus permisos y el montaje de datos de la API.");
 
             var key = JsonSerializer.Serialize(new[] { year, session, fileName });
             var name = Convert.ToHexString(SHA256.HashData(Encoding.UTF8.GetBytes(key))).ToLowerInvariant();

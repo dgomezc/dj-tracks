@@ -5,21 +5,14 @@ using FluentResults;
 
 namespace DjTracks.Api.Features.Library.GetTracks;
 
-public sealed class GetTracksHandler(JsonSettingsStore settingsStore, TrackLibrary library,
+public sealed class GetTracksHandler(PathSettings settings, TrackLibrary library,
     ILogger<GetTracksHandler> logger)
 {
-    public async Task<Result<TrackListing>> HandleAsync(GetTracksRequest request, CancellationToken ct)
+    public Result<TrackListing> Handle(GetTracksRequest request, CancellationToken ct)
     {
-        var settings = await settingsStore.LoadAsync(ct);
-        if (settings.IsFailed)
-            return settings.ToResult();
-        if (string.IsNullOrWhiteSpace(settings.Value.Tracks))
-            return new AppError(ErrorKind.Conflict, "Configura la ruta de Tracks.",
-                "Abre Configuración y guarda las rutas antes de explorar la biblioteca.");
-
         try
         {
-            var listing = library.Browse(settings.Value.Tracks, request.Year, request.Style, ct);
+            var listing = library.Browse(settings.Tracks, request.Year, request.Style, ct);
             if (listing.IsSuccess)
                 foreach (var track in listing.Value.Tracks.Where(track => track.Warning is not null))
                     logger.LogWarning("No se pudieron leer los tags de {Year}/{Style}/{FileName}",
