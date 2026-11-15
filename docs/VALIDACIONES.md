@@ -14,7 +14,8 @@ Consultar siempre el estado real de GitHub antes de actuar sobre un PR.
   DJ Tracks. Decisiones: Tempus,
   bibliotecas por carpetas, reproducción en línea y playlists de solo lectura,
   sin descargas ni estadísticas de Tempus; LAN/VPN con credenciales verificadas.
-- **F2.3 integrada con autorización del usuario**:
+  El 15/11/2026 el usuario pide no continuar; esperar una nueva instrucción.
+- **F2.3 validada globalmente por el usuario e integrada**:
   rama `fase/f2-3-marcas-tracklist`, desde `develop` con F6.1 integrada.
   PR [#23](https://github.com/dgomezc/dj-tracks/pull/23) mergeado en `develop`
   (`3201c116fd515d82f8e8ddd15363f8a57098ff0c`).
@@ -29,7 +30,10 @@ Consultar siempre el estado real de GitHub antes de actuar sobre un PR.
   separados y desalineados. Tras corregirlos confirma «ok, ya está perfecto.
   continúa» el 15/11/2026; esta confirmación se refiere a la corrección visual
   y no detalla otras comprobaciones individuales. Autoriza mezclar el PR y
-  continuar el 15/11/2026.
+  continuar el 15/11/2026. Posteriormente confirma «la tarea f2.3 la podemos
+  dar por terminada, mezcla lo que necesites pero no continúes». Esta aceptación
+  global no atribuye comprobaciones individuales adicionales ni implica haber
+  probado Docker para F2.3.
 - **F6.1 validada por el usuario el 15/11/2026 y mergeada**:
   rama `fase/f6-1-docker`, desde `develop` con F5.2 integrada.
   PR [#22](https://github.com/dgomezc/dj-tracks/pull/22) mergeado en `develop`
@@ -203,7 +207,7 @@ de Tempus; el cliente dispone de navegación por índices/directorios y usa JSON
 y token Subsonic. Inspeccionadas las bibliotecas existentes y el proxy Docker.
 Sin cambios de ejecución ni validación manual de Tempus.
 
-## F2.3: marcas de tracklist (PR #23; integrado)
+## F2.3: marcas de tracklist (PR #23; validado e integrado)
 
 Las marcas se guardan automáticamente como JSON en una carpeta nueva, separada
 de Sessions. Solo se puede marcar una línea no vacía y única. Al pulsar una
