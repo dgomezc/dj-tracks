@@ -1,4 +1,50 @@
 const instances = new WeakMap();
+const markerInstances = new WeakMap();
+
+export function setWaveformMarkers(layer, version, marks) {
+    let instance = markerInstances.get(layer);
+    if (!instance) {
+        const audio = document.getElementById("djtracks-audio");
+        if (!(audio instanceof HTMLAudioElement) || audio.dataset.playbackVersion !== String(version))
+            return;
+        instance = { layer, audio, version, marks: [] };
+        instance.render = () => renderMarkers(instance);
+        audio.addEventListener("loadedmetadata", instance.render);
+        audio.addEventListener("durationchange", instance.render);
+        markerInstances.set(layer, instance);
+    }
+    instance.marks = marks;
+    renderMarkers(instance);
+}
+
+export function disposeWaveformMarkers(layer) {
+    const instance = markerInstances.get(layer);
+    if (!instance) return;
+    instance.audio.removeEventListener("loadedmetadata", instance.render);
+    instance.audio.removeEventListener("durationchange", instance.render);
+    layer.replaceChildren();
+    markerInstances.delete(layer);
+}
+
+function renderMarkers(instance) {
+    const { audio, layer, version } = instance;
+    const duration = audio.duration;
+    layer.replaceChildren();
+    if (!Number.isFinite(duration) || duration <= 0) return;
+    for (const mark of instance.marks) {
+        if (!Number.isFinite(mark.seconds) || mark.seconds < 0 || mark.seconds > duration) continue;
+        const button = document.createElement("button");
+        button.type = "button";
+        button.className = "waveform-marker";
+        button.style.left = `${mark.seconds / duration * 100}%`;
+        button.setAttribute("aria-label", `Saltar a ${mark.line}`);
+        button.addEventListener("click", () => {
+            if (audio.isConnected && audio.dataset.playbackVersion === String(version))
+                audio.currentTime = mark.seconds;
+        });
+        layer.appendChild(button);
+    }
+}
 
 export function clearWaveform(canvas) {
     const instance = instances.get(canvas);

@@ -15,13 +15,14 @@
             <div @key="Player.PlaybackVersion">
                 @if (current.WaveformUrl is not null)
                 {
-                    <WaveformPlayer WaveformUrl="@current.WaveformUrl" UnavailableChanged="OnWaveformUnavailable" />
+                    <WaveformPlayer WaveformUrl="@current.WaveformUrl" UnavailableChanged="OnWaveformUnavailable"
+                                    Marks="@Player.SessionMarks" PlaybackVersion="@Player.PlaybackVersion" />
                 }
                 else
                 {
                     <span class="text-muted text-small">Forma de onda no disponible</span>
                 }
-                <audio id="djtracks-audio" @ref="_audio" preload="metadata"
+                <audio id="djtracks-audio" @ref="_audio" data-playback-version="@Player.PlaybackVersion" preload="metadata"
                        src="@BrowserAudioUrl(current.AudioUrl)"></audio>
             </div>
             <div class="player-wave-ruler" aria-hidden="true">

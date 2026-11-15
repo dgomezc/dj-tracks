@@ -18,8 +18,24 @@ public sealed class AudioPlayerState
     public QueueRepeatMode Repeat { get; private set; }
     public bool CanPrevious => CanMove(-1);
     public bool CanNext => CanMove(1);
+    public IReadOnlyList<SessionMark> SessionMarks { get; private set; } = Array.Empty<SessionMark>();
 
     public event Action? Changed;
+    public event Action? SessionMarksChanged;
+
+    public void SetSessionMarks(string? tracklistUrl, IEnumerable<SessionMark> marks)
+    {
+        if (tracklistUrl is null || Current?.TracklistUrl != tracklistUrl)
+            return;
+        SessionMarks = marks.ToArray();
+        SessionMarksChanged?.Invoke();
+    }
+
+    private void ClearSessionMarks()
+    {
+        SessionMarks = Array.Empty<SessionMark>();
+        SessionMarksChanged?.Invoke();
+    }
 
     public void Play(string audioUrl, string? waveformUrl, string? artworkUrl, TrackFile details,
         string? sessionFolder = null, string? tracklistUrl = null, string? rememberCategory = null)
@@ -57,6 +73,7 @@ public sealed class AudioPlayerState
             if (_order.Count > 0)
                 Current = _queue.Single(item => item.Id == _order[Math.Min(index, _order.Count - 1)]);
             PlaybackVersion++;
+            ClearSessionMarks();
         }
         Changed?.Invoke();
     }
@@ -67,6 +84,7 @@ public sealed class AudioPlayerState
         _order.Clear();
         Current = null;
         PlaybackVersion++;
+        ClearSessionMarks();
         Changed?.Invoke();
     }
 
@@ -145,8 +163,11 @@ public sealed class AudioPlayerState
 
     private void Select(QueuedTrack track)
     {
+        var changed = Current?.AudioUrl != track.AudioUrl;
         Current = track;
         PlaybackVersion++;
+        if (changed)
+            ClearSessionMarks();
         Changed?.Invoke();
     }
 }

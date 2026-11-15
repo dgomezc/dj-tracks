@@ -5,7 +5,7 @@
 <BbTypographyH2 Class="page-title">Configuración</BbTypographyH2>
 <BbTypographyMuted Class="page-intro">
     Introduce rutas absolutas de carpetas existentes en el servidor de la API, no en el navegador.
-    Las carpetas de música necesitan lectura; playlists necesita también escritura.
+    Las carpetas de música necesitan lectura; playlists y marcas necesitan también escritura.
 </BbTypographyMuted>
 
 @if (_busy)
@@ -65,6 +65,15 @@
                          AriaDescribedBy="settings-playlists-help" />
                 <BbFieldDescription Id="settings-playlists-help">Carpeta donde se guardan automáticamente las playlists como archivos M3U, con rutas relativas a ella; requiere escritura.</BbFieldDescription>
                 <BbFieldError Errors="@FieldErrors(nameof(_settings.Playlists))" />
+            </BbFieldContent>
+        </BbField>
+        <BbField IsInvalid="@HasError(nameof(_settings.SessionMarks))">
+            <BbFieldLabel For="settings-session-marks">Marcas de sesiones</BbFieldLabel>
+            <BbFieldContent>
+                <BbInput Id="settings-session-marks" @bind-Value="_settings.SessionMarks" Disabled="@Disabled"
+                         AriaDescribedBy="settings-session-marks-help" />
+                <BbFieldDescription Id="settings-session-marks-help">Carpeta donde se guardan las marcas de los tracklists; requiere lectura y escritura.</BbFieldDescription>
+                <BbFieldError Errors="@FieldErrors(nameof(_settings.SessionMarks))" />
             </BbFieldContent>
         </BbField>
         <div class="button-row">

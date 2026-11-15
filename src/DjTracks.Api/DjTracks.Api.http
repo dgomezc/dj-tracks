@@ -31,6 +31,18 @@ Accept: application/json
 
 ###
 
+GET {{DjTracks.Api_HostAddress}}/api/library/sessions/marks?year=2026&session=Nombre%20de%20sesión&fileName=Sesión.mp3
+Accept: application/json
+
+###
+
+PUT {{DjTracks.Api_HostAddress}}/api/library/sessions/marks
+Content-Type: application/json
+
+{"year":"2026","session":"Nombre de sesión","fileName":"Sesión.mp3","line":"1. Artista - Tema","seconds":42.5}
+
+###
+
 GET {{DjTracks.Api_HostAddress}}/api/library/sessions
 Accept: application/json
 

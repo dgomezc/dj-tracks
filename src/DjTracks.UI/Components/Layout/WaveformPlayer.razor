@@ -9,6 +9,7 @@
 <div class="player-waveform">
     <canvas @ref="_canvas" role="slider" aria-label="Forma de onda. Usa las flechas para buscar"
             aria-valuemin="0" aria-valuemax="100" tabindex="0"></canvas>
+    <div @ref="_markers" class="waveform-markers" aria-label="Marcas del tracklist"></div>
     @if (_loading)
     {
         <BbProgress Value="@_progress" Max="100" Class="waveform-loading"
@@ -23,8 +24,11 @@
 @code {
     [Parameter] public string? WaveformUrl { get; set; }
     [Parameter] public EventCallback<bool> UnavailableChanged { get; set; }
+    [Parameter] public IReadOnlyList<SessionMark> Marks { get; set; } = Array.Empty<SessionMark>();
+    [Parameter] public long PlaybackVersion { get; set; }
 
     private ElementReference _canvas;
+    private ElementReference _markers;
     private static readonly JsonSerializerOptions JsonOptions = new(JsonSerializerDefaults.Web);
     private IJSObjectReference? _module;
     private CancellationTokenSource? _loadCts;
@@ -34,6 +38,8 @@
     private bool _loading;
     private double _progress;
     private bool _disposed;
+    private IReadOnlyList<SessionMark>? _appliedMarks;
+    private readonly SemaphoreSlim _renderGate = new(1, 1);
 
     protected override void OnParametersSet()
     {
@@ -53,20 +59,32 @@
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
-        if (_renderedUrl == _requestedUrl)
-            return;
+        await _renderGate.WaitAsync();
+        try
+        {
+            if (_disposed) return;
+            _module ??= await JS.InvokeAsync<IJSObjectReference>("import",
+                "./Components/Layout/WaveformPlayer.razor.js");
+            if (!ReferenceEquals(_appliedMarks, Marks))
+            {
+                var marks = Marks;
+                _appliedMarks = marks;
+                await _module.InvokeVoidAsync("setWaveformMarkers", _markers, PlaybackVersion, marks);
+            }
+            if (_renderedUrl == _requestedUrl)
+                return;
 
-        _module ??= await JS.InvokeAsync<IJSObjectReference>("import",
-            "./Components/Layout/WaveformPlayer.razor.js");
-        await _module.InvokeVoidAsync("clearWaveform", _canvas);
-        _renderedUrl = _requestedUrl;
+            var url = _requestedUrl;
+            _renderedUrl = url;
+            await _module.InvokeVoidAsync("clearWaveform", _canvas);
 
-        if (string.IsNullOrWhiteSpace(_requestedUrl))
-            return;
+            if (string.IsNullOrWhiteSpace(url) || _disposed || url != _requestedUrl)
+                return;
 
-        var url = _requestedUrl;
-        _loadCts = new CancellationTokenSource();
-        _ = LoadWaveformAsync(url, _loadCts.Token);
+            _loadCts = new CancellationTokenSource();
+            _ = LoadWaveformAsync(url, _loadCts.Token);
+        }
+        finally { _renderGate.Release(); }
     }
 
     private async Task LoadWaveformAsync(string url, CancellationToken cancellationToken)
@@ -167,17 +185,18 @@
         _disposed = true;
         _loadCts?.Cancel();
         _loadCts?.Dispose();
-        if (_module is null)
-            return;
-
+        await _renderGate.WaitAsync();
         try
         {
+            if (_module is null) return;
             await _module.InvokeVoidAsync("disposeWaveform", _canvas);
+            await _module.InvokeVoidAsync("disposeWaveformMarkers", _markers);
             await _module.DisposeAsync();
         }
         catch (JSDisconnectedException)
         {
             Logger.LogDebug("El circuito se desconectó al liberar la forma de onda");
         }
+        finally { _renderGate.Release(); }
     }
 }

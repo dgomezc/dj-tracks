@@ -52,8 +52,11 @@ public partial class BottomPlayer
     protected override void OnInitialized()
     {
         Player.Changed += OnPlayerChanged;
+        Player.SessionMarksChanged += OnMarksChanged;
         UpdatePlaybackRecord();
     }
+
+    private void OnMarksChanged() => _ = InvokeAsync(StateHasChanged);
 
     private void OnPlayerChanged()
     {
@@ -191,6 +194,7 @@ public partial class BottomPlayer
     {
         _disposed = true;
         Player.Changed -= OnPlayerChanged;
+        Player.SessionMarksChanged -= OnMarksChanged;
         try
         {
             if (_module is not null)

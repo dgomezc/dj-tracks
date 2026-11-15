@@ -49,6 +49,11 @@ services:
         target: /music/Playlists
         bind:
           create_host_path: false
+      - type: bind
+        source: ${SESSION_MARKS_PATH:?Define SESSION_MARKS_PATH en .env}
+        target: /music/SessionMarks
+        bind:
+          create_host_path: false
     depends_on:
       db:
         condition: service_healthy

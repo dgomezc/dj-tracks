@@ -1,4 +1,4 @@
-@implements IDisposable
+@implements IAsyncDisposable
 
 @if (Url is not null)
 {
@@ -33,7 +33,61 @@
             }
             else
             {
-                <pre class="tracklist-content" tabindex="0" aria-label="Contenido del tracklist">@_tracklist.Content</pre>
+                @if (_marksError is not null)
+                {
+                    <BbAlert Variant="AlertVariant.Warning"><BbAlertDescription>@_marksError</BbAlertDescription></BbAlert>
+                }
+                @if (HasDuplicates)
+                {
+                    <p class="text-muted" role="status">Hay líneas duplicadas: no se pueden marcar ni usar sus marcas hasta que sean únicas.</p>
+                }
+                @if (OrphanCount > 0)
+                {
+                    <p class="text-muted" role="status">Hay @OrphanCount marcas de líneas que ya no están en el TXT. Se conservan por si restauras el texto original.</p>
+                }
+                <div class="tracklist-content session-mark-list" aria-label="Contenido del tracklist">
+                    @foreach (var line in Lines)
+                    {
+                        var mark = _marks.FirstOrDefault(item => item.Line == line);
+                        var enabled = _marksLoaded && !_saving && _module is not null
+                            && !string.IsNullOrWhiteSpace(line) && !IsDuplicate(line);
+                        <div class="session-mark-line">
+                            @if (mark is not null && enabled)
+                            {
+                                <button type="button" class="session-mark-jump" @onclick="() => SeekAsync(mark.Seconds)">@line</button>
+                                <span class="text-small">@FormatTime(mark.Seconds)</span>
+                            }
+                            else
+                            {
+                                <span class="session-mark-text">@line</span>
+                            }
+                            @if (!string.IsNullOrWhiteSpace(line))
+                            {
+                                <div class="session-mark-actions">
+                                    <span class="session-mark-action">
+                                        <BbButton Variant="ButtonVariant.Ghost" Size="ButtonSize.Icon"
+                                                  AriaLabel="@($"{(mark is null ? "Marcar" : "Sustituir marca de")} {line}")"
+                                                  Disabled="@(!enabled)" OnClick="() => SaveAsync(line, false)">
+                                            <LucideIcon Name="bookmark" />
+                                        </BbButton>
+                                        <span class="session-mark-tooltip" aria-hidden="true">@(mark is null ? "Marcar posición actual" : "Sustituir marca por posición actual")</span>
+                                    </span>
+                                    @if (mark is not null)
+                                    {
+                                        <span class="session-mark-action">
+                                            <BbButton Variant="ButtonVariant.Ghost" Size="ButtonSize.Icon"
+                                                      AriaLabel="@($"Borrar marca de {line}")"
+                                                      Disabled="@(!enabled)" OnClick="() => SaveAsync(line, true)">
+                                                <LucideIcon Name="trash-2" />
+                                            </BbButton>
+                                            <span class="session-mark-tooltip" aria-hidden="true">Borrar marca</span>
+                                        </span>
+                                    }
+                                </div>
+                            }
+                        </div>
+                    }
+                </div>
             }
         }
     </section>
