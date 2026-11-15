@@ -9,6 +9,7 @@ Consultar siempre el estado real de GitHub antes de actuar sobre un PR.
 
 - **F2.3 en desarrollo, pendiente de validación del usuario**:
   rama `fase/f2-3-marcas-tracklist`, desde `develop` con F6.1 integrada.
+  PR [#23](https://github.com/dgomezc/dj-tracks/pull/23) abierto hacia `develop`.
   Decisiones del 15/11/2026: carpeta independiente configurable y escribible;
   asociar marcas al texto exacto, avisar de duplicados y de marcas sin línea;
   conservar el único reproductor inferior. No avanzar a F6.2.
@@ -164,7 +165,7 @@ Consultar siempre el estado real de GitHub antes de actuar sobre un PR.
 - Port F1.2 recibido de `dgomezc-fase-f1-2-filtros` (`1354305` código, `c38cddb` documentación). Se integra mediante merge en la rama original: se conservan ambos historiales y se resuelven los conflictos de código con la versión adaptada a Result/FluentValidation. Sin PR duplicado ni reescritura de ramas. Cambios preexistentes y JSON privado conservados; no se borran worktrees.
 - Comprobación de integración en checkout original (27/10/2026): `src` coincide con el port recibido; compilación completa con 0 errores y advertencias. API/UI aisladas con MP3 sintéticos: multiaño/multigrupo/multisubestilo, alias, ausencia de duplicados, resultados vacíos, explorador, errores 400/404, opciones, carga de ajustes y página Tracks correctos. No equivale a validación visual de biblioteca real. Servicios y fixtures temporales retirados después de comprobar.
 
-## F2.3: marcas de tracklist (pendiente de validación)
+## F2.3: marcas de tracklist (PR #23; pendiente de validación)
 
 Las marcas se guardan automáticamente como JSON en una carpeta nueva, separada
 de Sessions. Solo se puede marcar una línea no vacía y única. Al pulsar una
