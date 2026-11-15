@@ -15,7 +15,8 @@
             <div @key="Player.PlaybackVersion">
                 @if (current.WaveformUrl is not null)
                 {
-                    <WaveformPlayer WaveformUrl="@current.WaveformUrl" UnavailableChanged="OnWaveformUnavailable" />
+                    <WaveformPlayer WaveformUrl="@current.WaveformUrl" UnavailableChanged="OnWaveformUnavailable"
+                                    Marks="@Player.SessionMarks" PlaybackVersion="@Player.PlaybackVersion" />
                 }
                 else
                 {

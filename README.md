@@ -13,6 +13,8 @@ sistema de archivos; PostgreSQL se utiliza únicamente para las estadísticas.
   carátulas y tracklists de sesiones.
 - Reproducción con búsqueda, onda progresiva, cola, reproducción aleatoria y
   bucle. La cola se mantiene en memoria y se pierde al recargar la sesión.
+- Marcas de sesiones guardadas por línea del tracklist, visibles y pulsables
+  en la onda del reproductor.
 - Playlists manuales y automáticas guardadas en archivos M3U. Las automáticas
   se actualizan contra un índice de la biblioteca al abrirlas o recargarlas.
 - Historial y dashboard de escuchas: una reproducción cuenta tras 30 segundos
@@ -21,8 +23,9 @@ sistema de archivos; PostgreSQL se utiliza únicamente para las estadísticas.
 
 ## Biblioteca
 
-Configura cuatro carpetas existentes: Tracks, Sessions, Remember y Playlists.
-La API necesita leer las tres primeras y también escribir en Playlists.
+Configura cinco carpetas existentes: Tracks, Sessions, Remember, Playlists y
+marcas de sesiones. La API necesita leer las tres primeras y también escribir
+en Playlists y en la carpeta de marcas.
 
 ```text
 Tracks/

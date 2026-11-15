@@ -13,6 +13,9 @@ Consultar siempre el estado real de GitHub antes de actuar sobre un PR.
   Decisiones del 15/11/2026: carpeta independiente configurable y escribible;
   asociar marcas al texto exacto, avisar de duplicados y de marcas sin línea;
   conservar el único reproductor inferior. No avanzar a F6.2.
+  Revisión solicitada: «A veces los tooltips de las marcas no desaparecen y
+  es imposible borrar o editar las marcas» y añadir líneas verticales
+  pulsables en la onda. Pendiente de nueva validación, sin aceptación global.
 - **F6.1 validada por el usuario el 15/11/2026 y mergeada**:
   rama `fase/f6-1-docker`, desde `develop` con F5.2 integrada.
   PR [#22](https://github.com/dgomezc/dj-tracks/pull/22) mergeado en `develop`
@@ -187,6 +190,18 @@ guardar ajustes o usar las marcas.
 
 **Pendiente del usuario:**
 
+- [ ] **Revisión:** crear, actualizar y borrar marcas repetidamente y mover el
+  puntero entre sus controles: los botones con texto siguen accesibles y ningún
+  tooltip de esas acciones queda bloqueando la edición.
+- [ ] **Nuevo:** crear marcas al principio, centro y final; las líneas aparecen
+  en la onda en sus posiciones. Pulsarlas mientras suena y en pausa: el audio
+  salta al tiempo exacto y conserva su estado. Crear, actualizar y borrar:
+  las líneas aparecen, se mueven y desaparecen sin recargar.
+- [ ] **Nuevo:** cambiar de sesión o a Tracks/Remember, volver a la sesión,
+  redimensionar y probar con teclado: solo se muestran las marcas asociadas
+  a la sesión activa y las líneas pulsables siguen siendo utilizables.
+  Al recargar un TXT con líneas duplicadas o modificadas, no aparecen las
+  marcas ambiguas o huérfanas en la onda.
 - [ ] Reproducir la sesión y marcar dos líneas a tiempos diferentes: aparecen
   los tiempos y la reproducción continúa sin interrupción.
 - [ ] Pulsar una línea marcada mientras suena y después en pausa: salta al tiempo
@@ -214,6 +229,16 @@ un despliegue Docker de F2.3 ni el entorno real del usuario. También se
 comprobó que los ajustes antiguos se leen y que un JSON de marcas corrupto
 no se sobrescribe. El servidor MCP de Blazor Blueprint no estaba disponible
 en esta sesión; se reutilizaron los controles existentes del proyecto.
+
+**Revisión comprobada por el agente:** compilación sin errores ni advertencias;
+en navegador con sesión sintética de 30 segundos, la onda se generó, mostró
+marcas en 3, 15 y 27 segundos y el salto a 15 segundos conservó pausa y
+reproducción en comprobaciones separadas. Actualizar y borrar reflejó los
+cambios en la onda; al cambiar a otra sesión desaparecieron. Al recargar el TXT
+con línea duplicada y otra modificada, desaparecieron las marcas ambiguas o
+sin línea. Captura visual de la onda comprobada. No sustituye la validación del
+usuario. Context7 y el MCP de Blazor Blueprint no estaban disponibles; se
+consultó la documentación oficial de Blazor y se reutilizaron botones existentes.
 
 ## F6.1: Docker en Ubuntu (PR #22; validada y mergeada)
 

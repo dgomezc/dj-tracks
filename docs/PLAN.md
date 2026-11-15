@@ -130,6 +130,8 @@ El estado de entrega y las checklists se mantienen en `VALIDACIONES.md`. Una imp
   Sessions; mantener la barra inferior como único reproductor. Las marcas se
   vinculan al texto exacto, sobreviven a la reordenación y se conservan si el
   texto desaparece; las líneas duplicadas no se pueden asociar y se avisa.
+  Revisión del 15/11/2026: controles de marcas con texto sin tooltips que
+  bloqueen la edición y líneas verticales pulsables en la onda para saltar.
 
 ### Bloque 3 — Remember
 - **F3.1 Remember**: selector Cortas/Largas, listado, reproducción y ficha del track.

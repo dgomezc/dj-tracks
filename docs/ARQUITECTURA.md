@@ -614,7 +614,14 @@ Sin borrar ni modificar el TXT. Un proceso de API por carpeta de marcas.
 `SessionTracklistPanel` presenta las líneas sin interpretar HTML, lee marcas
 por HTTP y usa el audio existente de la barra mediante JS para capturar el
 tiempo o saltar sin alterar pausa/reproducción. La versión de reproducción
-impide actuar sobre otro audio al cambiar de pista. No se crea un segundo
-reproductor ni se alteran cola, onda o estadísticas. Compose monta
+impide actuar sobre otro audio al cambiar de pista. Los controles de marca
+son botones con texto, sin tooltips que queden abiertos al modificar filas.
+El estado scoped del reproductor comparte solo marcas asociadas a líneas únicas
+del TXT activo; al cambiar de audio se limpia y las respuestas atrasadas no
+pueden publicar sobre otra sesión. `WaveformPlayer` dibuja controles verticales
+accesibles sobre la onda según la duración real del audio y cada uno salta a
+su tiempo sin cambiar el estado de reproducción. La onda conserva su seek normal
+y serializa su inicialización para evitar cargas simultáneas. Sin un segundo
+reproductor ni cambios de cola o estadísticas. Compose monta
 `SESSION_MARKS_PATH` con escritura en `/music/SessionMarks`; hay que configurar
 esta ruta también al actualizar una instalación existente.

@@ -60,6 +60,7 @@ public partial class SessionTracklistPanel
         _marksError = null;
         _error = null;
         _loading = url is not null;
+        Player.SetSessionMarks(url, []);
         if (url is null || current?.SessionFolder is null)
             return;
 
@@ -83,7 +84,12 @@ public partial class SessionTracklistPanel
         var marks = await Http.GetForResultAsync<SessionMark[]>(marksUrl, Logger);
         if (_disposed || version != _requestVersion) return;
         if (marks.IsFailed) _marksError = marks.Errors[0].Message;
-        else { _marks = marks.Value; _marksLoaded = true; }
+        else
+        {
+            _marks = marks.Value;
+            _marksLoaded = true;
+            PublishMarks(url);
+        }
     }
 
     private async Task SaveAsync(string line, bool delete)
@@ -111,10 +117,18 @@ public partial class SessionTracklistPanel
             var result = await Http.PutForResultAsync<object, SessionMark[]>("api/library/sessions/marks", body, Logger);
             if (_disposed || requestVersion != _requestVersion) return;
             if (result.IsFailed) _marksError = result.Errors[0].Message;
-            else _marks = result.Value;
+            else
+            {
+                _marks = result.Value;
+                PublishMarks(_loadedUrl);
+            }
         }
         finally { _saving = false; }
     }
+
+    private void PublishMarks(string? url) => Player.SetSessionMarks(url,
+        _marks.Where(mark => !_duplicates.Contains(mark.Line)
+            && _lines.Contains(mark.Line, StringComparer.Ordinal)));
 
     private async Task SeekAsync(double seconds)
     {

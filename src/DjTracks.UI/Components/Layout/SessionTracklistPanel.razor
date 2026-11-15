@@ -54,8 +54,7 @@
                         <div class="session-mark-line">
                             @if (mark is not null && enabled)
                             {
-                                <button type="button" class="session-mark-jump" @onclick="() => SeekAsync(mark.Seconds)"
-                                        title="Saltar a la marca">@line</button>
+                                <button type="button" class="session-mark-jump" @onclick="() => SeekAsync(mark.Seconds)">@line</button>
                                 <span class="text-small">@FormatTime(mark.Seconds)</span>
                             }
                             else
@@ -64,13 +63,15 @@
                             }
                             @if (!string.IsNullOrWhiteSpace(line))
                             {
-                                <IconButton Label="@(mark is null ? "Marcar posición actual" : "Sustituir marca por posición actual")"
-                                            AriaLabel="@($"{(mark is null ? "Marcar" : "Sustituir marca de")} {line}")"
-                                            Icon="bookmark" Disabled="@(!enabled)" OnClick="() => SaveAsync(line, false)" />
+                                <BbButton Variant="ButtonVariant.Ghost"
+                                          AriaLabel="@($"{(mark is null ? "Marcar" : "Sustituir marca de")} {line}")"
+                                          Disabled="@(!enabled)" OnClick="() => SaveAsync(line, false)">
+                                    @(mark is null ? "Marcar" : "Actualizar")
+                                </BbButton>
                                 @if (mark is not null)
                                 {
-                                    <IconButton Label="Borrar marca" AriaLabel="@($"Borrar marca de {line}")" Icon="trash-2" Disabled="@(!enabled)"
-                                                OnClick="() => SaveAsync(line, true)" />
+                                    <BbButton Variant="ButtonVariant.Ghost" AriaLabel="@($"Borrar marca de {line}")"
+                                              Disabled="@(!enabled)" OnClick="() => SaveAsync(line, true)">Borrar</BbButton>
                                 }
                             }
                         </div>
