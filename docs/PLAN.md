@@ -260,7 +260,41 @@ El estado de entrega y las checklists se mantienen en `VALIDACIONES.md`. Una imp
   solo lectura, playlists y marcas en lectura/escritura y volúmenes persistentes para
   estadísticas, ajustes/ondas y claves de protección de datos de Blazor.
   Despliegue HTTP solo en red local/VPN, sin añadir autenticación ni TLS.
-- **F6.2 (fase 2 del proyecto) Subsonic**: análisis de exponer API compatible para clientes Android.
+- **F6.2 (fase 2 del proyecto) Subsonic**: análisis de exponer API compatible para
+  clientes Android. Decisiones del 15/11/2026 para una primera implementación:
+  cliente [Tempus](https://github.com/eddyizm/tempus); exploración por carpetas
+  de Tracks, Sessions y Remember, reproducción en línea y playlists manuales y
+  automáticas de solo lectura. Sin descarga sin conexión ni estadísticas de
+  reproducciones de Tempus. Acceso solo por LAN/VPN y credenciales Subsonic
+  verificadas. Estas decisiones no implican compatibilidad completa con Tempus
+  ni autorización para funciones adicionales.
+
+  **Análisis, no implementado:** Tempus usa JSON Subsonic y dispone de
+  navegación por índices/directorios. Sus clientes incluyen `ping`,
+  `getMusicFolders`, `getIndexes`, `getMusicDirectory`, `getPlaylists`,
+  `getPlaylist` y `stream`; son candidatos a comprobar, no una lista verificada
+  y completa de peticiones necesarias. Hay que observar el arranque y uso real
+  de la versión de Tempus que se pruebe y responder según el protocolo, sin
+  fingir éxito para operaciones no soportadas. IDs de archivos/carpetas deben
+  resolverse de forma segura bajo las raíces configuradas y permanecer estables;
+  renombrar o mover un fichero puede cambiar su ID. La búsqueda y las vistas por
+  artista/álbum quedan fuera del alcance elegido, salvo llamadas indispensables
+  para el funcionamiento de Tempus que deban aclararse.
+
+  Se pueden reutilizar las bibliotecas, streaming con Range y M3U existentes;
+  el índice de playlists actuales no incluye Sessions. En Docker solo UI publica
+  puerto y el proxy actual pasa únicamente `/api/streaming`, por lo que exponer
+  `/rest` requiere una ruta explícita adicional, sin publicar toda la API.
+  Las playlists automáticas conservan la resolución viva de F4.4; solo se
+  prohíbe modificarlas desde Tempus.
+
+  Tempus implementa el token Subsonic `MD5(contraseña + salt)`; verificarlo
+  requiere que el servidor acceda al secreto, que debe configurarse fuera del
+  repositorio. El token y salt en URL pueden filtrarse en logs y reutilizarse;
+  HTTP no los protege. Usar contraseña exclusiva, proteger secretos y logs,
+  limitar a LAN/VPN y considerar HTTPS; la autenticación Subsonic no protege la
+  interfaz y API actuales. Véase [riesgos y autenticación OpenSubsonic](https://opensubsonic.github.io/docs/api-reference/).
+  Queda pendiente validar diseño y compatibilidad real antes de implementar.
 
 ## Aclaraciones confirmadas
 
