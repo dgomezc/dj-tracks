@@ -12,7 +12,9 @@ Consultar siempre el estado real de GitHub antes de actuar sobre un PR.
   PR [#22](https://github.com/dgomezc/dj-tracks/pull/22) abierto hacia `develop`.
   El 15/11/2026 el usuario confirma: «El despliegue en docker ha funcionado
   correctamente». Después confirma: «todos los checklist han pasado
-  correctamente». La validación no autoriza el merge.
+  correctamente». Posteriormente autoriza: «Todo ok, mezcla el PR pero no
+  continúes a la siguiente fase». No iniciar fases posteriores hasta nueva
+  instrucción del usuario; consultar GitHub para el estado real del merge.
   Decisiones del 12/11/2026: PostgreSQL nuevo junto a API/UI, una única URL
   pública para interfaz/audio y API/BD internas. No avanzar a F6.2 ni a F2.3.
 - **F5.2 validada globalmente por el usuario el 12/11/2026**:
@@ -160,7 +162,8 @@ Consultar siempre el estado real de GitHub antes de actuar sobre un PR.
 
 El 15/11/2026 el usuario indica: «El despliegue en docker ha funcionado
 correctamente» y confirma: «todos los checklist han pasado correctamente».
-No ha autorizado el merge.
+Después autoriza el merge y pide parar: «Todo ok, mezcla el PR pero no
+continúes a la siguiente fase». Consultar el estado real del PR en GitHub.
 
 Tres servicios: PostgreSQL 17 nuevo, API con FFmpeg y UI con proxy de audio.
 Solo UI publica el puerto 5050, configurable con `UI_PORT`. No modifica la BD
