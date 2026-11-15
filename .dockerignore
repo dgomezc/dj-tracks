@@ -1,0 +1,16 @@
+.git
+.github
+.vs
+.config
+.mcp.json
+.env*
+*.env
+**/*.env
+**/bin
+**/obj
+**/App_Data
+**/*.user
+**/*.http
+**/appsettings.Development.json
+**/Properties/launchSettings.json
+docs

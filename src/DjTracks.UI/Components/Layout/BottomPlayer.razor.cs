@@ -11,6 +11,7 @@ public partial class BottomPlayer
     [Inject] private HttpClient Http { get; set; } = default!;
     [Inject] private IJSRuntime JS { get; set; } = default!;
     [Inject] private ILogger<BottomPlayer> Logger { get; set; } = default!;
+    [Inject] private IConfiguration Configuration { get; set; } = default!;
     [Parameter] public bool QueueOpen { get; set; }
     [Parameter] public EventCallback OnToggleQueue { get; set; }
 
@@ -31,6 +32,10 @@ public partial class BottomPlayer
     private PlaybackRecord? _playbackRecord;
     private long _recordVersion = -1;
     private bool IsSilent => _muted || _volume == 0;
+    private string BrowserAudioUrl(string audioUrl) =>
+        Configuration.GetValue<bool>("StreamingProxy:Enabled")
+            ? new Uri(audioUrl, UriKind.Absolute).PathAndQuery
+            : audioUrl;
     private string RepeatLabel => Player.Repeat switch
     {
         QueueRepeatMode.All => "Bucle: cola. Cambiar a canción",

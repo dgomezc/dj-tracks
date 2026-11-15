@@ -549,3 +549,47 @@ Cambiar el selector solo vuelve a consultar estadísticas; «Volver a cargar»
 actualiza también los resúmenes. Sin timer ni acceso a disco desde la UI.
 El marcado usa tarjetas/select Blueprint y listas adaptables al ancho disponible,
 con fechas UTC explícitas y sin acciones nuevas sobre audio, cola o playlists.
+
+## 11. Despliegue Docker en Ubuntu (F6.1)
+
+`compose.yml` crea `db` (PostgreSQL 17), `api` y `ui`, cada proyecto con su
+Dockerfile multietapa SDK/runtime .NET 10. Solo UI publica un puerto (5050 por
+defecto). Los nombres `api` y `db` se resuelven únicamente dentro de Docker:
+`ApiBaseUrl=http://api:8080/` y conexión de estadísticas a `db`.
+La BD es nueva e independiente de la utilizada en desarrollo en el NAS.
+La migración de F5.1 se aplica mediante el servicio de arranque existente;
+Compose espera a que PostgreSQL esté disponible antes de iniciar la API.
+
+El audio es la única petición de streaming ejecutada directamente por el
+navegador; tags, carátulas, onda y tracklist se solicitan desde Blazor Server.
+En Compose, `StreamingProxy:Enabled=true` activa YARP en UI, configurado con
+una ruta GET `/api/streaming/{**path}` hacia la API. `BottomPlayer` presenta
+el `PathAndQuery` del audio como URL de mismo origen, conservando las URLs
+internas de la cola y del resto de recursos. YARP transmite el cuerpo y las
+cabeceras Range/Content-Range sin descargar el MP3 entero en memoria.
+No se exponen endpoints de configuración o estadísticas a través del proxy.
+Sin esta opción, Visual Studio conserva las URLs absolutas y los puertos
+habituales, sin registrar rutas de proxy.
+
+El Dockerfile de UI publica con los componentes Razor presentes al restaurar:
+restaurar solo los `.csproj` antes de copiarlos puede omitir los recursos
+internos de Blazor en .NET 10 y dejar una página sin interactividad.
+
+La API incorpora FFmpeg/FFprobe del sistema y ejecuta como usuario `app`
+(UID 1654), igual que UI. Los bind mounts del host se presentan como
+`/music/Tracks`, `/music/Sessions`, `/music/Remember` (solo lectura) y
+`/music/Playlists` (escritura necesaria para M3U). No crea directorios de
+origen si faltan: `create_host_path: false`. La cuenta necesita permisos de
+lectura/recorrido y escritura en playlists; las credenciales de montaje del NAS
+pertenecen al host Ubuntu, no a las imágenes ni al JSON de configuración.
+
+Volúmenes nombrados, independientes del contenedor: `statistics` para datos
+PostgreSQL, `api-data` para `App_Data/settings.json` y ondas v2, y `ui-keys`
+para las claves de Data Protection bajo `/home/app/.aspnet/DataProtection-Keys`.
+Estas claves deben tratarse como privadas; no se cifran con un proveedor externo.
+La cola sigue siendo memoria de circuito, no persiste al recrear UI.
+`.dockerignore` excluye Git, salidas de compilación, `App_Data`, configuración de
+Desarrollo y archivos de entorno. `.env` no se versiona; `.env.example` no tiene
+contraseña y Compose exige rellenarla. No se copian user-secrets al contenedor.
+HTTP sin autenticación, exclusivamente en LAN/VPN; no publicar en Internet.
+Arranque, permisos, compatibilidad de rutas M3U y checklist en `VALIDACIONES.md`.

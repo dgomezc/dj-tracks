@@ -242,6 +242,16 @@ El estado de entrega y las checklists se mantienen en `VALIDACIONES.md`. Una imp
 
 ### Bloque 6 — Cierre
 - **F6.1 Docker**: Dockerfiles (con ffmpeg si se usa), `docker-compose` (db, api, ui), despliegue en Ubuntu Server.
+  Decisiones confirmadas el 12/11/2026: PostgreSQL nuevo en contenedor, sin
+  sustituir ni importar automáticamente la BD del NAS; una única URL pública
+  para interfaz y audio. API/PostgreSQL quedan sin puertos publicados.
+  La UI usa YARP para retransmitir GET de streaming al servicio interno;
+  las demás llamadas HTTP siguen siendo de servidor a servidor.
+  Mantiene Visual Studio sin proxy por defecto. Imágenes multietapa .NET 10,
+  FFmpeg en API y ejecución API/UI sin root. Tres bibliotecas montadas en
+  solo lectura, playlists en lectura/escritura y volúmenes persistentes para
+  estadísticas, ajustes/ondas y claves de protección de datos de Blazor.
+  Despliegue HTTP solo en red local/VPN, sin añadir autenticación ni TLS.
 - **F6.2 (fase 2 del proyecto) Subsonic**: análisis de exponer API compatible para clientes Android.
 
 ## Aclaraciones confirmadas

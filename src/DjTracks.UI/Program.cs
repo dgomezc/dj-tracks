@@ -14,6 +14,9 @@ builder.Services.AddScoped<PlaylistChanges>();
 builder.Services.AddHttpClient("Api", client =>
     client.BaseAddress = new Uri(builder.Configuration["ApiBaseUrl"]!));
 builder.Services.AddScoped(sp => sp.GetRequiredService<IHttpClientFactory>().CreateClient("Api"));
+var streamingProxyEnabled = builder.Configuration.GetValue<bool>("StreamingProxy:Enabled");
+if (streamingProxyEnabled)
+    builder.Services.AddReverseProxy().LoadFromConfig(builder.Configuration.GetSection("ReverseProxy"));
 
 var app = builder.Build();
 
@@ -29,6 +32,8 @@ app.UseHttpsRedirection();
 
 app.UseAntiforgery();
 
+if (streamingProxyEnabled)
+    app.MapReverseProxy();
 app.MapStaticAssets();
 app.MapRazorComponents<App>()
     .AddInteractiveServerRenderMode();
