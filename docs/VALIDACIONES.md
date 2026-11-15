@@ -7,21 +7,33 @@ Consultar siempre el estado real de GitHub antes de actuar sobre un PR.
 
 ## Estado actual
 
-- **F2.3 en desarrollo, pendiente de validación del usuario**:
+- **F6.2 en análisis, pendiente de validación del usuario**:
+  rama `fase/f6-2-subsonic`, desde `develop`; PR
+  [#24](https://github.com/dgomezc/dj-tracks/pull/24) hacia `develop`.
+  Aún no se ha implementado ninguna API Subsonic ni comprobado Tempus contra
+  DJ Tracks. Decisiones: Tempus,
+  bibliotecas por carpetas, reproducción en línea y playlists de solo lectura,
+  sin descargas ni estadísticas de Tempus; LAN/VPN con credenciales verificadas.
+  El 15/11/2026 el usuario pide no continuar; esperar una nueva instrucción.
+- **F2.3 validada globalmente por el usuario e integrada**:
   rama `fase/f2-3-marcas-tracklist`, desde `develop` con F6.1 integrada.
-  PR [#23](https://github.com/dgomezc/dj-tracks/pull/23) abierto hacia `develop`.
+  PR [#23](https://github.com/dgomezc/dj-tracks/pull/23) mergeado en `develop`
+  (`3201c116fd515d82f8e8ddd15363f8a57098ff0c`).
   Decisiones del 15/11/2026: carpeta independiente configurable y escribible;
   asociar marcas al texto exacto, avisar de duplicados y de marcas sin línea;
-  conservar el único reproductor inferior. No avanzar a F6.2.
+  conservar el único reproductor inferior.
   Revisión solicitada: «A veces los tooltips de las marcas no desaparecen y
   es imposible borrar o editar las marcas» y añadir líneas verticales
-  pulsables en la onda. Pendiente de nueva validación, sin aceptación global.
+  pulsables en la onda. Sin atribuir comprobaciones individuales no confirmadas.
   El usuario prefiere recuperar los botones con icono y tooltip sin el bloqueo.
   Después indica que funcionan bien, pero la captura muestra los iconos muy
   separados y desalineados. Tras corregirlos confirma «ok, ya está perfecto.
   continúa» el 15/11/2026; esta confirmación se refiere a la corrección visual
   y no detalla otras comprobaciones individuales. Autoriza mezclar el PR y
-  continuar el 15/11/2026.
+  continuar el 15/11/2026. Posteriormente confirma «la tarea f2.3 la podemos
+  dar por terminada, mezcla lo que necesites pero no continúes». Esta aceptación
+  global no atribuye comprobaciones individuales adicionales ni implica haber
+  probado Docker para F2.3.
 - **F6.1 validada por el usuario el 15/11/2026 y mergeada**:
   rama `fase/f6-1-docker`, desde `develop` con F5.2 integrada.
   PR [#22](https://github.com/dgomezc/dj-tracks/pull/22) mergeado en `develop`
@@ -174,7 +186,28 @@ Consultar siempre el estado real de GitHub antes de actuar sobre un PR.
 - Port F1.2 recibido de `dgomezc-fase-f1-2-filtros` (`1354305` código, `c38cddb` documentación). Se integra mediante merge en la rama original: se conservan ambos historiales y se resuelven los conflictos de código con la versión adaptada a Result/FluentValidation. Sin PR duplicado ni reescritura de ramas. Cambios preexistentes y JSON privado conservados; no se borran worktrees.
 - Comprobación de integración en checkout original (27/10/2026): `src` coincide con el port recibido; compilación completa con 0 errores y advertencias. API/UI aisladas con MP3 sintéticos: multiaño/multigrupo/multisubestilo, alias, ausencia de duplicados, resultados vacíos, explorador, errores 400/404, opciones, carga de ajustes y página Tracks correctos. No equivale a validación visual de biblioteca real. Servicios y fixtures temporales retirados después de comprobar.
 
-## F2.3: marcas de tracklist (PR #23; pendiente de validación)
+## F6.2: análisis de compatibilidad con Tempus
+
+Las decisiones, riesgos y posibles puntos de integración están en `PLAN.md`.
+Se ha consultado la documentación OpenSubsonic y el código público de Tempus;
+no se ha instalado ni conectado Tempus y todavía no hay API compatible.
+La lista de endpoints es preliminar y no certifica que el cliente funcione.
+
+**Pendiente del usuario:**
+
+- [ ] Revisar el alcance: exploración por carpetas de las tres bibliotecas,
+  reproducción en línea y playlists de solo lectura; sin descargas, edición
+  de playlists ni estadísticas desde Tempus.
+- [ ] Revisar el modelo LAN/VPN con credenciales Subsonic: el token puede
+  reutilizarse si se intercepta, HTTP no lo protege y la autenticación nueva no
+  protege las páginas o la API existentes. Confirmar el diseño antes de programar.
+
+**Comprobado por el agente:** fuentes oficiales de OpenSubsonic y código público
+de Tempus; el cliente dispone de navegación por índices/directorios y usa JSON
+y token Subsonic. Inspeccionadas las bibliotecas existentes y el proxy Docker.
+Sin cambios de ejecución ni validación manual de Tempus.
+
+## F2.3: marcas de tracklist (PR #23; validado e integrado)
 
 Las marcas se guardan automáticamente como JSON en una carpeta nueva, separada
 de Sessions. Solo se puede marcar una línea no vacía y única. Al pulsar una
@@ -194,7 +227,7 @@ Configuración, conservar las rutas existentes, introducir la nueva carpeta
 se puede leer sin configurar marcas, pero hay que completar la nueva ruta para
 guardar ajustes o usar las marcas.
 
-**Pendiente del usuario:**
+**Checklist propuesta al usuario en la entrega:**
 
 - [ ] **Revisión de iconos:** pasar el puntero y tabular por Marcar, Sustituir
   y Borrar: se muestra el tooltip de la acción y desaparece al salir. Crear,
