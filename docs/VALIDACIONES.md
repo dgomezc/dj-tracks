@@ -7,9 +7,10 @@ Consultar siempre el estado real de GitHub antes de actuar sobre un PR.
 
 ## Estado actual
 
-- **Revisión de rutas en desarrollo, pendiente de validación del usuario**:
+- **Revisión de rutas implementada, pendiente de validación del usuario**:
   rama `dgomezc-configuracion-de-carpetas`, desde `develop` con F2.3 integrada.
-  PR pendiente de publicación hacia `develop`. No autoriza merge ni avanzar
+  PR [#25](https://github.com/dgomezc/dj-tracks/pull/25) abierto hacia
+  `develop`. No autoriza merge ni avanzar
   F6.2. Estructura confirmada el 15/11/2026: `dj-tracks-data` contiene
   `playlists`, `session-marks` y `tracks-waves`; Tracks, Sessions y Remember
   se configuran por separado. Sin formulario de rutas ni JSON de ajustes.
