@@ -8,8 +8,10 @@ Consultar siempre el estado real de GitHub antes de actuar sobre un PR.
 ## Estado actual
 
 - **F6.2 en análisis, pendiente de validación del usuario**:
-  rama `fase/f6-2-subsonic`, desde `develop`. Aún no se ha implementado ninguna
-  API Subsonic ni comprobado Tempus contra DJ Tracks. Decisiones: Tempus,
+  rama `fase/f6-2-subsonic`, desde `develop`; PR
+  [#24](https://github.com/dgomezc/dj-tracks/pull/24) hacia `develop`.
+  Aún no se ha implementado ninguna API Subsonic ni comprobado Tempus contra
+  DJ Tracks. Decisiones: Tempus,
   bibliotecas por carpetas, reproducción en línea y playlists de solo lectura,
   sin descargas ni estadísticas de Tempus; LAN/VPN con credenciales verificadas.
 - **F2.3 integrada con autorización del usuario**:
