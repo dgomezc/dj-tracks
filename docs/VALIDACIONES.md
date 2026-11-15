@@ -7,9 +7,12 @@ Consultar siempre el estado real de GitHub antes de actuar sobre un PR.
 
 ## Estado actual
 
-- **F6.1 entregada, pendiente de validación del usuario**:
+- **F6.1 validada por el usuario el 15/11/2026, pendiente de merge**:
   rama `fase/f6-1-docker`, desde `develop` con F5.2 integrada.
   PR [#22](https://github.com/dgomezc/dj-tracks/pull/22) abierto hacia `develop`.
+  El 15/11/2026 el usuario confirma: «El despliegue en docker ha funcionado
+  correctamente». Después confirma: «todos los checklist han pasado
+  correctamente». La validación no autoriza el merge.
   Decisiones del 12/11/2026: PostgreSQL nuevo junto a API/UI, una única URL
   pública para interfaz/audio y API/BD internas. No avanzar a F6.2 ni a F2.3.
 - **F5.2 validada globalmente por el usuario el 12/11/2026**:
@@ -153,7 +156,11 @@ Consultar siempre el estado real de GitHub antes de actuar sobre un PR.
 - Port F1.2 recibido de `dgomezc-fase-f1-2-filtros` (`1354305` código, `c38cddb` documentación). Se integra mediante merge en la rama original: se conservan ambos historiales y se resuelven los conflictos de código con la versión adaptada a Result/FluentValidation. Sin PR duplicado ni reescritura de ramas. Cambios preexistentes y JSON privado conservados; no se borran worktrees.
 - Comprobación de integración en checkout original (27/10/2026): `src` coincide con el port recibido; compilación completa con 0 errores y advertencias. API/UI aisladas con MP3 sintéticos: multiaño/multigrupo/multisubestilo, alias, ausencia de duplicados, resultados vacíos, explorador, errores 400/404, opciones, carga de ajustes y página Tracks correctos. No equivale a validación visual de biblioteca real. Servicios y fixtures temporales retirados después de comprobar.
 
-## F6.1: Docker en Ubuntu (PR #22; pendiente de validación del usuario)
+## F6.1: Docker en Ubuntu (PR #22; validada por el usuario, pendiente de merge)
+
+El 15/11/2026 el usuario indica: «El despliegue en docker ha funcionado
+correctamente» y confirma: «todos los checklist han pasado correctamente».
+No ha autorizado el merge.
 
 Tres servicios: PostgreSQL 17 nuevo, API con FFmpeg y UI con proxy de audio.
 Solo UI publica el puerto 5050, configurable con `UI_PORT`. No modifica la BD
@@ -263,27 +270,27 @@ Los comandos de esta sección son para Linux, no PowerShell.
 - Despliegue HTTP sin autenticación, solo LAN/VPN. No abrir el puerto al
   exterior ni publicar API/BD. TLS/autenticación no se añaden en esta fase.
 
-### Checklist pendiente del usuario
+### Checklist validada por el usuario
 
-- [ ] **Arranque Ubuntu:** construir/arrancar con carpetas de prueba; `db`
+- [x] **Arranque Ubuntu:** construir/arrancar con carpetas de prueba; `db`
   saludable, migración aplicada y «Probar conexión» sin pendientes.
   Solo UI tiene puerto publicado; entrar desde otro equipo de la LAN/VPN.
-- [ ] **Bibliotecas y rutas:** guardar las cuatro rutas de contenedor y
+- [x] **Bibliotecas y rutas:** guardar las cuatro rutas de contenedor y
   navegar por Tracks, Sessions y Remember; tags y tracklist se mantienen.
   Música de solo lectura y playlists escribibles para UID 1654.
-- [ ] **Audio de mismo origen:** reproducir las tres bibliotecas desde otro
+- [x] **Audio de mismo origen:** reproducir las tres bibliotecas desde otro
   equipo; suena sin resolver el nombre interno `api`. Buscar en el audio
   funciona con respuestas Range/206; onda progresiva/cacheada y carátula
   siguen disponibles. Revisar una sesión larga y controles de cola/volumen.
-- [ ] **Playlists:** crear/editar manual y automática en carpeta de prueba;
+- [x] **Playlists:** crear/editar manual y automática en carpeta de prueba;
   M3U visible en host, carga sin duplicados ni interrupción. Añadir una copia
   MP3 válida y recargar la automática cuando el índice se haya actualizado
   refleja el cambio (regenerar si el NAS no avisa); sin recargar no
   cambia sola la pantalla ni la cola. Verificar compatibilidad de M3U copiados.
-- [ ] **Escuchas y persistencia:** escuchar al menos 30 segundos, comprobar
+- [x] **Escuchas y persistencia:** escuchar al menos 30 segundos, comprobar
   Inicio y recrear con `docker compose up -d --force-recreate`. Ajustes,
   playlists, ondas y escuchas permanecen; cola/circuito no se conservan.
-- [ ] **Regresión Visual Studio:** detener Compose si usa 5050; arrancar
+- [x] **Regresión Visual Studio:** detener Compose si usa 5050; arrancar
   perfil DJ Tracks (Api + UI) en VS 2026, UI 5050/API 5247. Biblioteca,
   reproducción/seek/onda y prueba de conexión a la BD de desarrollo siguen
   funcionando sin activar el proxy ni alterar sus user-secrets.
@@ -329,10 +336,10 @@ Los comandos de esta sección son para Linux, no PowerShell.
 - Servicios locales detenidos. Contenedores, imágenes, volúmenes exclusivamente
   sintéticos, credencial temporal y fixtures de esta comprobación retirados;
   contenedores preexistentes y cachés de música del usuario conservados.
-- No se ha desplegado en Ubuntu/NAS real ni escuchado audio físico; VPN,
-  permisos/montajes reales,
-  sesiones largas y validación completa desde Visual Studio siguen
-  pendientes del usuario. La BD del NAS y sus user-secrets no se han modificado.
+- El agente no ha desplegado en Ubuntu/NAS real ni escuchado audio físico; VPN,
+  permisos/montajes reales y sesiones largas fueron comprobaciones pendientes
+  del usuario en la entrega; este confirmó después toda la checklist. La BD
+  del NAS y sus user-secrets no se han modificado por el agente.
 
 ## F5.2: dashboard de Inicio (PR #21; validada globalmente por el usuario)
 
