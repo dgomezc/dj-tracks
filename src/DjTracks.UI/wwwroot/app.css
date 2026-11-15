@@ -869,9 +869,16 @@ body {
     min-height: 2rem;
 }
 
-.session-mark-action {
-    position: relative;
+.session-mark-actions {
+    display: grid;
+    grid-template-columns: repeat(2, 2.5rem);
     flex: none;
+    white-space: normal;
+}
+
+.session-mark-action {
+    display: inline-flex;
+    position: relative;
 }
 
 .session-mark-tooltip {

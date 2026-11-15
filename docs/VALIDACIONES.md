@@ -17,6 +17,8 @@ Consultar siempre el estado real de GitHub antes de actuar sobre un PR.
   es imposible borrar o editar las marcas» y añadir líneas verticales
   pulsables en la onda. Pendiente de nueva validación, sin aceptación global.
   El usuario prefiere recuperar los botones con icono y tooltip sin el bloqueo.
+  Después indica que funcionan bien, pero la captura muestra los iconos muy
+  separados y desalineados; pendiente de validar la corrección visual.
 - **F6.1 validada por el usuario el 15/11/2026 y mergeada**:
   rama `fase/f6-1-docker`, desde `develop` con F5.2 integrada.
   PR [#22](https://github.com/dgomezc/dj-tracks/pull/22) mergeado en `develop`
@@ -195,6 +197,8 @@ guardar ajustes o usar las marcas.
   y Borrar: se muestra el tooltip de la acción y desaparece al salir. Crear,
   actualizar y borrar repetidamente, incluso con el tooltip visible: ningún
   tooltip queda huérfano ni impide utilizar los controles.
+- [ ] **Corrección visual:** con líneas marcadas y sin marcar, comprobar que
+  los iconos quedan juntos y alineados entre filas; repetir en ventana estrecha.
 - [ ] **Nuevo:** crear marcas al principio, centro y final; las líneas aparecen
   en la onda en sus posiciones. Pulsarlas mientras suena y en pausa: el audio
   salta al tiempo exacto y conserva su estado. Crear, actualizar y borrar:
@@ -247,6 +251,12 @@ sin errores ni advertencias; la salida habitual estaba bloqueada por Visual Stud
 y los procesos API/UI en ejecución. Pendiente comprobar visualmente los nuevos
 tooltips y sus acciones con el navegador y la biblioteca del usuario. Context7
 consultado para Blazor; el servidor MCP de Blueprint no estaba disponible.
+
+**Corrección visual comprobada por el agente:** compilación aislada sin errores
+ni advertencias. En navegador con una sesión sintética se comprobaron filas
+con y sin marca: iconos contiguos y alineados, también con un tracklist de
+260 px de ancho. Crear, sustituir y borrar una marca siguió funcionando.
+Queda pendiente la comprobación visual y con teclado del usuario.
 
 ## F6.1: Docker en Ubuntu (PR #22; validada y mergeada)
 

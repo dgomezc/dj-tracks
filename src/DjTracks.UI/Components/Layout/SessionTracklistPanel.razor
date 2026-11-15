@@ -63,25 +63,27 @@
                             }
                             @if (!string.IsNullOrWhiteSpace(line))
                             {
-                                <span class="session-mark-action">
-                                    <BbButton Variant="ButtonVariant.Ghost" Size="ButtonSize.Icon"
-                                              AriaLabel="@($"{(mark is null ? "Marcar" : "Sustituir marca de")} {line}")"
-                                              Disabled="@(!enabled)" OnClick="() => SaveAsync(line, false)">
-                                        <LucideIcon Name="bookmark" />
-                                    </BbButton>
-                                    <span class="session-mark-tooltip" aria-hidden="true">@(mark is null ? "Marcar posición actual" : "Sustituir marca por posición actual")</span>
-                                </span>
-                                @if (mark is not null)
-                                {
+                                <div class="session-mark-actions">
                                     <span class="session-mark-action">
                                         <BbButton Variant="ButtonVariant.Ghost" Size="ButtonSize.Icon"
-                                                  AriaLabel="@($"Borrar marca de {line}")"
-                                                  Disabled="@(!enabled)" OnClick="() => SaveAsync(line, true)">
-                                            <LucideIcon Name="trash-2" />
+                                                  AriaLabel="@($"{(mark is null ? "Marcar" : "Sustituir marca de")} {line}")"
+                                                  Disabled="@(!enabled)" OnClick="() => SaveAsync(line, false)">
+                                            <LucideIcon Name="bookmark" />
                                         </BbButton>
-                                        <span class="session-mark-tooltip" aria-hidden="true">Borrar marca</span>
+                                        <span class="session-mark-tooltip" aria-hidden="true">@(mark is null ? "Marcar posición actual" : "Sustituir marca por posición actual")</span>
                                     </span>
-                                }
+                                    @if (mark is not null)
+                                    {
+                                        <span class="session-mark-action">
+                                            <BbButton Variant="ButtonVariant.Ghost" Size="ButtonSize.Icon"
+                                                      AriaLabel="@($"Borrar marca de {line}")"
+                                                      Disabled="@(!enabled)" OnClick="() => SaveAsync(line, true)">
+                                                <LucideIcon Name="trash-2" />
+                                            </BbButton>
+                                            <span class="session-mark-tooltip" aria-hidden="true">Borrar marca</span>
+                                        </span>
+                                    }
+                                </div>
                             }
                         </div>
                     }
