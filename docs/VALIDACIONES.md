@@ -18,7 +18,10 @@ Consultar siempre el estado real de GitHub antes de actuar sobre un PR.
   pulsables en la onda. Pendiente de nueva validación, sin aceptación global.
   El usuario prefiere recuperar los botones con icono y tooltip sin el bloqueo.
   Después indica que funcionan bien, pero la captura muestra los iconos muy
-  separados y desalineados; pendiente de validar la corrección visual.
+  separados y desalineados. Tras corregirlos confirma «ok, ya está perfecto.
+  continúa» el 15/11/2026; esta confirmación se refiere a la corrección visual
+  y no detalla otras comprobaciones individuales. Autoriza mezclar el PR y
+  continuar el 15/11/2026.
 - **F6.1 validada por el usuario el 15/11/2026 y mergeada**:
   rama `fase/f6-1-docker`, desde `develop` con F5.2 integrada.
   PR [#22](https://github.com/dgomezc/dj-tracks/pull/22) mergeado en `develop`
