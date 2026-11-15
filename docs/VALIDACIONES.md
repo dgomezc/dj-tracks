@@ -7,16 +7,22 @@ Consultar siempre el estado real de GitHub antes de actuar sobre un PR.
 
 ## Estado actual
 
-- **F6.1 validada por el usuario el 15/11/2026, pendiente de merge**:
+- **F2.3 en desarrollo, pendiente de validación del usuario**:
+  rama `fase/f2-3-marcas-tracklist`, desde `develop` con F6.1 integrada.
+  Decisiones del 15/11/2026: carpeta independiente configurable y escribible;
+  asociar marcas al texto exacto, avisar de duplicados y de marcas sin línea;
+  conservar el único reproductor inferior. No avanzar a F6.2.
+- **F6.1 validada por el usuario el 15/11/2026 y mergeada**:
   rama `fase/f6-1-docker`, desde `develop` con F5.2 integrada.
-  PR [#22](https://github.com/dgomezc/dj-tracks/pull/22) abierto hacia `develop`.
+  PR [#22](https://github.com/dgomezc/dj-tracks/pull/22) mergeado en `develop`
+  el 15/11/2026 a las 08:17:09 UTC, commit `73e79da7d574b698e08f050816ff9b085cb165ad`.
   El 15/11/2026 el usuario confirma: «El despliegue en docker ha funcionado
   correctamente». Después confirma: «todos los checklist han pasado
   correctamente». Posteriormente autoriza: «Todo ok, mezcla el PR pero no
   continúes a la siguiente fase». No iniciar fases posteriores hasta nueva
-  instrucción del usuario; consultar GitHub para el estado real del merge.
+  instrucción del usuario; posteriormente solicita expresamente F2.3.
   Decisiones del 12/11/2026: PostgreSQL nuevo junto a API/UI, una única URL
-  pública para interfaz/audio y API/BD internas. No avanzar a F6.2 ni a F2.3.
+  pública para interfaz/audio y API/BD internas.
 - **F5.2 validada globalmente por el usuario el 12/11/2026**:
   rama `fase/f5-2-dashboard`, desde `develop` con F5.1 integrada.
   PR [#21](https://github.com/dgomezc/dj-tracks/pull/21) mergeado en `develop`
@@ -158,7 +164,57 @@ Consultar siempre el estado real de GitHub antes de actuar sobre un PR.
 - Port F1.2 recibido de `dgomezc-fase-f1-2-filtros` (`1354305` código, `c38cddb` documentación). Se integra mediante merge en la rama original: se conservan ambos historiales y se resuelven los conflictos de código con la versión adaptada a Result/FluentValidation. Sin PR duplicado ni reescritura de ramas. Cambios preexistentes y JSON privado conservados; no se borran worktrees.
 - Comprobación de integración en checkout original (27/10/2026): `src` coincide con el port recibido; compilación completa con 0 errores y advertencias. API/UI aisladas con MP3 sintéticos: multiaño/multigrupo/multisubestilo, alias, ausencia de duplicados, resultados vacíos, explorador, errores 400/404, opciones, carga de ajustes y página Tracks correctos. No equivale a validación visual de biblioteca real. Servicios y fixtures temporales retirados después de comprobar.
 
-## F6.1: Docker en Ubuntu (PR #22; validada por el usuario, pendiente de merge)
+## F2.3: marcas de tracklist (pendiente de validación)
+
+Las marcas se guardan automáticamente como JSON en una carpeta nueva, separada
+de Sessions. Solo se puede marcar una línea no vacía y única. Al pulsar una
+línea marcada se salta a su tiempo sin cambiar pausa/reproducción; se puede
+sustituir o borrar. Los cambios de orden conservan las marcas por texto exacto.
+Las marcas de líneas ausentes se conservan y se muestra un aviso; las líneas
+duplicadas no se pueden usar hasta hacerlas únicas. No se modifica el TXT.
+Si se renombra el MP3 o sus carpetas, sus marcas dejan de asociarse; no se
+migran automáticamente. Se admite un solo proceso de API por carpeta de marcas.
+
+**Requisitos:** Visual Studio 2026 y .NET 10; perfil **DJ Tracks (Api + UI)**,
+UI `http://localhost:5050`, API `http://localhost:5247`, FFmpeg en la API.
+Crear una carpeta para marcas con permisos de lectura/escritura y disponer de
+una sesión MP3 con TXT compatible; usar copias para editar el TXT. En
+Configuración, conservar las rutas existentes, introducir la nueva carpeta
+«Marcas de sesiones» y guardar las cinco rutas. Un JSON de ajustes anterior
+se puede leer sin configurar marcas, pero hay que completar la nueva ruta para
+guardar ajustes o usar las marcas.
+
+**Pendiente del usuario:**
+
+- [ ] Reproducir la sesión y marcar dos líneas a tiempos diferentes: aparecen
+  los tiempos y la reproducción continúa sin interrupción.
+- [ ] Pulsar una línea marcada mientras suena y después en pausa: salta al tiempo
+  correspondiente y conserva respectivamente reproducción y pausa.
+- [ ] Sustituir una marca, borrar otra y recargar el tracklist o reiniciar la
+  aplicación: se conservan los cambios y no se modifica el TXT.
+- [ ] Reordenar las líneas del TXT de copia y recargar: las marcas siguen a su
+  texto. Modificar una línea marcada: se avisa de la marca no asociada; restaurar
+  el texto la recupera. Duplicar una línea: se avisa y se deshabilitan sus acciones.
+- [ ] Cambiar a otra sesión y a Tracks/Remember, navegar y usar la cola: no se
+  aplican marcas a otro audio y la barra, onda y reproducción siguen funcionando.
+- [ ] En una sesión sin TXT o con TXT vacío y con la carpeta de marcas inaccesible,
+  comprobar los avisos correspondientes sin interrumpir el audio.
+- [ ] En ventana estrecha y tema claro/oscuro, comprobar legibilidad y botones.
+- [ ] Si se usa Docker: crear una carpeta escribible por UID 1654, añadir
+  `SESSION_MARKS_PATH` al `.env`, reconstruir con `docker compose up -d --build`
+  y configurar `/music/SessionMarks`. Crear una marca, recrear contenedores y
+  comprobar que persiste; Sessions sigue montada en solo lectura.
+
+**Comprobado por el agente:** compilación de la solución; API con audio/TXT
+sintéticos: persistencia, reordenación y rechazo de líneas duplicadas o cambiadas.
+En navegador aislado se creó y borró una marca y se saltó a otra con audio pausado.
+Compose se validó sintácticamente con valores sintéticos; no se ha validado
+un despliegue Docker de F2.3 ni el entorno real del usuario. También se
+comprobó que los ajustes antiguos se leen y que un JSON de marcas corrupto
+no se sobrescribe. El servidor MCP de Blazor Blueprint no estaba disponible
+en esta sesión; se reutilizaron los controles existentes del proyecto.
+
+## F6.1: Docker en Ubuntu (PR #22; validada y mergeada)
 
 El 15/11/2026 el usuario indica: «El despliegue en docker ha funcionado
 correctamente» y confirma: «todos los checklist han pasado correctamente».

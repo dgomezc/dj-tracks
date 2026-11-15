@@ -107,7 +107,9 @@ public sealed class JsonSettingsStore(string filePath, ILogger<JsonSettingsStore
                 stream, JsonOptions, cancellationToken);
             if (settings is null || new[] { settings.Tracks, settings.Sessions, settings.Remember,
                     settings.Playlists }
-                .Any(path => string.IsNullOrWhiteSpace(path) || !Path.IsPathFullyQualified(path)))
+                .Any(path => string.IsNullOrWhiteSpace(path) || !Path.IsPathFullyQualified(path))
+                || settings.SessionMarks is null
+                || (settings.SessionMarks.Length > 0 && !Path.IsPathFullyQualified(settings.SessionMarks)))
             {
                 throw new JsonException("El JSON de ajustes debe contener las cuatro rutas absolutas.");
             }

@@ -578,7 +578,8 @@ internos de Blazor en .NET 10 y dejar una página sin interactividad.
 La API incorpora FFmpeg/FFprobe del sistema y ejecuta como usuario `app`
 (UID 1654), igual que UI. Los bind mounts del host se presentan como
 `/music/Tracks`, `/music/Sessions`, `/music/Remember` (solo lectura) y
-`/music/Playlists` (escritura necesaria para M3U). No crea directorios de
+`/music/Playlists` (escritura necesaria para M3U) y `/music/SessionMarks`
+(escritura necesaria para marcas). No crea directorios de
 origen si faltan: `create_host_path: false`. La cuenta necesita permisos de
 lectura/recorrido y escritura en playlists; las credenciales de montaje del NAS
 pertenecen al host Ubuntu, no a las imágenes ni al JSON de configuración.
@@ -593,3 +594,27 @@ Desarrollo y archivos de entorno. `.env` no se versiona; `.env.example` no tiene
 contraseña y Compose exige rellenarla. No se copian user-secrets al contenedor.
 HTTP sin autenticación, exclusivamente en LAN/VPN; no publicar en Internet.
 Arranque, permisos, compatibilidad de rutas M3U y checklist en `VALIDACIONES.md`.
+
+## 12. Marcas de tracklist (F2.3)
+
+`SessionMarkStore` guarda un JSON versionado por identificadores de MP3 (año,
+carpeta y fichero) en la carpeta configurable de marcas, independiente de
+Sessions. Usa nombre derivado de SHA-256, bloqueo por proceso y escritura
+atómica; un JSON inválido o un enlace no se sobrescribe. La configuración
+anterior sin esta ruta sigue siendo legible, pero para guardar ajustes se
+requiere configurar una carpeta existente con permisos de lectura y escritura.
+
+Los endpoints `GET` y `PUT /api/library/sessions/marks` leen o actualizan una
+marca mediante `Result`/`AppError`. Al guardar se vuelve a leer el TXT: solo
+se permite un texto de línea único y presente. El texto exacto identifica la
+marca; al reordenar se conserva, al cambiar o borrar la línea queda almacenada
+sin asociar y se avisa. Los duplicados no se pueden usar hasta hacerlos únicos.
+Sin borrar ni modificar el TXT. Un proceso de API por carpeta de marcas.
+
+`SessionTracklistPanel` presenta las líneas sin interpretar HTML, lee marcas
+por HTTP y usa el audio existente de la barra mediante JS para capturar el
+tiempo o saltar sin alterar pausa/reproducción. La versión de reproducción
+impide actuar sobre otro audio al cambiar de pista. No se crea un segundo
+reproductor ni se alteran cola, onda o estadísticas. Compose monta
+`SESSION_MARKS_PATH` con escritura en `/music/SessionMarks`; hay que configurar
+esta ruta también al actualizar una instalación existente.

@@ -67,7 +67,8 @@ guardar estadísticas, pero no para reproducir.
    Sustituye los valores por los de tu base de datos. No publiques credenciales.
    La API intenta aplicar las migraciones al arrancar.
 3. Inicia con F5 y abre [Configuración](http://localhost:5050/settings).
-   Guarda las cuatro rutas absolutas accesibles desde la API y, si usas
+   Guarda las cinco rutas absolutas accesibles desde la API, incluida una carpeta
+   de marcas de sesiones con permisos de escritura, y, si usas
    PostgreSQL, pulsa **Probar conexión**.
 
 La UI usa `http://localhost:5050` y la API `http://localhost:5247`. Para
@@ -78,7 +79,7 @@ compilar desde la raíz: `dotnet build DjTracks.slnx`.
 Requisitos: Docker Engine y el plugin Docker Compose. Si la música está en
 un NAS, monta y verifica las carpetas en Ubuntu antes de arrancar: Docker no
 configura el montaje ni sus credenciales. Las bibliotecas necesitan permisos de
-lectura y recorrido para UID 1654; la carpeta de playlists necesita escritura.
+lectura y recorrido para UID 1654; las carpetas de playlists y marcas necesitan escritura.
 
 1. En la raíz del proyecto, prepara la configuración:
 
@@ -88,7 +89,8 @@ lectura y recorrido para UID 1654; la carpeta de playlists necesita escritura.
    openssl rand -hex 32
    ```
 
-   Edita `.env`: indica las cuatro rutas absolutas **del host**, pega los
+   Edita `.env`: indica las cinco rutas absolutas **del host**, incluida
+   `SESSION_MARKS_PATH` para las marcas (también en instalaciones existentes), pega los
    64 caracteres generados en `POSTGRES_PASSWORD` y ajusta `UI_PORT` si es
    necesario. No compartas ni subas `.env`.
 2. Construye y arranca los servicios:
@@ -101,12 +103,12 @@ lectura y recorrido para UID 1654; la carpeta de playlists necesita escritura.
 
 3. Abre `http://IP_DEL_SERVIDOR:5050/settings` desde la LAN/VPN. Guarda las
    rutas **del contenedor** `/music/Tracks`, `/music/Sessions`,
-   `/music/Remember` y `/music/Playlists`. Pulsa **Probar conexión**: debe
+   `/music/Remember`, `/music/Playlists` y `/music/SessionMarks`. Pulsa **Probar conexión**: debe
    mostrar la migración inicial aplicada y ninguna pendiente.
 
 Compose crea una base PostgreSQL nueva, independiente de la de desarrollo,
 y publica solo la UI. Los volúmenes conservan estadísticas, ajustes, ondas y
-claves de Blazor; los M3U se guardan en la carpeta de playlists del host.
+claves de Blazor; los M3U y las marcas JSON se guardan en sus carpetas del host.
 Haz copias de seguridad y no uses `docker compose down -v` si deseas conservar
 los datos. Cambiar la contraseña de `.env` no la cambia en una base ya creada.
 

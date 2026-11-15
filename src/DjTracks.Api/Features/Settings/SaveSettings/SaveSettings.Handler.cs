@@ -14,7 +14,8 @@ public sealed class SaveSettingsHandler(JsonSettingsStore settingsStore, Playlis
             Tracks = request.Tracks!.Trim(),
             Sessions = request.Sessions!.Trim(),
             Remember = request.Remember!.Trim(),
-            Playlists = request.Playlists!.Trim()
+            Playlists = request.Playlists!.Trim(),
+            SessionMarks = request.SessionMarks!.Trim()
         };
 
         Dictionary<string, string[]> errors = [];
@@ -23,10 +24,11 @@ public sealed class SaveSettingsHandler(JsonSettingsStore settingsStore, Playlis
             (nameof(settings.Tracks), settings.Tracks),
             (nameof(settings.Sessions), settings.Sessions),
             (nameof(settings.Remember), settings.Remember),
-            (nameof(settings.Playlists), settings.Playlists)
+            (nameof(settings.Playlists), settings.Playlists),
+            (nameof(settings.SessionMarks), settings.SessionMarks)
         })
         {
-            var error = CheckFolder(path, writable: name is nameof(settings.Playlists));
+            var error = CheckFolder(path, writable: name is nameof(settings.Playlists) or nameof(settings.SessionMarks));
             if (error is not null)
                 errors[name] = [error];
         }

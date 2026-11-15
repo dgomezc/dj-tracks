@@ -5,6 +5,7 @@ using DjTracks.Api.Features.Library.GetSessionTracklist;
 using DjTracks.Api.Features.Library.GetRemember;
 using DjTracks.Api.Features.Library.GetTrackFilters;
 using DjTracks.Api.Features.Library.GetFilteredTracks;
+using DjTracks.Api.Features.Library.SessionMarks;
 using DjTracks.Infrastructure.Library;
 
 namespace DjTracks.Api.Features.Library;
@@ -14,11 +15,13 @@ public static class LibraryFeature
     public static IServiceCollection AddLibraryFeature(this IServiceCollection services) => services
         .AddSingleton<TrackLibrary>()
         .AddSingleton<SessionLibrary>()
+        .AddSingleton<SessionMarkStore>()
         .AddSingleton<RememberLibrary>()
         .AddScoped<GetLibrarySummaryHandler>()
         .AddScoped<GetRememberHandler>()
         .AddScoped<GetSessionsHandler>()
         .AddScoped<GetSessionTracklistHandler>()
+        .AddScoped<SessionMarksHandler>()
         .AddScoped<GetTracksHandler>()
         .AddScoped<GetTrackFiltersHandler>()
         .AddScoped<GetFilteredTracksHandler>();
@@ -30,6 +33,7 @@ public static class LibraryFeature
         api.MapGetSessions();
         api.MapGetRemember();
         api.MapGetSessionTracklist();
+        api.MapSessionMarks();
         api.MapGetTrackFilters();
         api.MapGetFilteredTracks();
         return api;

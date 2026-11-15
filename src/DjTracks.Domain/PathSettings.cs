@@ -15,4 +15,6 @@ public sealed record PathSettings
 
     [JsonRequired]
     public string Playlists { get; set; } = "";
+
+    public string SessionMarks { get; set; } = "";
 }

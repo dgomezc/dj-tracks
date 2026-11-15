@@ -123,7 +123,13 @@ El estado de entrega y las checklists se mantienen en `VALIDACIONES.md`. Una imp
   Sin TXT, vacío o error se indican explícitamente; recargar tracklist no
   interrumpe el audio. Lectura UTF-8 (con/sin BOM) o Unicode con BOM, sin caché ni
   escritura de archivos; un TXT con codificación inválida pide guardarlo como UTF-8.
-- **F2.3 (último, opcional) Marcas de inicio por canción**: marcar posición actual en el tracklist, guardar en JSON junto a la sesión, clic para saltar. Reproductor grande sincronizado en la página principal.
+- **F2.3 (último, opcional) Marcas de inicio por canción**: marcar posición actual
+  en una línea del tracklist, sustituirla o borrarla y pulsar la línea marcada
+  para saltar sin cambiar reproducción/pausa. Decisiones del usuario del
+  15/11/2026: JSON en una carpeta configurable de escritura independiente de
+  Sessions; mantener la barra inferior como único reproductor. Las marcas se
+  vinculan al texto exacto, sobreviven a la reordenación y se conservan si el
+  texto desaparece; las líneas duplicadas no se pueden asociar y se avisa.
 
 ### Bloque 3 — Remember
 - **F3.1 Remember**: selector Cortas/Largas, listado, reproducción y ficha del track.
@@ -249,7 +255,7 @@ El estado de entrega y las checklists se mantienen en `VALIDACIONES.md`. Una imp
   las demás llamadas HTTP siguen siendo de servidor a servidor.
   Mantiene Visual Studio sin proxy por defecto. Imágenes multietapa .NET 10,
   FFmpeg en API y ejecución API/UI sin root. Tres bibliotecas montadas en
-  solo lectura, playlists en lectura/escritura y volúmenes persistentes para
+  solo lectura, playlists y marcas en lectura/escritura y volúmenes persistentes para
   estadísticas, ajustes/ondas y claves de protección de datos de Blazor.
   Despliegue HTTP solo en red local/VPN, sin añadir autenticación ni TLS.
 - **F6.2 (fase 2 del proyecto) Subsonic**: análisis de exponer API compatible para clientes Android.

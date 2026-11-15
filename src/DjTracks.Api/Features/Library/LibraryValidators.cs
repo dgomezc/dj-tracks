@@ -4,6 +4,7 @@ using DjTracks.Api.Features.Library.GetSessions;
 using DjTracks.Api.Features.Library.GetSessionTracklist;
 using DjTracks.Api.Features.Library.GetRemember;
 using DjTracks.Api.Features.Library.GetFilteredTracks;
+using DjTracks.Api.Features.Library.SessionMarks;
 using FluentValidation;
 
 namespace DjTracks.Api.Features.Library;
@@ -69,6 +70,42 @@ public sealed class GetSessionTracklistRequestValidator : AbstractValidator<GetS
         RuleFor(request => request.FileName).Must(name => BeName(name)
                 && string.Equals(Path.GetExtension(name), ".mp3", StringComparison.OrdinalIgnoreCase))
             .WithMessage("El fichero debe ser un nombre de archivo MP3, no una ruta.");
+    }
+
+    public sealed class GetSessionMarksRequestValidator : AbstractValidator<GetSessionMarksRequest>
+    {
+        public GetSessionMarksRequestValidator()
+        {
+            RuleFor(request => request.Year).Must(SessionMarkValidation.BeName).WithMessage("Año no válido.");
+            RuleFor(request => request.Session).Must(SessionMarkValidation.BeName).WithMessage("Sesión no válida.");
+            RuleFor(request => request.FileName).Must(SessionMarkValidation.BeMp3).WithMessage("Fichero MP3 no válido.");
+        }
+    }
+
+    public sealed class SaveSessionMarkRequestValidator : AbstractValidator<SaveSessionMarkRequest>
+    {
+        public SaveSessionMarkRequestValidator()
+        {
+            RuleFor(request => request.Year).Must(SessionMarkValidation.BeName).WithMessage("Año no válido.");
+            RuleFor(request => request.Session).Must(SessionMarkValidation.BeName).WithMessage("Sesión no válida.");
+            RuleFor(request => request.FileName).Must(SessionMarkValidation.BeMp3).WithMessage("Fichero MP3 no válido.");
+            RuleFor(request => request.Line).Must(line => !string.IsNullOrWhiteSpace(line)
+                && line.Length <= 10000 && !line.Contains('\n') && !line.Contains('\r'))
+                .WithMessage("La línea debe contener texto en una sola línea.");
+            RuleFor(request => request.Seconds).Must(seconds => seconds is null
+                || (double.IsFinite(seconds.Value) && seconds.Value >= 0
+                    && seconds.Value < TimeSpan.MaxValue.TotalSeconds - 1))
+                .WithMessage("La posición debe ser un número no negativo.");
+        }
+    }
+
+    internal static class SessionMarkValidation
+    {
+        public static bool BeName(string? name) => !string.IsNullOrWhiteSpace(name)
+            && name is not ("." or "..") && name.IndexOfAny(['/', '\\', ':']) < 0 && !Path.IsPathRooted(name);
+
+        public static bool BeMp3(string? name) => BeName(name)
+            && string.Equals(Path.GetExtension(name), ".mp3", StringComparison.OrdinalIgnoreCase);
     }
 
     private static bool BeName(string? name) =>

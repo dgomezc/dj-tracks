@@ -12,6 +12,7 @@ public sealed class SaveSettingsRequestValidator : AbstractValidator<SaveSetting
         PathRule(request => request.Sessions);
         PathRule(request => request.Remember);
         PathRule(request => request.Playlists);
+        PathRule(request => request.SessionMarks);
     }
 
     private void PathRule(Expression<Func<SaveSettingsRequest, string?>> path) =>
