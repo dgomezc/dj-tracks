@@ -5,21 +5,14 @@ using FluentResults;
 
 namespace DjTracks.Api.Features.Streaming.StreamSession;
 
-public sealed class StreamSessionHandler(JsonSettingsStore settingsStore, SessionLibrary library,
+public sealed class StreamSessionHandler(PathSettings settings, SessionLibrary library,
     ILogger<StreamSessionHandler> logger)
 {
-    public async Task<Result<FileStream>> HandleAsync(StreamSessionRequest request, CancellationToken ct)
+    public Result<FileStream> Handle(StreamSessionRequest request, CancellationToken ct)
     {
-        var settings = await settingsStore.LoadAsync(ct);
-        if (settings.IsFailed)
-            return settings.ToResult();
-        if (string.IsNullOrWhiteSpace(settings.Value.Sessions))
-            return new AppError(ErrorKind.Conflict, "Configura la ruta de Sessions.",
-                "Abre Configuración y guarda las rutas antes de reproducir sesiones.");
-
         try
         {
-            return library.OpenAudio(settings.Value.Sessions, request.Year!, request.Session!, request.FileName!, ct);
+            return library.OpenAudio(settings.Sessions, request.Year!, request.Session!, request.FileName!, ct);
         }
         catch (FileNotFoundException ex)
         {

@@ -5,21 +5,14 @@ using FluentResults;
 
 namespace DjTracks.Api.Features.Streaming.StreamTrack;
 
-public sealed class StreamTrackHandler(JsonSettingsStore settingsStore, TrackLibrary library,
+public sealed class StreamTrackHandler(PathSettings settings, TrackLibrary library,
     ILogger<StreamTrackHandler> logger)
 {
-    public async Task<Result<FileStream>> HandleAsync(StreamTrackRequest request, CancellationToken ct)
+    public Result<FileStream> Handle(StreamTrackRequest request, CancellationToken ct)
     {
-        var settings = await settingsStore.LoadAsync(ct);
-        if (settings.IsFailed)
-            return settings.ToResult();
-        if (string.IsNullOrWhiteSpace(settings.Value.Tracks))
-            return new AppError(ErrorKind.Conflict, "Configura la ruta de Tracks.",
-                "Abre Configuración y guarda las rutas antes de reproducir canciones.");
-
         try
         {
-            return library.OpenTrack(settings.Value.Tracks, request.Year!, request.Style!, request.FileName!, ct);
+            return library.OpenTrack(settings.Tracks, request.Year!, request.Style!, request.FileName!, ct);
         }
         catch (FileNotFoundException ex)
         {

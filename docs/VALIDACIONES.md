@@ -7,6 +7,103 @@ Consultar siempre el estado real de GitHub antes de actuar sobre un PR.
 
 ## Estado actual
 
+- **Revisión de rutas implementada, pendiente de validación del usuario**:
+  rama `dgomezc-configuracion-de-carpetas`, desde `develop` con F2.3 integrada.
+  PR [#25](https://github.com/dgomezc/dj-tracks/pull/25) abierto hacia
+  `develop`. No autoriza merge ni avanzar
+  F6.2. Estructura confirmada el 15/11/2026: `dj-tracks-data` contiene
+  `playlists`, `session-marks` y `tracks-waves`; Tracks, Sessions y Remember
+  se configuran por separado. Sin formulario de rutas ni JSON de ajustes.
+- F2.3: PR [#23](https://github.com/dgomezc/dj-tracks/pull/23) comprobado
+  **mergeado** el 15/11/2026 a las 10:23:16 UTC. Las notas históricas
+  inferiores conservan la evidencia y no sustituyen este estado.
+
+## Revisión de rutas: configuración del servidor y datos unificados
+
+**Requisitos de arranque:**
+
+- **Visual Studio 2026:** perfil **DJ Tracks (Api + UI)**, .NET 10, FFmpeg
+  disponible para la API; UI `http://localhost:5050`, API
+  `http://localhost:5247`. Configurar mediante user-secrets de la API
+  `Paths:Tracks`, `Paths:Sessions`, `Paths:Remember` y `Paths:Data` con rutas
+  absolutas Windows. Crear previamente la raíz `dj-tracks-data` y dar
+  lectura/escritura al usuario de la API. Las bibliotecas necesitan lectura.
+- **Docker Ubuntu:** `.env` con `TRACKS_PATH`, `SESSIONS_PATH`,
+  `REMEMBER_PATH`, `DJ_TRACKS_DATA_PATH`, `POSTGRES_PASSWORD` y, opcionalmente,
+  `UI_PORT`. Las cuatro carpetas del host deben existir; música legible y
+  datos escribibles por UID 1654. Ejecutar `docker compose config --quiet`
+  y `docker compose up -d --build`; abrir `http://IP_DEL_SERVIDOR:5050`.
+- Para migrar, detener API, respaldar los datos y seguir `README.md`:
+  copiar M3U a `playlists`, JSON de marcas a `session-marks` y ajustar
+  referencias relativas de M3U manuales. Las ondas se pueden regenerar o
+  copiar del antiguo `App_Data/Waveforms` a `tracks-waves`.
+  No borrar volúmenes ni datos originales; no se migran automáticamente.
+
+**Pendiente del usuario (nuevo y regresión):**
+
+- [ ] Arrancar sin entrar en Configuración: se crean solo `playlists`,
+  `session-marks` y `tracks-waves` bajo datos; las tres bibliotecas se
+  exploran con las rutas configuradas, sin guardar ajustes.
+- [ ] Abrir `/settings`: no hay campos ni botones de guardado de rutas;
+  tema claro/oscuro, selector de tema y prueba PostgreSQL siguen funcionando.
+- [ ] Reproducir Tracks, Sessions y Remember; comprobar audio, seek, onda,
+  carátula y cola. Se generan JSON de onda en `tracks-waves`, no en App_Data;
+  al volver a reproducir/reiniciar se reutilizan si el audio no ha cambiado.
+- [ ] Crear/renombrar una playlist manual, añadir Tracks/Remember y cargarla:
+  M3U en `playlists`; reiniciar y volver a cargar conserva nombre/canciones.
+  Una automática sigue reflejando incorporaciones al volver a abrirla.
+- [ ] Crear, sustituir y borrar una marca en una sesión con TXT compatible:
+  JSON en `session-marks`; tras reiniciar se conserva y permite saltar desde
+  el tracklist y la onda sin alterar pausa/reproducción.
+- [ ] Con copias migradas, abrir y reproducir playlists manuales/automáticas
+  y comprobar marcas anteriores antes de retirar los respaldos.
+- [ ] Cambiar una ruta, reiniciar API (VS) o ejecutar
+  `docker compose up -d api` (Docker): se usa la nueva ruta sin consultar
+  `settings.json`. Editar `.env` sin recrear no cambia el proceso existente.
+- [ ] En un entorno de prueba, una ruta obligatoria vacía/relativa o raíz de
+  datos ausente/sin permisos impide iniciar con error explícito y no crea
+  la raíz. Una biblioteca desconectada devuelve error sin éxito vacío ni
+  sobrescribir playlists; al recuperarla vuelve a funcionar.
+
+**Comprobaciones realizadas por el agente (15/11/2026):**
+
+- `dotnet build DjTracks.slnx`: correcto, 0 errores y 0 advertencias.
+- API/UI locales aisladas, con MP3 sintéticos y sin acceder a bibliotecas
+  ni PostgreSQL reales: variables de entorno sobre appsettings vacío,
+  creación de exactamente tres subcarpetas, sin temporales residuales,
+  navegación/filtros/resúmenes de las tres bibliotecas, carátulas y audio
+  Range 206 correctos. GET/PUT `/api/settings` devuelven 404.
+- Ondas completas de las tres bibliotecas guardadas en `tracks-waves`;
+  caché reutilizada sin cambiar su fecha, incluso tras reiniciar.
+  Si desaparece la carpeta, error NDJSON explícito sin recrearla.
+- Playlist manual con Tracks/Remember, renombrado y playback; automática
+  con dos coincidencias; M3U en `playlists`. Marca en `session-marks`;
+  playlists y marca conservadas al reiniciar.
+- Opciones ausentes/relativas, raíz de datos ausente y colisión de un archivo
+  con `tracks-waves`: arranque rechazado explícitamente. Raíz ausente no
+  creada. Biblioteca ausente: API arranca, consulta 503 sin crear carpetas.
+  Cambiar el entorno del proceso padre no altera la API ya arrancada.
+- HTML de `/settings` sin formulario de rutas, con tema y prueba PostgreSQL.
+  No se atribuye validación visual ni interacción del navegador a esta lectura.
+- Docker Desktop con contenedores Linux, proyecto y datos efímeros aislados:
+  Compose válido, imágenes API/UI construidas y DB/API/UI arrancadas.
+  API como UID 1654; único bind de datos con tres subcarpetas; audio Range
+  y ondas de las tres bibliotecas a través de la URL pública de UI.
+  Recrear API/UI conserva y reutiliza las ondas del host. Una raíz `/usr`
+  no escribible por UID 1654 impide arrancar con `UnauthorizedAccessException`.
+  Contenedores, red, imágenes y volúmenes del proyecto de prueba retirados.
+- No se generaron tests ni se modificaron datos de instalaciones existentes.
+  Sigue pendiente la validación visual del usuario, la migración con sus
+  M3U/marcas y el despliegue en el host Ubuntu/NAS real.
+
+**Limitaciones:** sin migración automática ni recarga de configuración en
+caliente. Cambiar la ubicación de playlists exige revisar sus referencias
+relativas; las rutas internas `/music/Tracks` y `/music/Remember` se mantienen
+en Docker. PostgreSQL y claves de Blazor conservan sus volúmenes separados;
+solo los datos de ficheros de la API se unifican.
+
+## Historial de entregas y confirmaciones
+
 - **F2.3 en desarrollo, pendiente de validación del usuario**:
   rama `fase/f2-3-marcas-tracklist`, desde `develop` con F6.1 integrada.
   PR [#23](https://github.com/dgomezc/dj-tracks/pull/23) abierto hacia `develop`.

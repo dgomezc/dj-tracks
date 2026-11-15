@@ -16,7 +16,7 @@ public sealed class LoadPlaylistHandler(M3uPlaylistStore store, PlaylistTrackRes
         if (request.EntryId is not null && entries.Length == 0)
             return new AppError(ErrorKind.NotFound, "Canción no encontrada.",
                 "La entrada ya no está en la playlist. Vuelve a cargarla.");
-        var tracks = await resolver.ResolveAsync(entries.Select(entry => entry.Track), ct);
+        var tracks = resolver.Resolve(entries.Select(entry => entry.Track), ct);
         return tracks.IsFailed ? tracks.ToResult() : new PlaylistPlayback(tracks.Value);
     }
 }

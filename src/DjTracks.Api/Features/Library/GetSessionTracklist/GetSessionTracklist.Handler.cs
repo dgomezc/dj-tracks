@@ -6,21 +6,14 @@ using FluentResults;
 
 namespace DjTracks.Api.Features.Library.GetSessionTracklist;
 
-public sealed class GetSessionTracklistHandler(JsonSettingsStore settingsStore, SessionLibrary library,
+public sealed class GetSessionTracklistHandler(PathSettings settings, SessionLibrary library,
     ILogger<GetSessionTracklistHandler> logger)
 {
     public async Task<Result<SessionTracklist>> HandleAsync(GetSessionTracklistRequest request, CancellationToken ct)
     {
-        var settings = await settingsStore.LoadAsync(ct);
-        if (settings.IsFailed)
-            return settings.ToResult();
-        if (string.IsNullOrWhiteSpace(settings.Value.Sessions))
-            return new AppError(ErrorKind.Conflict, "Configura la ruta de Sessions.",
-                "Abre Configuración y guarda las rutas antes de cargar el tracklist.");
-
         try
         {
-            return await library.ReadTracklistAsync(settings.Value.Sessions, request.Year!,
+            return await library.ReadTracklistAsync(settings.Sessions, request.Year!,
                 request.Session!, request.FileName!, ct);
         }
         catch (FileNotFoundException ex)

@@ -9,10 +9,10 @@ public static class StreamSessionEndpoint
     public static void MapStreamSession(this RouteGroupBuilder api) =>
         api.MapGet("streaming/sessions", Handle).WithTags("Streaming");
 
-    private static async Task<IResult> Handle([AsParameters] StreamSessionRequest request,
+    private static IResult Handle([AsParameters] StreamSessionRequest request,
         StreamSessionHandler handler, CancellationToken ct)
     {
-        var result = await handler.HandleAsync(request, ct);
+        var result = handler.Handle(request, ct);
         return result.IsSuccess
             ? Results.File(result.Value, "audio/mpeg", enableRangeProcessing: true)
             : result.ToHttpResult();

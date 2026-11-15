@@ -3,7 +3,7 @@ using DjTracks.Infrastructure.Settings;
 
 namespace DjTracks.Api.Features.Playlists;
 
-public sealed class PlaylistLibraryIndexWorker(PlaylistLibraryIndex index, JsonSettingsStore settingsStore)
+public sealed class PlaylistLibraryIndexWorker(PlaylistLibraryIndex index, PathSettings settings)
     : BackgroundService
 {
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
@@ -28,10 +28,6 @@ public sealed class PlaylistLibraryIndexWorker(PlaylistLibraryIndex index, JsonS
             await RefreshAsync(force: true, ct);
     }
 
-    private async Task RefreshAsync(bool force, CancellationToken ct)
-    {
-        var settings = await settingsStore.LoadAsync(ct);
-        if (settings.IsSuccess)
-            await index.RefreshAsync(settings.Value, force, ct);
-    }
+    private Task RefreshAsync(bool force, CancellationToken ct) =>
+        index.RefreshAsync(settings, force, ct);
 }
