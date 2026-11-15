@@ -16,6 +16,7 @@ Consultar siempre el estado real de GitHub antes de actuar sobre un PR.
   Revisión solicitada: «A veces los tooltips de las marcas no desaparecen y
   es imposible borrar o editar las marcas» y añadir líneas verticales
   pulsables en la onda. Pendiente de nueva validación, sin aceptación global.
+  El usuario prefiere recuperar los botones con icono y tooltip sin el bloqueo.
 - **F6.1 validada por el usuario el 15/11/2026 y mergeada**:
   rama `fase/f6-1-docker`, desde `develop` con F5.2 integrada.
   PR [#22](https://github.com/dgomezc/dj-tracks/pull/22) mergeado en `develop`
@@ -190,9 +191,10 @@ guardar ajustes o usar las marcas.
 
 **Pendiente del usuario:**
 
-- [ ] **Revisión:** crear, actualizar y borrar marcas repetidamente y mover el
-  puntero entre sus controles: los botones con texto siguen accesibles y ningún
-  tooltip de esas acciones queda bloqueando la edición.
+- [ ] **Revisión de iconos:** pasar el puntero y tabular por Marcar, Sustituir
+  y Borrar: se muestra el tooltip de la acción y desaparece al salir. Crear,
+  actualizar y borrar repetidamente, incluso con el tooltip visible: ningún
+  tooltip queda huérfano ni impide utilizar los controles.
 - [ ] **Nuevo:** crear marcas al principio, centro y final; las líneas aparecen
   en la onda en sus posiciones. Pulsarlas mientras suena y en pausa: el audio
   salta al tiempo exacto y conserva su estado. Crear, actualizar y borrar:
@@ -239,6 +241,12 @@ con línea duplicada y otra modificada, desaparecieron las marcas ambiguas o
 sin línea. Captura visual de la onda comprobada. No sustituye la validación del
 usuario. Context7 y el MCP de Blazor Blueprint no estaban disponibles; se
 consultó la documentación oficial de Blazor y se reutilizaron botones existentes.
+
+**Revisión posterior de iconos:** compilación de la solución con salida aislada
+sin errores ni advertencias; la salida habitual estaba bloqueada por Visual Studio
+y los procesos API/UI en ejecución. Pendiente comprobar visualmente los nuevos
+tooltips y sus acciones con el navegador y la biblioteca del usuario. Context7
+consultado para Blazor; el servidor MCP de Blueprint no estaba disponible.
 
 ## F6.1: Docker en Ubuntu (PR #22; validada y mergeada)
 

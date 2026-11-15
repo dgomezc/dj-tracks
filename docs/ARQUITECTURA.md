@@ -615,7 +615,9 @@ Sin borrar ni modificar el TXT. Un proceso de API por carpeta de marcas.
 por HTTP y usa el audio existente de la barra mediante JS para capturar el
 tiempo o saltar sin alterar pausa/reproducción. La versión de reproducción
 impide actuar sobre otro audio al cambiar de pista. Los controles de marca
-son botones con texto, sin tooltips que queden abiertos al modificar filas.
+son botones con icono y tooltip local sin interacción: CSS lo muestra con hover
+o foco de teclado y lo oculta al deshabilitar o retirar el botón. No usa el
+portal de `IconButton`, porque estas acciones modifican o eliminan sus filas.
 El estado scoped del reproductor comparte solo marcas asociadas a líneas únicas
 del TXT activo; al cambiar de audio se limpia y las respuestas atrasadas no
 pueden publicar sobre otra sesión. `WaveformPlayer` dibuja controles verticales

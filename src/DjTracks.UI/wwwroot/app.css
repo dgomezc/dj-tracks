@@ -869,6 +869,34 @@ body {
     min-height: 2rem;
 }
 
+.session-mark-action {
+    position: relative;
+    flex: none;
+}
+
+.session-mark-tooltip {
+    display: none;
+    position: absolute;
+    z-index: 1;
+    top: 50%;
+    right: 100%;
+    transform: translateY(-50%);
+    width: max-content;
+    max-width: min(16rem, 55vw);
+    padding: 0.35rem 0.5rem;
+    border-radius: var(--radius);
+    background: var(--primary);
+    color: var(--primary-foreground);
+    font-size: 0.75rem;
+    white-space: normal;
+    pointer-events: none;
+}
+
+.session-mark-action > button:not(:disabled):hover + .session-mark-tooltip,
+.session-mark-action > button:not(:disabled):focus-visible + .session-mark-tooltip {
+    display: block;
+}
+
 .session-mark-text, .session-mark-jump {
     flex: 1;
     min-width: 0;
