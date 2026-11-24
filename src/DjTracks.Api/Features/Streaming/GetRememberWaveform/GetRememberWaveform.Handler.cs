@@ -6,22 +6,15 @@ using FluentResults;
 
 namespace DjTracks.Api.Features.Streaming.GetRememberWaveform;
 
-public sealed class GetRememberWaveformHandler(JsonSettingsStore settingsStore, RememberLibrary library,
+public sealed class GetRememberWaveformHandler(PathSettings settings, RememberLibrary library,
     TrackWaveformCache waveformCache, ILogger<GetRememberWaveformHandler> logger)
 {
     public async Task<Result<TrackWaveform>> HandleAsync(GetRememberWaveformRequest request,
         Func<TrackWaveformChunk, CancellationToken, ValueTask> onChunk, CancellationToken ct)
     {
-        var settings = await settingsStore.LoadAsync(ct);
-        if (settings.IsFailed)
-            return settings.ToResult();
-        if (string.IsNullOrWhiteSpace(settings.Value.Remember))
-            return new AppError(ErrorKind.Conflict, "Configura la ruta de Remember.",
-                "Abre Configuración y guarda las rutas antes de cargar la forma de onda.");
-
         try
         {
-            var file = library.ResolveAudioFile(settings.Value.Remember, request.Category!, request.FileName!, ct);
+            var file = library.ResolveAudioFile(settings.Remember, request.Category!, request.FileName!, ct);
             return file.IsFailed ? file.ToResult() : await waveformCache.GetAsync(file.Value, ct, onChunk);
         }
         catch (FileNotFoundException ex)

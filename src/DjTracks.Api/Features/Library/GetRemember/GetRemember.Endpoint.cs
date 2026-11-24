@@ -9,7 +9,7 @@ public static class GetRememberEndpoint
     public static void MapGetRemember(this RouteGroupBuilder api) =>
         api.MapGet("library/remember", Handle).WithTags("Library");
 
-    private static async Task<IResult> Handle([AsParameters] GetRememberRequest request,
+    private static IResult Handle([AsParameters] GetRememberRequest request,
         GetRememberHandler handler, CancellationToken ct) =>
-        (await handler.HandleAsync(request, ct)).ToHttpResult();
+        handler.Handle(request, ct).ToHttpResult();
 }

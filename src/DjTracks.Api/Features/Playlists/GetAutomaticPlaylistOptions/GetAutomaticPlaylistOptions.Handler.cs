@@ -5,20 +5,14 @@ using FluentResults;
 
 namespace DjTracks.Api.Features.Playlists.GetAutomaticPlaylistOptions;
 
-public sealed class GetAutomaticPlaylistOptionsHandler(JsonSettingsStore settingsStore, TrackLibrary library,
+public sealed class GetAutomaticPlaylistOptionsHandler(PathSettings settings, TrackLibrary library,
     ILogger<GetAutomaticPlaylistOptionsHandler> logger)
 {
-    public async Task<Result<AutomaticPlaylistOptions>> HandleAsync(CancellationToken ct)
+    public Result<AutomaticPlaylistOptions> Handle(CancellationToken ct)
     {
-        var settings = await settingsStore.LoadAsync(ct);
-        if (settings.IsFailed)
-            return settings.ToResult();
-        if (string.IsNullOrWhiteSpace(settings.Value.Tracks))
-            return new AppError(ErrorKind.Conflict, "Configura la ruta de Tracks.",
-                "Abre Configuración y guarda las rutas antes de generar playlists.");
         try
         {
-            return library.GetAutomaticOptions(settings.Value.Tracks, ct);
+            return library.GetAutomaticOptions(settings.Tracks, ct);
         }
         catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or NotSupportedException)
         {

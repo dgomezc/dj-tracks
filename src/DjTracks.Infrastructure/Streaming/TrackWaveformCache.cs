@@ -64,7 +64,6 @@ public sealed class TrackWaveformCache(string cacheDirectory, IWaveformGenerator
                 return new AppError(ErrorKind.Conflict, "La canción ha cambiado.",
                     "El fichero cambió mientras se generaba la forma de onda. Vuelve a cargar la pista.");
 
-            Directory.CreateDirectory(cacheDirectory);
             var temporaryPath = $"{cachePath}.{Guid.NewGuid():N}.tmp";
             try
             {
@@ -102,7 +101,7 @@ public sealed class TrackWaveformCache(string cacheDirectory, IWaveformGenerator
         {
             logger.LogError(ex, "No se pudo generar la forma de onda de {FileName}", file.Name);
             return new AppError(ErrorKind.Unavailable, "No se pudo generar la forma de onda.",
-                "Comprueba que el MP3 sea legible y que FFmpeg esté instalado y disponible para la API.");
+                "Comprueba que el MP3 sea legible, que FFmpeg esté disponible y que tracks-waves dentro de Paths:Data permita escritura.");
         }
     }
 

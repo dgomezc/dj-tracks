@@ -5,21 +5,14 @@ using FluentResults;
 
 namespace DjTracks.Api.Features.Library.GetRemember;
 
-public sealed class GetRememberHandler(JsonSettingsStore settingsStore, RememberLibrary library,
+public sealed class GetRememberHandler(PathSettings settings, RememberLibrary library,
     ILogger<GetRememberHandler> logger)
 {
-    public async Task<Result<RememberListing>> HandleAsync(GetRememberRequest request, CancellationToken ct)
+    public Result<RememberListing> Handle(GetRememberRequest request, CancellationToken ct)
     {
-        var settings = await settingsStore.LoadAsync(ct);
-        if (settings.IsFailed)
-            return settings.ToResult();
-        if (string.IsNullOrWhiteSpace(settings.Value.Remember))
-            return new AppError(ErrorKind.Conflict, "Configura la ruta de Remember.",
-                "Abre Configuración y guarda las rutas antes de explorar Remember.");
-
         try
         {
-            var result = library.Browse(settings.Value.Remember, request.Category!, ct);
+            var result = library.Browse(settings.Remember, request.Category!, ct);
             if (result.IsSuccess)
                 foreach (var file in result.Value.Files.Where(file => file.Warning is not null))
                     logger.LogWarning("No se pudieron leer los tags de Remember/{Category}/{FileName}",

@@ -11,7 +11,7 @@ public sealed class AddPlaylistTrackHandler(M3uPlaylistStore store, PlaylistTrac
         var playlist = await store.GetAsync(id, ct);
         if (playlist.IsFailed)
             return playlist;
-        var resolved = await resolver.ResolveAsync([request.Track!], ct);
+        var resolved = resolver.Resolve([request.Track!], ct);
         return resolved.IsFailed ? resolved.ToResult() : await store.AddAsync(id, request.Track!, ct);
     }
 }

@@ -6,37 +6,24 @@ using FluentResults;
 
 namespace DjTracks.Api.Features.Library.SessionMarks;
 
-public sealed class SessionMarksHandler(JsonSettingsStore settingsStore, SessionLibrary library,
+public sealed class SessionMarksHandler(PathSettings settings, SessionLibrary library,
     SessionMarkStore store, ILogger<SessionMarksHandler> logger)
 {
-    public async Task<Result<SessionMark[]>> GetAsync(GetSessionMarksRequest request, CancellationToken ct)
-    {
-        var settings = await settingsStore.LoadAsync(ct);
-        if (settings.IsFailed) return settings.ToResult();
-        if (string.IsNullOrWhiteSpace(settings.Value.SessionMarks))
-            return MissingConfiguration();
-        return await store.ReadAsync(settings.Value.SessionMarks, request.Year!, request.Session!, request.FileName!, ct);
-    }
+    public Task<Result<SessionMark[]>> GetAsync(GetSessionMarksRequest request, CancellationToken ct) =>
+        store.ReadAsync(settings.SessionMarks, request.Year!, request.Session!, request.FileName!, ct);
 
     public async Task<Result<SessionMark[]>> SaveAsync(SaveSessionMarkRequest request, CancellationToken ct)
     {
-        var settings = await settingsStore.LoadAsync(ct);
-        if (settings.IsFailed) return settings.ToResult();
-        if (string.IsNullOrWhiteSpace(settings.Value.SessionMarks))
-            return MissingConfiguration();
-        if (string.IsNullOrWhiteSpace(settings.Value.Sessions))
-            return new AppError(ErrorKind.Conflict, "Configura Sessions.", "Configura la carpeta de Sessions.");
-
         try
         {
-            var tracklist = await library.ReadTracklistAsync(settings.Value.Sessions, request.Year!,
+            var tracklist = await library.ReadTracklistAsync(settings.Sessions, request.Year!,
                 request.Session!, request.FileName!, ct);
             if (tracklist.IsFailed) return tracklist.ToResult();
             var lines = (tracklist.Value.Content ?? "").Replace("\r\n", "\n").Replace('\r', '\n').Split('\n');
             if (lines.Count(line => line == request.Line) != 1)
                 return new AppError(ErrorKind.Conflict, "No se puede guardar la marca.",
                     "La línea ha cambiado o está duplicada en el TXT. Vuelve a cargar el tracklist.");
-            return await store.UpdateAsync(settings.Value.SessionMarks, request.Year!, request.Session!,
+            return await store.UpdateAsync(settings.SessionMarks, request.Year!, request.Session!,
                 request.FileName!, request.Line!, request.Seconds, ct);
         }
         catch (DecoderFallbackException ex)
@@ -52,7 +39,4 @@ public sealed class SessionMarksHandler(JsonSettingsStore settingsStore, Session
                 "Comprueba la ruta de Sessions y vuelve a cargar.");
         }
     }
-
-    private static AppError MissingConfiguration() => new(ErrorKind.Conflict, "Configura la carpeta de marcas.",
-        "Abre Configuración y guarda una carpeta de marcas con permisos de lectura y escritura.");
 }

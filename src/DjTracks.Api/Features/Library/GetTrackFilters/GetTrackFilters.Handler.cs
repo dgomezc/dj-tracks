@@ -5,21 +5,14 @@ using FluentResults;
 
 namespace DjTracks.Api.Features.Library.GetTrackFilters;
 
-public sealed class GetTrackFiltersHandler(JsonSettingsStore settingsStore, TrackLibrary library,
+public sealed class GetTrackFiltersHandler(PathSettings settings, TrackLibrary library,
     ILogger<GetTrackFiltersHandler> logger)
 {
-    public async Task<Result<TrackFilterOptions>> HandleAsync(CancellationToken ct)
+    public Result<TrackFilterOptions> Handle(CancellationToken ct)
     {
-        var settings = await settingsStore.LoadAsync(ct);
-        if (settings.IsFailed)
-            return settings.ToResult();
-        if (string.IsNullOrWhiteSpace(settings.Value.Tracks))
-            return new AppError(ErrorKind.Conflict, "Configura la ruta de Tracks.",
-                "Abre Configuración y guarda las rutas antes de explorar la biblioteca.");
-
         try
         {
-            return library.GetFilterOptions(settings.Value.Tracks, ct);
+            return library.GetFilterOptions(settings.Tracks, ct);
         }
         catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or NotSupportedException)
         {

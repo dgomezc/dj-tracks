@@ -14,11 +14,12 @@ Reproductor autoalojado de música electrónica (Tracks, Sessions, Remember). Se
 | Playlists | Un fichero M3U por playlist en la carpeta configurable, guardado automáticamente en cada cambio; legible por otros reproductores |
 | PostgreSQL | Solo estadísticas (reproducciones). EF Core + Npgsql |
 | Tags/carátula | TagLibSharp (lectura de tags y carátula incrustada) |
-| Onda | FFMpegCore decodifica PCM por pipe; desde F4.2a calcula una envolvente RMS estéreo, transmite bloques terminados progresivamente y cachea el JSON final (versión 2) bajo `App_Data/Waveforms`. El dibujo usa un realce suave fijo de niveles bajos/medios, sin normalización por canción; requiere FFmpeg disponible en la API. NAudio se comparó y se descartó por menor rendimiento |
+| Onda | FFMpegCore decodifica PCM por pipe; desde F4.2a calcula una envolvente RMS estéreo, transmite bloques terminados progresivamente y cachea el JSON final (versión 2), ahora bajo `Paths:Data/tracks-waves` (antes `App_Data/Waveforms`). El dibujo usa un realce suave fijo de niveles bajos/medios, sin normalización por canción; requiere FFmpeg disponible en la API. NAudio se comparó y se descartó por menor rendimiento |
 | Autenticación | Ninguna (red local/VPN) |
 | Playlists automáticos | Filtros y canciones en un único M3U desde F4.3. F4.4: resolución al abrir/recargar/cargar en cola contra un índice, refrescado con `FileSystemWatcher` + reescaneo horario (`BackgroundService`) por si la red no notifica cambios; no cambia sola la pantalla ni la cola existente |
 | Audio | Endpoint con soporte de `Range` (seek) |
 | Tests | No se generan; validación manual por fase |
+| Rutas (revisión 15/11/2026) | Cuatro opciones `Paths:Tracks`, `Paths:Sessions`, `Paths:Remember` y `Paths:Data`; `.env` en Docker mediante Compose, user-secrets en Visual Studio. Raíz `dj-tracks-data` existente y escribible con subcarpetas creadas por la API: `playlists`, `session-marks`, `tracks-waves`. Sin edición en Configuración ni JSON de ajustes; reiniciar/recrear API para cambiar rutas. Sustituye el mecanismo original de F0.2 y las rutas independientes de playlists/marcas. |
 
 ## Convenciones de la biblioteca
 
@@ -64,7 +65,6 @@ Features/
   Streaming/    (audio, carátula, onda)
   Playlists/    (manuales y automáticos, guardados como m3u)
   Stats/
-  Settings/
 ```
 Cada slice agrupa endpoint, request/response y lógica. `Domain` contiene entidades/enums (Estilo, Track, Session, Playlist); `Infrastructure` contiene acceso a ficheros, TagLib, ffmpeg/NAudio, EF Core.
 
@@ -85,6 +85,8 @@ El estado de entrega y las checklists se mantienen en `VALIDACIONES.md`. Una imp
   *Prueba*: navegar entre páginas, layout correcto.
 - **F0.2 Configuración de rutas**: página Configuración que edita rutas (tracks, sessions, remember, playlists; la ruta raíz m3u se eliminó en F4.2) guardadas en un JSON de ajustes; validación de que existen.
   *Prueba*: guardar rutas y ver mensaje de validación.
+  **Sustituida el 15/11/2026** por configuración de servidor (ver decisión
+  «Rutas»): la página conserva temas y diagnóstico de PostgreSQL.
 
 ### Bloque 1 — Tracks
 - **F1.1 Explorador de Tracks**: árbol/listado Año → Estilo → canciones (nombre de fichero, tags básicos).
@@ -211,7 +213,8 @@ El estado de entrega y las checklists se mantienen en `VALIDACIONES.md`. Una imp
 - **F4.4 Playlists vivos**: índice en memoria de referencias de Tracks/Remember,
   sin leer tags al escanear. `FileSystemWatcher` invalida y un `BackgroundService`
   agrupa eventos y reindexa; reescaneo horario de respaldo para redes sin avisos.
-  Un error/overflow recrea la vigilancia. Guardar rutas sustituye raíces e índice.
+  Un error/overflow recrea la vigilancia. Cambiar rutas requiere reiniciar
+  la API y reconstruye el índice al arrancar.
   Decisión del usuario del 03/11/2026: actualizar **al abrir o volver a cargar**,
   no mientras la playlist permanece abierta. Listar, abrir y cargar en cola
   resuelven filtros contra el índice y actualizan el M3U solo si cambian sus
@@ -258,7 +261,8 @@ El estado de entrega y las checklists se mantienen en `VALIDACIONES.md`. Una imp
   Mantiene Visual Studio sin proxy por defecto. Imágenes multietapa .NET 10,
   FFmpeg en API y ejecución API/UI sin root. Tres bibliotecas montadas en
   solo lectura, playlists y marcas en lectura/escritura y volúmenes persistentes para
-  estadísticas, ajustes/ondas y claves de protección de datos de Blazor.
+  estadísticas y claves de protección de datos de Blazor. Desde la revisión
+  de rutas, playlists, marcas y ondas comparten el bind mount `dj-tracks-data`.
   Despliegue HTTP solo en red local/VPN, sin añadir autenticación ni TLS.
 - **F6.2 (fase 2 del proyecto) Subsonic**: análisis de exponer API compatible para clientes Android.
 
@@ -268,7 +272,10 @@ El estado de entrega y las checklists se mantienen en `VALIDACIONES.md`. Una imp
 2. Los m3u usan rutas **relativas** a la carpeta de playlists (desde F4.2 no hay ruta raíz M3U aparte).
 3. Los playlists manuales pueden mezclar Tracks y Remember.
 4. Las sesiones no se pueden añadir a playlists manuales.
-5. Las rutas se introducen mediante campos de texto, sin botón Examinar ni selector de carpetas (decisión del usuario del 26/10/2026, que revoca la propuesta del selector).
+5. Desde el 15/11/2026 las rutas se configuran en el servidor, no en la UI;
+   sustituye los campos de texto de la decisión del 26/10/2026. Data contiene
+   exactamente `playlists`, `session-marks` y `tracks-waves` inicialmente;
+   no se añaden carpetas o configuraciones especulativas.
 6. Los filtros de Tracks son multiselección en los tres campos: por ejemplo, 2025 y 2026 simultáneamente. Se aplica OR dentro de cada campo y AND entre campos; sin selección en un campo se incluyen todos (aclaración del usuario del 26/10/2026).
 7. Cargar una playlist manual añade sus canciones al final de la cola sin duplicados
    ni interrumpir el audio (decisión del usuario del 28/10/2026).

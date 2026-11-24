@@ -9,7 +9,7 @@ public static class GetTrackArtworkEndpoint
     public static void MapGetTrackArtwork(this RouteGroupBuilder api) =>
         api.MapGet("streaming/tracks/artwork", Handle).WithTags("Streaming");
 
-    private static async Task<IResult> Handle([AsParameters] GetTrackArtworkRequest request,
+    private static IResult Handle([AsParameters] GetTrackArtworkRequest request,
         GetTrackArtworkHandler handler, CancellationToken ct) =>
-        (await handler.HandleAsync(request, ct)).ToHttpResult();
+        handler.Handle(request, ct).ToHttpResult();
 }

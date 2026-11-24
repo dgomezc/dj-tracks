@@ -5,21 +5,14 @@ using FluentResults;
 
 namespace DjTracks.Api.Features.Streaming.GetSessionArtwork;
 
-public sealed class GetSessionArtworkHandler(JsonSettingsStore settingsStore, SessionLibrary library,
+public sealed class GetSessionArtworkHandler(PathSettings settings, SessionLibrary library,
     ILogger<GetSessionArtworkHandler> logger)
 {
-    public async Task<Result<TrackArtwork>> HandleAsync(GetSessionArtworkRequest request, CancellationToken ct)
+    public Result<TrackArtwork> Handle(GetSessionArtworkRequest request, CancellationToken ct)
     {
-        var settings = await settingsStore.LoadAsync(ct);
-        if (settings.IsFailed)
-            return settings.ToResult();
-        if (string.IsNullOrWhiteSpace(settings.Value.Sessions))
-            return new AppError(ErrorKind.Conflict, "Configura la ruta de Sessions.",
-                "Abre Configuración y guarda las rutas antes de cargar la carátula.");
-
         try
         {
-            var result = library.ReadArtwork(settings.Value.Sessions, request.Year!,
+            var result = library.ReadArtwork(settings.Sessions, request.Year!,
                 request.Session!, request.FileName!, ct);
             if (result.IsFailed)
                 logger.LogWarning("No se pudo cargar la carátula de {FileName}: {Error}",

@@ -5,21 +5,14 @@ using FluentResults;
 
 namespace DjTracks.Api.Features.Streaming.GetTrackArtwork;
 
-public sealed class GetTrackArtworkHandler(JsonSettingsStore settingsStore, TrackLibrary library,
+public sealed class GetTrackArtworkHandler(PathSettings settings, TrackLibrary library,
     ILogger<GetTrackArtworkHandler> logger)
 {
-    public async Task<Result<TrackArtwork>> HandleAsync(GetTrackArtworkRequest request, CancellationToken ct)
+    public Result<TrackArtwork> Handle(GetTrackArtworkRequest request, CancellationToken ct)
     {
-        var settings = await settingsStore.LoadAsync(ct);
-        if (settings.IsFailed)
-            return settings.ToResult();
-        if (string.IsNullOrWhiteSpace(settings.Value.Tracks))
-            return new AppError(ErrorKind.Conflict, "Configura la ruta de Tracks.",
-                "Abre Configuración y guarda las rutas antes de cargar la carátula.");
-
         try
         {
-            var result = library.ReadArtwork(settings.Value.Tracks, request.Year!,
+            var result = library.ReadArtwork(settings.Tracks, request.Year!,
                 request.Style!, request.FileName!, ct);
             if (result.IsFailed)
                 logger.LogWarning("No se pudo cargar la carátula de {FileName}: {Error}",

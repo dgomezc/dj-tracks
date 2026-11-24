@@ -9,7 +9,7 @@ public static class GetSessionArtworkEndpoint
     public static void MapGetSessionArtwork(this RouteGroupBuilder api) =>
         api.MapGet("streaming/sessions/artwork", Handle).WithTags("Streaming");
 
-    private static async Task<IResult> Handle([AsParameters] GetSessionArtworkRequest request,
+    private static IResult Handle([AsParameters] GetSessionArtworkRequest request,
         GetSessionArtworkHandler handler, CancellationToken ct) =>
-        (await handler.HandleAsync(request, ct)).ToHttpResult();
+        handler.Handle(request, ct).ToHttpResult();
 }

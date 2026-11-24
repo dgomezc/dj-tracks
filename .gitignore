@@ -13,6 +13,7 @@
 
 # Ajustes locales del servidor (rutas privadas)
 **/App_Data/
+**/dj-tracks-data/
 
 # User-specific files (MonoDevelop/Xamarin Studio)
 *.userprefs
