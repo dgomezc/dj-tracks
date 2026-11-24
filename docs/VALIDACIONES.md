@@ -7,14 +7,17 @@ Consultar siempre el estado real de GitHub antes de actuar sobre un PR.
 
 ## Estado actual
 
-- **F6.2 en análisis, pendiente de validación del usuario**:
+- **F6.2: análisis validado; implementación pendiente**:
   rama `fase/f6-2-subsonic`, desde `develop`; PR
   [#24](https://github.com/dgomezc/dj-tracks/pull/24) hacia `develop`.
   Aún no se ha implementado ninguna API Subsonic ni comprobado Tempus contra
   DJ Tracks. Decisiones: Tempus,
-  bibliotecas por carpetas, reproducción en línea y playlists de solo lectura,
-  sin descargas ni estadísticas de Tempus; LAN/VPN con credenciales verificadas.
-  El 15/11/2026 el usuario pide no continuar; esperar una nueva instrucción.
+  bibliotecas por carpetas,   reproducción en línea y playlists de solo lectura; LAN/VPN con credenciales
+  verificadas y sin estadísticas de Tempus. El 24/11/2026 se confirma el análisis
+  y se pide implementar esta fase. El usuario amplía el alcance: incluir el
+  endpoint Subsonic `download` del MP3 original para otros clientes. Tempus
+  puede usar `stream` para descargas transcodificadas; no se puede distinguir
+  de forma fiable esa descarga de una reproducción.
 - **F2.3 validada globalmente por el usuario e integrada**:
   rama `fase/f2-3-marcas-tracklist`, desde `develop` con F6.1 integrada.
   PR [#23](https://github.com/dgomezc/dj-tracks/pull/23) mergeado en `develop`
@@ -193,14 +196,16 @@ Se ha consultado la documentación OpenSubsonic y el código público de Tempus;
 no se ha instalado ni conectado Tempus y todavía no hay API compatible.
 La lista de endpoints es preliminar y no certifica que el cliente funcione.
 
-**Pendiente del usuario:**
+**Alcance confirmado por el usuario el 24/11/2026:**
 
-- [ ] Revisar el alcance: exploración por carpetas de las tres bibliotecas,
-  reproducción en línea y playlists de solo lectura; sin descargas, edición
+- [x] Exploración por carpetas de las tres bibliotecas,
+  reproducción en línea y playlists de solo lectura; sin edición
   de playlists ni estadísticas desde Tempus.
-- [ ] Revisar el modelo LAN/VPN con credenciales Subsonic: el token puede
+- [x] Modelo LAN/VPN con credenciales Subsonic: el token puede
   reutilizarse si se intercepta, HTTP no lo protege y la autenticación nueva no
-  protege las páginas o la API existentes. Confirmar el diseño antes de programar.
+  protege las páginas o la API existentes.
+- [x] Incluir `download` para descargar el MP3 original; `stream` también
+  puede emplearse para guardar audio en el cliente.
 
 **Comprobado por el agente:** fuentes oficiales de OpenSubsonic y código público
 de Tempus; el cliente dispone de navegación por índices/directorios y usa JSON

@@ -63,6 +63,36 @@ public sealed class M3uPlaylistStore(JsonSettingsStore settingsStore, TrackLibra
             return result.IsFailed ? result.ToResult() : await RefreshAutomaticAsync(settings, result.Value, ct);
         }, ct);
 
+    public Task<Result<PlaylistSnapshot[]>> ListSnapshotsAsync(CancellationToken ct) =>
+        ExecuteAsync<PlaylistSnapshot[]>(async settings =>
+        {
+            var all = await ReadAllAsync(settings, ct);
+            List<PlaylistSnapshot> snapshots = [];
+            foreach (var stored in all)
+            {
+                var refreshed = await RefreshAutomaticAsync(settings, stored, ct);
+                if (refreshed.IsFailed)
+                    return refreshed.ToResult();
+                var file = new FileInfo(stored.Path);
+                snapshots.Add(new PlaylistSnapshot(refreshed.Value, file.CreationTimeUtc, file.LastWriteTimeUtc));
+            }
+            return snapshots.OrderBy(item => item.Playlist.Name, StringComparer.OrdinalIgnoreCase)
+                .ThenBy(item => item.Playlist.Id).ToArray();
+        }, ct);
+
+    public Task<Result<PlaylistSnapshot>> GetSnapshotAsync(Guid id, CancellationToken ct) =>
+        ExecuteAsync<PlaylistSnapshot>(async settings =>
+        {
+            var stored = await FindAsync(settings, id, ct);
+            if (stored.IsFailed)
+                return stored.ToResult();
+            var refreshed = await RefreshAutomaticAsync(settings, stored.Value, ct);
+            if (refreshed.IsFailed)
+                return refreshed.ToResult();
+            var file = new FileInfo(stored.Value.Path);
+            return new PlaylistSnapshot(refreshed.Value, file.CreationTimeUtc, file.LastWriteTimeUtc);
+        }, ct);
+
     public Task<Result<ManualPlaylist>> CreateAsync(string name, CancellationToken ct) =>
         ExecuteAsync<ManualPlaylist>(async settings =>
         {

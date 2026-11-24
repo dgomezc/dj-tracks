@@ -3,10 +3,12 @@ using DjTracks.Api.Features.Playlists;
 using DjTracks.Api.Features.Settings;
 using DjTracks.Api.Features.Streaming;
 using DjTracks.Api.Features.Stats;
+using DjTracks.Api.Features.Subsonic;
 using DjTracks.Api.Shared;
 using FluentValidation;
 
 var builder = WebApplication.CreateBuilder(args);
+builder.Logging.AddFilter("Microsoft.AspNetCore.Hosting.Diagnostics", LogLevel.Warning);
 
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 builder.Services.AddOpenApi();
@@ -18,6 +20,7 @@ builder.Services.AddLibraryFeature();
 builder.Services.AddStreamingFeature();
 builder.Services.AddPlaylistsFeature();
 builder.Services.AddStatsFeature();
+builder.Services.AddSubsonicFeature();
 
 var app = builder.Build();
 
@@ -29,6 +32,7 @@ if (app.Environment.IsDevelopment())
 app.UseExceptionHandler();
 app.UseHttpsRedirection();
 
+app.MapSubsonicFeature();
 var api = app.MapGroup("/api").AddEndpointFilterFactory(ValidationFilter.Create);
 api.MapSettingsFeature();
 api.MapLibraryFeature();

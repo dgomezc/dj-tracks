@@ -264,8 +264,11 @@ El estado de entrega y las checklists se mantienen en `VALIDACIONES.md`. Una imp
   clientes Android. Decisiones del 15/11/2026 para una primera implementación:
   cliente [Tempus](https://github.com/eddyizm/tempus); exploración por carpetas
   de Tracks, Sessions y Remember, reproducción en línea y playlists manuales y
-  automáticas de solo lectura. Sin descarga sin conexión ni estadísticas de
-  reproducciones de Tempus. Acceso solo por LAN/VPN y credenciales Subsonic
+  automáticas de solo lectura. Sin estadísticas de reproducciones de Tempus.
+  Decisión posterior del 24/11/2026: incluir el endpoint Subsonic `download`
+  del MP3 original para clientes de otras plataformas. Tempus también puede
+  guardar una descarga transcodificada mediante `stream`; el servidor no puede
+  distinguirla de forma fiable de una reproducción. Acceso solo por LAN/VPN y credenciales Subsonic
   verificadas. Estas decisiones no implican compatibilidad completa con Tempus
   ni autorización para funciones adicionales.
 
@@ -294,7 +297,8 @@ El estado de entrega y las checklists se mantienen en `VALIDACIONES.md`. Una imp
   HTTP no los protege. Usar contraseña exclusiva, proteger secretos y logs,
   limitar a LAN/VPN y considerar HTTPS; la autenticación Subsonic no protege la
   interfaz y API actuales. Véase [riesgos y autenticación OpenSubsonic](https://opensubsonic.github.io/docs/api-reference/).
-  Queda pendiente validar diseño y compatibilidad real antes de implementar.
+  El análisis fue validado y se autorizó iniciar la implementación el 24/11/2026.
+  La compatibilidad real con Tempus sigue pendiente de comprobación.
 
 ## Aclaraciones confirmadas
 
