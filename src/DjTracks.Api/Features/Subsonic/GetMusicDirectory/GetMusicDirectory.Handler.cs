@@ -9,7 +9,7 @@ namespace DjTracks.Api.Features.Subsonic.GetMusicDirectory;
 public sealed class GetMusicDirectoryHandler(GetTracksHandler tracks, GetSessionsHandler sessions,
     GetRememberHandler remember)
 {
-    public async Task<Result<SubsonicDirectory>> HandleAsync(SubsonicId id, CancellationToken ct)
+    public Result<SubsonicDirectory> Handle(SubsonicId id, CancellationToken ct)
     {
         if (!id.IsDirectory)
             return new AppError(ErrorKind.NotFound, "Carpeta no encontrada.", "El identificador no es una carpeta.");
@@ -18,7 +18,7 @@ public sealed class GetMusicDirectoryHandler(GetTracksHandler tracks, GetSession
         TrackFile[] files = [];
         if (id.Library == "Tracks")
         {
-            var result = await tracks.HandleAsync(new GetTracksRequest(
+            var result = tracks.Handle(new GetTracksRequest(
                 id.Parts.ElementAtOrDefault(0), id.Parts.ElementAtOrDefault(1)), ct);
             if (result.IsFailed)
                 return result.ToResult();
@@ -27,7 +27,7 @@ public sealed class GetMusicDirectoryHandler(GetTracksHandler tracks, GetSession
         }
         else if (id.Library == "Sessions")
         {
-            var result = await sessions.HandleAsync(new GetSessionsRequest(
+            var result = sessions.Handle(new GetSessionsRequest(
                 id.Parts.ElementAtOrDefault(0), id.Parts.ElementAtOrDefault(1)), ct);
             if (result.IsFailed)
                 return result.ToResult();
@@ -38,7 +38,7 @@ public sealed class GetMusicDirectoryHandler(GetTracksHandler tracks, GetSession
         {
             foreach (var category in new[] { "Cortas", "Largas" })
             {
-                var result = await remember.HandleAsync(new GetRememberRequest(category), ct);
+                var result = remember.Handle(new GetRememberRequest(category), ct);
                 if (result.IsFailed)
                     return result.ToResult();
             }
@@ -46,7 +46,7 @@ public sealed class GetMusicDirectoryHandler(GetTracksHandler tracks, GetSession
         }
         else
         {
-            var result = await remember.HandleAsync(new GetRememberRequest(id.Parts[0]), ct);
+            var result = remember.Handle(new GetRememberRequest(id.Parts[0]), ct);
             if (result.IsFailed)
                 return result.ToResult();
             files = result.Value.Files;

@@ -23,11 +23,13 @@ services:
     environment:
       ASPNETCORE_ENVIRONMENT: Production
       ConnectionStrings__Statistics: Host=db;Database=djtracks;Username=djtracks;Password=${POSTGRES_PASSWORD:?Define POSTGRES_PASSWORD en .env}
-      Settings__FilePath: /app/App_Data/settings.json
       Subsonic__Username: ${SUBSONIC_USERNAME:-}
       Subsonic__Password: ${SUBSONIC_PASSWORD:-}
+      Paths__Tracks: /music/Tracks
+      Paths__Sessions: /music/Sessions
+      Paths__Remember: /music/Remember
+      Paths__Data: /dj-tracks-data
     volumes:
-      - api-data:/app/App_Data
       - type: bind
         source: ${TRACKS_PATH:?Define TRACKS_PATH en .env}
         target: /music/Tracks
@@ -47,13 +49,8 @@ services:
         bind:
           create_host_path: false
       - type: bind
-        source: ${PLAYLISTS_PATH:?Define PLAYLISTS_PATH en .env}
-        target: /music/Playlists
-        bind:
-          create_host_path: false
-      - type: bind
-        source: ${SESSION_MARKS_PATH:?Define SESSION_MARKS_PATH en .env}
-        target: /music/SessionMarks
+        source: ${DJ_TRACKS_DATA_PATH:?Define DJ_TRACKS_DATA_PATH en .env}
+        target: /dj-tracks-data
         bind:
           create_host_path: false
     depends_on:
@@ -87,5 +84,4 @@ services:
 
 volumes:
   statistics:
-  api-data:
   ui-keys:

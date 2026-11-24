@@ -5,21 +5,14 @@ using FluentResults;
 
 namespace DjTracks.Api.Features.Streaming.StreamRemember;
 
-public sealed class StreamRememberHandler(JsonSettingsStore settingsStore, RememberLibrary library,
+public sealed class StreamRememberHandler(PathSettings settings, RememberLibrary library,
     ILogger<StreamRememberHandler> logger)
 {
-    public async Task<Result<FileStream>> HandleAsync(StreamRememberRequest request, CancellationToken ct)
+    public Result<FileStream> Handle(StreamRememberRequest request, CancellationToken ct)
     {
-        var settings = await settingsStore.LoadAsync(ct);
-        if (settings.IsFailed)
-            return settings.ToResult();
-        if (string.IsNullOrWhiteSpace(settings.Value.Remember))
-            return new AppError(ErrorKind.Conflict, "Configura la ruta de Remember.",
-                "Abre Configuración y guarda las rutas antes de reproducir Remember.");
-
         try
         {
-            return library.OpenAudio(settings.Value.Remember, request.Category!, request.FileName!, ct);
+            return library.OpenAudio(settings.Remember, request.Category!, request.FileName!, ct);
         }
         catch (FileNotFoundException ex)
         {

@@ -5,24 +5,17 @@ using FluentResults;
 
 namespace DjTracks.Api.Features.Library.GetLibrarySummary;
 
-public sealed class GetLibrarySummaryHandler(JsonSettingsStore settingsStore, TrackLibrary tracks,
+public sealed class GetLibrarySummaryHandler(PathSettings settings, TrackLibrary tracks,
     RememberLibrary remember, ILogger<GetLibrarySummaryHandler> logger)
 {
-    public async Task<Result<LibrarySummary>> HandleAsync(GetLibrarySummaryRequest request, CancellationToken ct)
+    public Result<LibrarySummary> Handle(GetLibrarySummaryRequest request, CancellationToken ct)
     {
-        var settings = await settingsStore.LoadAsync(ct);
-        if (settings.IsFailed)
-            return settings.ToResult();
-
         var root = request.Library switch
         {
-            "Tracks" => settings.Value.Tracks,
-            "Sessions" => settings.Value.Sessions,
-            _ => settings.Value.Remember
+            "Tracks" => settings.Tracks,
+            "Sessions" => settings.Sessions,
+            _ => settings.Remember
         };
-        if (string.IsNullOrWhiteSpace(root))
-            return new AppError(ErrorKind.Conflict, "Biblioteca no configurada.",
-                $"Configura la ruta de {request.Library} para ver su resumen.");
 
         try
         {

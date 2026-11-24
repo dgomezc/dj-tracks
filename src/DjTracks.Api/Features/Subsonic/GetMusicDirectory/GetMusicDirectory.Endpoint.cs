@@ -17,7 +17,7 @@ public static class GetMusicDirectoryEndpoint
         if (!(await validator.ValidateAsync(request, ct)).IsValid)
             return SubsonicResponse.Error(context, 70, "Carpeta no encontrada.");
         SubsonicId.TryParse(request.Id, out var id);
-        var result = await handler.HandleAsync(id, ct);
+        var result = handler.Handle(id, ct);
         return result.IsSuccess
             ? SubsonicResponse.Ok(context, "directory", result.Value)
             : SubsonicResponse.FromError(context, result);

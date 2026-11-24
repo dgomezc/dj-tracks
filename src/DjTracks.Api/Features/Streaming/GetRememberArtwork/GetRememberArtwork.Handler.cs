@@ -5,21 +5,14 @@ using FluentResults;
 
 namespace DjTracks.Api.Features.Streaming.GetRememberArtwork;
 
-public sealed class GetRememberArtworkHandler(JsonSettingsStore settingsStore, RememberLibrary library,
+public sealed class GetRememberArtworkHandler(PathSettings settings, RememberLibrary library,
     ILogger<GetRememberArtworkHandler> logger)
 {
-    public async Task<Result<TrackArtwork>> HandleAsync(GetRememberArtworkRequest request, CancellationToken ct)
+    public Result<TrackArtwork> Handle(GetRememberArtworkRequest request, CancellationToken ct)
     {
-        var settings = await settingsStore.LoadAsync(ct);
-        if (settings.IsFailed)
-            return settings.ToResult();
-        if (string.IsNullOrWhiteSpace(settings.Value.Remember))
-            return new AppError(ErrorKind.Conflict, "Configura la ruta de Remember.",
-                "Abre Configuración y guarda las rutas antes de cargar la carátula.");
-
         try
         {
-            var result = library.ReadArtwork(settings.Value.Remember, request.Category!, request.FileName!, ct);
+            var result = library.ReadArtwork(settings.Remember, request.Category!, request.FileName!, ct);
             if (result.IsFailed)
                 logger.LogWarning("No se pudo cargar la carátula de Remember/{FileName}: {Error}",
                     request.FileName, result.Errors[0].Message);

@@ -16,7 +16,7 @@ public sealed class GetPlaylistsHandler(M3uPlaylistStore store, PlaylistTrackRes
         List<SubsonicPlaylist> playlists = [];
         foreach (var snapshot in snapshots.Value)
         {
-            var result = await ConvertAsync(snapshot, ct);
+            var result = Convert(snapshot, ct);
             if (result.IsFailed)
                 return result.ToResult();
             playlists.Add(result.Value with { Entry = null });
@@ -27,12 +27,12 @@ public sealed class GetPlaylistsHandler(M3uPlaylistStore store, PlaylistTrackRes
     public async Task<Result<SubsonicPlaylist>> GetAsync(Guid id, CancellationToken ct)
     {
         var snapshot = await store.GetSnapshotAsync(id, ct);
-        return snapshot.IsFailed ? snapshot.ToResult() : await ConvertAsync(snapshot.Value, ct);
+        return snapshot.IsFailed ? snapshot.ToResult() : Convert(snapshot.Value, ct);
     }
 
-    private async Task<Result<SubsonicPlaylist>> ConvertAsync(PlaylistSnapshot snapshot, CancellationToken ct)
+    private Result<SubsonicPlaylist> Convert(PlaylistSnapshot snapshot, CancellationToken ct)
     {
-        var result = await resolver.ResolveAsync(snapshot.Playlist.Entries.Select(entry => entry.Track), ct);
+        var result = resolver.Resolve(snapshot.Playlist.Entries.Select(entry => entry.Track), ct);
         if (result.IsFailed)
             return result.ToResult();
         if (result.Value.Any(item => item.Details.DurationSeconds is not { } seconds

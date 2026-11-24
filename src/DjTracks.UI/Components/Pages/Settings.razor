@@ -4,90 +4,9 @@
 
 <BbTypographyH2 Class="page-title">Configuración</BbTypographyH2>
 <BbTypographyMuted Class="page-intro">
-    Introduce rutas absolutas de carpetas existentes en el servidor de la API, no en el navegador.
-    Las carpetas de música necesitan lectura; playlists y marcas necesitan también escritura.
+    Las carpetas se configuran en el servidor de la API: Tracks, Sessions, Remember y datos de la app.
+    En Docker se definen en .env; los cambios requieren recrear la API.
 </BbTypographyMuted>
-
-@if (_busy)
-{
-    <div class="busy-indicator" role="status">
-        <BbSpinner Size="SpinnerSize.Small" AriaLabel="Procesando ajustes" />
-        <span>Procesando ajustes…</span>
-    </div>
-}
-@if (_error is not null)
-{
-    <BbAlert Variant="AlertVariant.Danger" Class="page-alert">
-        <BbAlertDescription>@_error</BbAlertDescription>
-    </BbAlert>
-}
-@if (_saved)
-{
-    <BbAlert Variant="AlertVariant.Success" Class="page-alert" role="status">
-        <BbAlertDescription>Rutas validadas y guardadas en el servidor.</BbAlertDescription>
-    </BbAlert>
-}
-
-<BbCard>
-    <BbCardContent Class="settings-card">
-<form class="settings-form" @onsubmit="SaveAsync" @onsubmit:preventDefault @oninput="() => _saved = false">
-        <BbField IsInvalid="@HasError(nameof(_settings.Tracks))">
-            <BbFieldLabel For="settings-tracks">Tracks</BbFieldLabel>
-            <BbFieldContent>
-                <BbInput Id="settings-tracks" @bind-Value="_settings.Tracks" Disabled="@Disabled"
-                         AriaDescribedBy="settings-tracks-help" />
-                <BbFieldDescription Id="settings-tracks-help">Carpeta de canciones organizadas por año y estilo.</BbFieldDescription>
-                <BbFieldError Errors="@FieldErrors(nameof(_settings.Tracks))" />
-            </BbFieldContent>
-        </BbField>
-        <BbField IsInvalid="@HasError(nameof(_settings.Sessions))">
-            <BbFieldLabel For="settings-sessions">Sessions</BbFieldLabel>
-            <BbFieldContent>
-                <BbInput Id="settings-sessions" @bind-Value="_settings.Sessions" Disabled="@Disabled"
-                         AriaDescribedBy="settings-sessions-help" />
-                <BbFieldDescription Id="settings-sessions-help">Carpeta de sesiones organizadas por año, con su audio y tracklist.</BbFieldDescription>
-                <BbFieldError Errors="@FieldErrors(nameof(_settings.Sessions))" />
-            </BbFieldContent>
-        </BbField>
-        <BbField IsInvalid="@HasError(nameof(_settings.Remember))">
-            <BbFieldLabel For="settings-remember">Remember</BbFieldLabel>
-            <BbFieldContent>
-                <BbInput Id="settings-remember" @bind-Value="_settings.Remember" Disabled="@Disabled"
-                         AriaDescribedBy="settings-remember-help" />
-                <BbFieldDescription Id="settings-remember-help">Carpeta de música Remember, dividida en Cortas y Largas.</BbFieldDescription>
-                <BbFieldError Errors="@FieldErrors(nameof(_settings.Remember))" />
-            </BbFieldContent>
-        </BbField>
-        <BbField IsInvalid="@HasError(nameof(_settings.Playlists))">
-            <BbFieldLabel For="settings-playlists">Playlists</BbFieldLabel>
-            <BbFieldContent>
-                <BbInput Id="settings-playlists" @bind-Value="_settings.Playlists" Disabled="@Disabled"
-                         AriaDescribedBy="settings-playlists-help" />
-                <BbFieldDescription Id="settings-playlists-help">Carpeta donde se guardan automáticamente las playlists como archivos M3U, con rutas relativas a ella; requiere escritura.</BbFieldDescription>
-                <BbFieldError Errors="@FieldErrors(nameof(_settings.Playlists))" />
-            </BbFieldContent>
-        </BbField>
-        <BbField IsInvalid="@HasError(nameof(_settings.SessionMarks))">
-            <BbFieldLabel For="settings-session-marks">Marcas de sesiones</BbFieldLabel>
-            <BbFieldContent>
-                <BbInput Id="settings-session-marks" @bind-Value="_settings.SessionMarks" Disabled="@Disabled"
-                         AriaDescribedBy="settings-session-marks-help" />
-                <BbFieldDescription Id="settings-session-marks-help">Carpeta donde se guardan las marcas de los tracklists; requiere lectura y escritura.</BbFieldDescription>
-                <BbFieldError Errors="@FieldErrors(nameof(_settings.SessionMarks))" />
-            </BbFieldContent>
-        </BbField>
-        <div class="button-row">
-            <BbButton Type="ButtonType.Submit" Disabled="@Disabled">Guardar rutas</BbButton>
-            <BbButton Variant="ButtonVariant.Outline" OnClick="LoadAsync" Disabled="@_busy">
-                Volver a cargar
-            </BbButton>
-        </div>
-        <BbTypographyMuted>
-            Volver a cargar descarta los cambios sin guardar. No se crean carpetas de biblioteca.
-        </BbTypographyMuted>
-    </form>
-    </BbCardContent>
-</BbCard>
 
 <BbCard Class="settings-theme-card">
     <BbCardContent Class="settings-card">

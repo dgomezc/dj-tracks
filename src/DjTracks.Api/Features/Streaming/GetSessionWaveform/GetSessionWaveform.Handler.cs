@@ -6,22 +6,15 @@ using FluentResults;
 
 namespace DjTracks.Api.Features.Streaming.GetSessionWaveform;
 
-public sealed class GetSessionWaveformHandler(JsonSettingsStore settingsStore, SessionLibrary library,
+public sealed class GetSessionWaveformHandler(PathSettings settings, SessionLibrary library,
     TrackWaveformCache waveformCache, ILogger<GetSessionWaveformHandler> logger)
 {
     public async Task<Result<TrackWaveform>> HandleAsync(GetSessionWaveformRequest request,
         Func<TrackWaveformChunk, CancellationToken, ValueTask> onChunk, CancellationToken ct)
     {
-        var settings = await settingsStore.LoadAsync(ct);
-        if (settings.IsFailed)
-            return settings.ToResult();
-        if (string.IsNullOrWhiteSpace(settings.Value.Sessions))
-            return new AppError(ErrorKind.Conflict, "Configura la ruta de Sessions.",
-                "Abre Configuración y guarda las rutas antes de cargar la forma de onda.");
-
         try
         {
-            var file = library.ResolveAudioFile(settings.Value.Sessions, request.Year!,
+            var file = library.ResolveAudioFile(settings.Sessions, request.Year!,
                 request.Session!, request.FileName!, ct);
             return file.IsFailed
                 ? file.ToResult()

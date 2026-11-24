@@ -6,23 +6,16 @@ using FluentResults;
 
 namespace DjTracks.Api.Features.Streaming.GetTrackWaveform;
 
-public sealed class GetTrackWaveformHandler(JsonSettingsStore settingsStore, TrackLibrary library,
+public sealed class GetTrackWaveformHandler(PathSettings settings, TrackLibrary library,
     TrackWaveformCache waveformCache, ILogger<GetTrackWaveformHandler> logger)
 {
     public async Task<Result<TrackWaveform>> HandleAsync(GetTrackWaveformRequest request,
         Func<TrackWaveformChunk, CancellationToken, ValueTask> onChunk,
         CancellationToken ct)
     {
-        var settings = await settingsStore.LoadAsync(ct);
-        if (settings.IsFailed)
-            return settings.ToResult();
-        if (string.IsNullOrWhiteSpace(settings.Value.Tracks))
-            return new AppError(ErrorKind.Conflict, "Configura la ruta de Tracks.",
-                "Abre Configuración y guarda las rutas antes de cargar la forma de onda.");
-
         try
         {
-            var file = library.ResolveTrackFile(settings.Value.Tracks, request.Year!,
+            var file = library.ResolveTrackFile(settings.Tracks, request.Year!,
                 request.Style!, request.FileName!, ct);
             return file.IsFailed
                 ? file.ToResult()

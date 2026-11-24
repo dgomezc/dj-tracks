@@ -1,9 +1,11 @@
 # Arquitectura de DJ Tracks
 
 Guía obligatoria para todo desarrollo nuevo. Describe la estructura, la nomenclatura y el
-flujo que ya siguen las llamadas existentes (`GET /api/library/tracks`, `GET /api/settings`,
-`PUT /api/settings`). El diseño detallado de una llamada completa está en
+flujo que ya siguen las llamadas existentes (`GET /api/library/tracks`, playlists
+y streaming). El diseño original de una llamada completa está en
 [`arquitectura/flujo-get-tracks.html`](arquitectura/flujo-get-tracks.html).
+Ese diseño histórico incluye ajustes JSON ya retirados; la sección 13 describe
+la configuración vigente.
 
 Principios: KISS y YAGNI. Vertical Slices simplificado: sin MediatR, sin repositorios
 genéricos, sin clientes HTTP intermedios ni clases de errores por feature.
@@ -13,7 +15,7 @@ genéricos, sin clientes HTTP intermedios ni clases de errores por feature.
 | Proyecto | Responsabilidad | Depende de | Paquetes clave |
 |---|---|---|---|
 | `DjTracks.Domain` | Contratos compartidos API ↔ UI (records), `AppError`/`ErrorKind` | — | FluentResults |
-| `DjTracks.Infrastructure` | Ficheros, tags, ajustes, onda y EF Core | Domain | TagLibSharp, FFMpegCore, Logging.Abstractions |
+| `DjTracks.Infrastructure` | Ficheros, tags, rutas, onda y EF Core | Domain | TagLibSharp, FFMpegCore, Logging.Abstractions |
 | `DjTracks.Api` | Minimal API en vertical slices | Domain, Infrastructure | FluentValidation (+ DependencyInjectionExtensions) |
 | `DjTracks.UI` | Blazor Server + Blazor Blueprint; llama a la API por HTTP | Domain | BlazorBlueprint.Components, BlazorBlueprint.Icons.Lucide |
 
@@ -39,10 +41,10 @@ Qué hace cada capa:
 | Code-behind (`.razor.cs`) | Construye la URL, llama con las extensiones, pinta `Result` | `try/catch` HTTP, leer `ProblemDetails` |
 | `HttpClientResultExtensions` | HTTP → `Result<T>`; errores de red/JSON → `AppError`; log | Traducir HTTP → `ErrorKind` |
 | `ValidationFilter` | Ejecuta el validador de cada parámetro `*Request` → 400 | Reglas de negocio |
-| `<Caso>RequestValidator` | **Formato** del request (obligatorio, absoluto, nombre de carpeta…) | Disco, ajustes |
+| `<Caso>RequestValidator` | **Formato** del request (obligatorio, nombre de carpeta…) | Disco, configuración |
 | `<Caso>Endpoint` | Declara ruta y request; delega en el handler; `ToHttpResult()` | Lógica, `try/catch` |
-| `<Caso>Handler` | **Negocio**: ajustes, disco, orquestar Infrastructure, logs; devuelve `Result<T>` | Conocer HTTP |
-| Infrastructure | Acceso a ficheros/tags/ajustes; `Result` para fallos esperables | Mensajes HTTP |
+| `<Caso>Handler` | **Negocio**: rutas tipadas, disco, orquestar Infrastructure, logs; devuelve `Result<T>` | Conocer HTTP |
+| Infrastructure | Acceso a ficheros/tags y rutas tipadas; `Result` para fallos esperables | Mensajes HTTP |
 | `UseExceptionHandler()` integrado | Excepciones **imprevistas** → log + 500 ProblemDetails | — |
 
 ## 3. Estructura de carpetas y nomenclatura
@@ -56,12 +58,12 @@ src/DjTracks.Api/
 └─ Features/<Feature>/                p. ej. Library, Settings, Streaming, Playlists, Stats
    ├─ <Feature>Feature.cs             Add<Feature>Feature() · Map<Feature>Feature()
    ├─ <Feature>Validators.cs          todos los validadores de la feature
-   └─ <Caso>/                         p. ej. GetTracks, SaveSettings
+   └─ <Caso>/                         p. ej. GetTracks, GetSessions
       ├─ <Caso>.Endpoint.cs           record <Caso>Request + static class <Caso>Endpoint
       └─ <Caso>.Handler.cs            sealed class <Caso>Handler
 
-src/DjTracks.Domain/                  records de contrato (TrackListing, PathSettings…) y AppError.cs
-src/DjTracks.Infrastructure/<Área>/   p. ej. Library/TrackLibrary.cs, Settings/JsonSettingsStore.cs
+src/DjTracks.Domain/                  records de contrato (TrackListing, ManualPlaylist…) y AppError.cs
+src/DjTracks.Infrastructure/<Área>/   p. ej. Library/TrackLibrary.cs, Settings/PathSettings.cs
 src/DjTracks.UI/
 ├─ Shared/HttpClientResultExtensions.cs
 └─ Components/Pages/<Página>.razor + <Página>.razor.cs
@@ -70,7 +72,7 @@ src/DjTracks.UI/
 La forma de onda de Tracks se genera en Infrastructure mediante `IWaveformGenerator`
 y FFMpegCore. El slice `Streaming/GetTrackWaveform` envía los valores de la envolvente en bloques
 NDJSON durante la primera generación y la UI los dibuja al recibirlos; después
-entrega la caché JSON de `Api/App_Data/Waveforms` en un solo bloque. La UI controla
+entrega la caché JSON de `Paths:Data/tracks-waves` en un solo bloque. La UI controla
 el seek en `WaveformPlayer`; no accede al sistema de ficheros ni invoca FFmpeg.
 
 La cola de reproducción se mantiene únicamente en la UI, en el servicio scoped
@@ -172,7 +174,7 @@ F4.1 añade `Features/Playlists` con slices explícitos GetPlaylists, GetPlaylis
 CreatePlaylist, RenamePlaylist, DeletePlaylist, AddPlaylistTrack, RemovePlaylistTrack
 y LoadPlaylist. Cada endpoint delega en su handler; requests validados por
 FluentValidation, respuestas `Result<T>` y traducción estándar de AppError.
-`M3uPlaylistStore` (singleton) carga las rutas desde `JsonSettingsStore` y guarda
+`M3uPlaylistStore` (singleton) recibe `PathSettings` por DI y guarda
 cada playlist como `<nombre saneado>.m3u` en la carpeta de playlists, reescrito en
 cada operación (crear, renombrar, añadir, quitar, borrar). El nombre visible va en
 `#PLAYLIST:` y el ID estable en `#DJTRACKS-ID:`; los IDs de entrada se derivan de
@@ -282,8 +284,8 @@ publica resultados parciales ni referencias antiguas como éxito.
 Cada resolución comprueba acceso a la raíz aun con caché limpia: desconectada
 no equivale a vacía. Remember exige ambas categorías. Los errores se reintentan
 al consultar; un año eliminado simplemente deja de aportar referencias. Tras
-guardar ajustes con éxito, `SaveSettingsHandler` invalida y despierta el worker;
-al detectar otra ruta, se liberan el watcher y las referencias anteriores.
+reiniciar la API con otras rutas se reconstruye el índice y su vigilancia;
+no hay guardado de ajustes ni recarga dinámica de configuración.
 El token del host cancela esperas/timer/escaneos y DI libera los watchers.
 
 `M3uPlaylistStore` resuelve las automáticas al listar, abrir o cargar playback;
@@ -363,13 +365,13 @@ evitar decimales con coma en atributos/estilos del componente Blueprint.
 
 | Elemento | Nombre | Namespace |
 |---|---|---|
-| Caso de uso | Verbo + sustantivo: `GetTracks`, `SaveSettings`, `GetSessions`, `CreatePlaylist` | — |
+| Caso de uso | Verbo + sustantivo: `GetTracks`, `GetSessions`, `CreatePlaylist` | — |
 | Request | `<Caso>Request` (record, propiedades anulables) | `DjTracks.Api.Features.<Feature>.<Caso>` |
 | Endpoint | `static class <Caso>Endpoint` con `Map<Caso>(this RouteGroupBuilder api)` y `private static Handle(...)` | ídem |
 | Handler | `sealed class <Caso>Handler` (constructor primario) con `HandleAsync(...)` | ídem |
 | Validador | `<Caso>RequestValidator : AbstractValidator<<Caso>Request>` | `DjTracks.Api.Features.<Feature>` |
 | Feature | `static class <Feature>Feature` | `DjTracks.Api.Features.<Feature>` |
-| Respuesta | Record de Domain si la UI lo consume (`TrackListing`, `PathSettings`) | `DjTracks.Domain` |
+| Respuesta | Record de Domain si la UI lo consume (`TrackListing`, `ManualPlaylist`) | `DjTracks.Domain` |
 
 ## 4. Receta: añadir un caso de uso
 
@@ -390,11 +392,13 @@ evitar decimales con coma en atributos/estilos del componente Blueprint.
            (await handler.HandleAsync(request, ct)).ToHttpResult();
    }
    ```
-   Query string → `[AsParameters]`; cuerpo JSON → parámetro sin atributo (`SaveSettingsRequest request`).
+   Query string → `[AsParameters]`; cuerpo JSON → parámetro sin atributo (`CreatePlaylistRequest request`).
    La ruta es relativa al grupo `/api` (sin barra inicial).
 4. **Handler** (`<Caso>.Handler.cs`): `Task<Result<T>> HandleAsync(<Caso>Request request, CancellationToken ct)`.
-   Carga ajustes con `JsonSettingsStore.LoadAsync` (si falla, `return settings.ToResult();`),
-   aplica reglas de negocio y captura solo las excepciones de E/S esperables con log y mensaje propio.
+   Recibe `PathSettings` por DI si necesita rutas, aplica reglas de negocio y
+   captura solo las excepciones de E/S esperables con log y mensaje propio.
+   Si no hay operaciones asíncronas, usa `Result<T> Handle(...)` y un endpoint
+   síncrono; no añadas `Task` ni `async` artificiales.
 5. **Validador** en `<Feature>Validators.cs`: solo formato. Las reglas auxiliares son métodos
    `private static bool Be…` dentro del validador que las usa.
 6. **Registro** en `<Feature>Feature.cs`: `.AddScoped<<Caso>Handler>()` en `Add<Feature>Feature()` y
@@ -404,7 +408,7 @@ evitar decimales con coma en atributos/estilos del componente Blueprint.
    `((AppError)result.Errors[0]).FieldErrors`.
 8. Añade la petición a `DjTracks.Api.http` y compila con `dotnet build DjTracks.slnx`.
 
-Endpoints sin request (p. ej. `GET /api/settings`) no necesitan validador. Todo parámetro cuyo tipo
+Endpoints sin request (p. ej. `GET /api/playlists`) no necesitan validador. Todo parámetro cuyo tipo
 termine en `Request` **debe** tener validador: si falta, la API falla al construir el endpoint.
 
 ## 5. Errores
@@ -415,28 +419,28 @@ y orientados al usuario (`detail` es lo que se muestra).
 
 | `ErrorKind` | HTTP | Uso |
 |---|---|---|
-| `Validation` | 400 | Regla de negocio por campo (con `fieldErrors`), p. ej. carpeta inexistente al guardar ajustes |
+| `Validation` | 400 | Regla de negocio por campo (con `fieldErrors`) |
 | `NotFound` | 404 | Recurso que ya no existe (carpeta seleccionada) |
 | `Conflict` | 409 | Estado previo incorrecto (ruta no configurada) |
 | `Unavailable` | 503 | Almacenamiento o ficheros inaccesibles |
-| `Unexpected` | 500 | Datos corruptos (JSON de ajustes inválido) |
+| `Unexpected` | 500 | Datos corruptos (M3U o JSON de marcas inválido) |
 
 Los errores de formato no usan `AppError`: los devuelve `ValidationFilter` como 400
 `ValidationProblem` (título «Revisa los datos enviados.», `detail` = primer mensaje, `errors` por campo).
 
-Criterio de dónde va cada comprobación: **formato** → validador · **negocio, disco, ajustes** →
+Criterio de dónde va cada comprobación: **formato** → validador · **negocio y disco** →
 handler/Infrastructure con `Result` · **imprevisto** → manejador integrado.
 
 ## 6. Logging
 
-- Infrastructure registra los errores que traduce (p. ej. `JsonSettingsStore`).
+- Infrastructure registra los errores que traduce (p. ej. `M3uPlaylistStore`).
 - El handler registra sus `catch` y avisos de negocio (`LogWarning` por tags ilegibles).
 - La UI registra en `HttpClientResultExtensions` (respuesta no 2xx, red, JSON).
 - Usa plantillas estructuradas (`{Year}`), nunca interpolación.
 
 ## 7. Registro de servicios
 
-- Ciclo de vida: Infrastructure con estado compartido → `Singleton` (`TrackLibrary`, `JsonSettingsStore`);
+- Ciclo de vida: Infrastructure con estado compartido → `Singleton` (`TrackLibrary`, `PathSettings`);
   handlers → `Scoped`; validadores → `Singleton` (escaneo con `AddValidatorsFromAssemblyContaining<Program>`).
 - UI: `AddHttpClient("Api")` + `AddScoped(sp => factory.CreateClient("Api"))` para inyectar `HttpClient`.
 - Sin escaneo por reflexión para handlers ni endpoints: todo explícito y navegable.
@@ -508,7 +512,7 @@ ni detecta modificaciones manuales del esquema.
 
 Configuración llama a este endpoint desde su code-behind con `GetForResultAsync`.
 Su sección «Base de datos de estadísticas» tiene carga y resultado independientes del
-formulario de rutas: conexión correcta sin pendientes, aviso con pendientes o error.
+configuración de rutas: conexión correcta sin pendientes, aviso con pendientes o error.
 Se ejecuta únicamente al pulsar «Probar conexión» y nunca permite editar credenciales.
 
 ## 10. Dashboard de Inicio (F5.2)
@@ -563,7 +567,7 @@ Compose espera a que PostgreSQL esté disponible antes de iniciar la API.
 El audio es la única petición de streaming ejecutada directamente por el
 navegador; tags, carátulas, onda y tracklist se solicitan desde Blazor Server.
 En Compose, `StreamingProxy:Enabled=true` activa YARP en UI, configurado con
-una ruta GET `/api/streaming/{**path}` hacia la API. `BottomPlayer` presenta
+las rutas GET `/api/streaming/{**path}` y `/rest/{**path}` hacia la API. `BottomPlayer` presenta
 el `PathAndQuery` del audio como URL de mismo origen, conservando las URLs
 internas de la cola y del resto de recursos. YARP transmite el cuerpo y las
 cabeceras Range/Content-Range sin descargar el MP3 entero en memoria.
@@ -578,18 +582,18 @@ internos de Blazor en .NET 10 y dejar una página sin interactividad.
 La API incorpora FFmpeg/FFprobe del sistema y ejecuta como usuario `app`
 (UID 1654), igual que UI. Los bind mounts del host se presentan como
 `/music/Tracks`, `/music/Sessions`, `/music/Remember` (solo lectura) y
-`/music/Playlists` (escritura necesaria para M3U) y `/music/SessionMarks`
-(escritura necesaria para marcas). No crea directorios de
+`/dj-tracks-data` (lectura/escritura para playlists, marcas y ondas).
+No crea directorios de
 origen si faltan: `create_host_path: false`. La cuenta necesita permisos de
-lectura/recorrido y escritura en playlists; las credenciales de montaje del NAS
-pertenecen al host Ubuntu, no a las imágenes ni al JSON de configuración.
+lectura/recorrido y escritura en datos; las credenciales de montaje del NAS
+pertenecen al host Ubuntu, no a las imágenes ni a la configuración de rutas.
 
 Volúmenes nombrados, independientes del contenedor: `statistics` para datos
-PostgreSQL, `api-data` para `App_Data/settings.json` y ondas v2, y `ui-keys`
+PostgreSQL y `ui-keys`
 para las claves de Data Protection bajo `/home/app/.aspnet/DataProtection-Keys`.
 Estas claves deben tratarse como privadas; no se cifran con un proveedor externo.
 La cola sigue siendo memoria de circuito, no persiste al recrear UI.
-`.dockerignore` excluye Git, salidas de compilación, `App_Data`, configuración de
+`.dockerignore` excluye Git, salidas de compilación, `App_Data`, `dj-tracks-data`, configuración de
 Desarrollo y archivos de entorno. `.env` no se versiona; `.env.example` no tiene
 contraseña y Compose exige rellenarla. No se copian user-secrets al contenedor.
 HTTP sin autenticación, exclusivamente en LAN/VPN; no publicar en Internet.
@@ -598,11 +602,9 @@ Arranque, permisos, compatibilidad de rutas M3U y checklist en `VALIDACIONES.md`
 ## 12. Marcas de tracklist (F2.3)
 
 `SessionMarkStore` guarda un JSON versionado por identificadores de MP3 (año,
-carpeta y fichero) en la carpeta configurable de marcas, independiente de
+carpeta y fichero) en `Paths:Data/session-marks`, independiente de
 Sessions. Usa nombre derivado de SHA-256, bloqueo por proceso y escritura
-atómica; un JSON inválido o un enlace no se sobrescribe. La configuración
-anterior sin esta ruta sigue siendo legible, pero para guardar ajustes se
-requiere configurar una carpeta existente con permisos de lectura y escritura.
+atómica; un JSON inválido o un enlace no se sobrescribe.
 
 Los endpoints `GET` y `PUT /api/library/sessions/marks` leen o actualizan una
 marca mediante `Result`/`AppError`. Al guardar se vuelve a leer el TXT: solo
@@ -624,6 +626,78 @@ pueden publicar sobre otra sesión. `WaveformPlayer` dibuja controles verticales
 accesibles sobre la onda según la duración real del audio y cada uno salta a
 su tiempo sin cambiar el estado de reproducción. La onda conserva su seek normal
 y serializa su inicialización para evitar cargas simultáneas. Sin un segundo
-reproductor ni cambios de cola o estadísticas. Compose monta
-`SESSION_MARKS_PATH` con escritura en `/music/SessionMarks`; hay que configurar
-esta ruta también al actualizar una instalación existente.
+reproductor ni cambios de cola o estadísticas. Compose monta un único
+`DJ_TRACKS_DATA_PATH` en `/dj-tracks-data`, con escritura para las tres
+subcarpetas de datos.
+
+## 13. Configuración de carpetas (revisión 15/11/2026)
+
+`PathSettings` vive en Infrastructure: ya no es un contrato HTTP.
+Solo se configuran `Paths:Tracks`, `Paths:Sessions`, `Paths:Remember` y
+`Paths:Data`. De Data se derivan, sin opciones adicionales, `playlists`,
+`session-marks` y `tracks-waves`. El nombre recomendado para la raíz del host
+es `dj-tracks-data`; no se impone su ubicación.
+
+La API registra `AddOptions<PathSettings>().BindConfiguration("Paths")`,
+valida que las cuatro rutas sean absolutas con `ValidateOnStart` y expone
+`IOptions<PathSettings>.Value` como singleton a los consumidores. No hay
+proveedores propios, repositorio de ajustes, interfaces ni paquetes nuevos.
+Handlers, stores e índice mantienen sus comprobaciones de acceso en ejecución
+y `Result`/`AppError`; perder el NAS nunca equivale a una biblioteca vacía.
+
+Antes de servir peticiones, `InitializeDataDirectories` comprueba que la raíz
+Data existe y es accesible, crea las tres subcarpetas y verifica escritura con
+temporales eliminados al cerrar. Un fallo detiene el arranque explícitamente.
+No crea raíces de bibliotecas ni la de datos: evita inventar carpetas vacías
+si falta un montaje. Una biblioteca desconectada no bloquea el arranque;
+su consulta devuelve el error correspondiente. La caché no recrea la carpeta
+de ondas durante una petición si ha desaparecido después de arrancar.
+
+`WebApplication.CreateBuilder` ya incluye variables de entorno: `Paths__Data`
+se interpreta como `Paths:Data` y prevalece sobre appsettings y user-secrets.
+`appsettings.json` contiene solo las cuatro claves vacías a modo de esquema.
+En Visual Studio se usan user-secrets con rutas Windows; no se carga `.env`.
+Compose interpola las cuatro rutas del host de `.env` en bind mounts y pasa
+a la API destinos internos fijos mediante `Paths__*`. No se copia ni lee
+`.env` dentro del proceso. No se usa `env_file` para inyectar otras variables.
+
+No hay recarga en caliente: reiniciar API en VS o recrearla con
+`docker compose up -d api`. El índice se construye de nuevo al arrancar.
+Se retiran GET/PUT `/api/settings`, sus validadores y el formulario de rutas.
+`/settings` conserva temas y diagnóstico PostgreSQL sin leer rutas por HTTP.
+El viejo `App_Data/settings.json` se ignora, sin fallback ni borrado.
+
+Persistencia Docker: `statistics` y `ui-keys` conservan sus nombres y datos.
+El antiguo volumen `api-data` deja de montarse; no se elimina. El único bind
+de datos guarda M3U, marcas y ondas. La migración es manual y con backup:
+copiar M3U y JSON de marcas a sus subcarpetas, ajustar referencias relativas
+de M3U manuales a su nueva ubicación y, opcionalmente, copiar ondas.
+Las automáticas conservan filtros y reconstruyen referencias al consultarlas.
+
+## 14. Subsonic (F6.2)
+
+`Features/Subsonic` adapta bibliotecas, streaming y playlists mediante endpoints
+y handlers existentes; los identificadores codifican biblioteca y segmentos
+relativos, se validan y se resuelven bajo las raíces configuradas. No contienen
+rutas absolutas; cambiar el nombre o ubicación cambia el ID. `getIndexes` presenta
+las carpetas de primer nivel como artistas para acceder a sus directorios.
+El índice se marca modificado en cada consulta; no se aprovecha `ifModifiedSince`.
+Las playlists usan el store y el índice existentes: se refrescan las automáticas,
+se incluyen fechas del M3U y un error de resolución no devuelve listas parciales.
+
+La autenticación Subsonic verifica `MD5(contraseña + salt)` con comparación
+de tiempo constante. `Subsonic:Username` y `Subsonic:Password` son secretos de
+la API; sin ambos, las operaciones autenticadas fallan cerradas. No se admiten
+contraseñas `p` ni API keys. `getOpenSubsonicExtensions` es público y anuncia
+una lista vacía. No protege la UI ni los endpoints `/api` preexistentes.
+URLs y tokens pueden aparecer en clientes, proxies o logs; limitar LAN/VPN,
+usar credenciales exclusivas y recomendar HTTPS. Los filtros de logs de hosting
+y YARP reducen la exposición, pero no protegen logs externos.
+
+`stream` y `download` entregan el MP3 original con Range; `stream` puede
+transcodificar con FFmpeg a MP3, Opus, Ogg Vorbis o AAC. Una transcodificación
+no admite rangos distintos de `bytes=0-` ni `timeOffset` distinto de cero.
+Los endpoints de modificación y los no implementados responden con error
+Subsonic. Tempus y el despliegue real siguen pendientes de validación.
+Ver instrucciones concretas en `README.md`; no hay migración automática ni
+formatos nuevos de persistencia.

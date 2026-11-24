@@ -8,6 +8,7 @@ using DjTracks.Api.Features.Streaming.StreamRemember;
 using DjTracks.Api.Features.Streaming.GetRememberArtwork;
 using DjTracks.Api.Features.Streaming.GetRememberWaveform;
 using DjTracks.Infrastructure.Streaming;
+using DjTracks.Infrastructure.Settings;
 
 namespace DjTracks.Api.Features.Streaming;
 
@@ -24,8 +25,7 @@ public static class StreamingFeature
             .AddSingleton<IWaveformGenerator>(sp => new FfmpegWaveformGenerator(
                 sp.GetRequiredService<IConfiguration>()["Waveform:BinaryFolder"]))
             .AddSingleton(sp => new TrackWaveformCache(
-                Path.Combine(sp.GetRequiredService<IHostEnvironment>().ContentRootPath,
-                    "App_Data", "Waveforms"),
+                sp.GetRequiredService<PathSettings>().TrackWaves,
                 sp.GetRequiredService<IWaveformGenerator>(),
                 sp.GetRequiredService<ILogger<TrackWaveformCache>>()))
             .AddScoped<GetTrackWaveformHandler>()

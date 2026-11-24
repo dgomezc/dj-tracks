@@ -7,9 +7,9 @@ namespace DjTracks.Api.Features.Subsonic.GetIndexes;
 
 public sealed class GetIndexesHandler(GetMusicDirectoryHandler directory, GetMusicFoldersHandler folders)
 {
-    public async Task<Result<SubsonicIndexes>> HandleAsync(string? folderId, CancellationToken ct)
+    public Result<SubsonicIndexes> Handle(string? folderId, CancellationToken ct)
     {
-        var libraries = await folders.HandleAsync(ct);
+        var libraries = folders.Handle();
         if (libraries.IsFailed)
             return libraries.ToResult();
         if (!string.IsNullOrEmpty(folderId)
@@ -20,7 +20,7 @@ public sealed class GetIndexesHandler(GetMusicDirectoryHandler directory, GetMus
         foreach (var folder in libraries.Value.Where(folder => folderId is null || folder.Id == folderId))
         {
             SubsonicId.TryParse(folder.Id, out var root);
-            var result = await directory.HandleAsync(root, ct);
+            var result = directory.Handle(root, ct);
             if (result.IsFailed)
                 return result.ToResult();
             items.AddRange(result.Value.Child.Where(child => child.IsDir)

@@ -6,25 +6,19 @@ using Microsoft.Extensions.Logging;
 
 namespace DjTracks.Infrastructure.Playlists;
 
-public sealed class PlaylistTrackResolver(JsonSettingsStore settingsStore, TrackLibrary tracks,
+public sealed class PlaylistTrackResolver(PathSettings settings, TrackLibrary tracks,
     RememberLibrary remember, ILogger<PlaylistTrackResolver> logger)
 {
-    public async Task<Result<ResolvedPlaylistTrack[]>> ResolveAsync(
+    public Result<ResolvedPlaylistTrack[]> Resolve(
         IEnumerable<PlaylistTrackReference> references, CancellationToken ct)
     {
-        var settings = await settingsStore.LoadAsync(ct);
-        if (settings.IsFailed)
-            return settings.ToResult();
         List<ResolvedPlaylistTrack> resolved = [];
         try
         {
             foreach (var reference in references)
             {
                 ct.ThrowIfCancellationRequested();
-                var root = reference.Library == "Tracks" ? settings.Value.Tracks : settings.Value.Remember;
-                if (string.IsNullOrWhiteSpace(root))
-                    return new AppError(ErrorKind.Conflict, "Configura la biblioteca.",
-                        "Abre Configuración y guarda las rutas antes de añadir o cargar canciones.");
+                var root = reference.Library == "Tracks" ? settings.Tracks : settings.Remember;
                 var result = reference.Library == "Tracks"
                     ? tracks.ResolveTrackFile(root, reference.Year!, reference.Style!, reference.FileName, ct)
                     : remember.ResolveAudioFile(root, reference.Category!, reference.FileName, ct);

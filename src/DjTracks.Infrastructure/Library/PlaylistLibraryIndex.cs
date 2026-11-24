@@ -1,5 +1,6 @@
 using System.Threading.Channels;
 using DjTracks.Domain;
+using DjTracks.Infrastructure.Settings;
 using FluentResults;
 using Microsoft.Extensions.Logging;
 
@@ -79,12 +80,6 @@ public sealed class PlaylistLibraryIndex(TrackLibrary tracks, RememberLibrary re
         // Agrupa la ráfaga de eventos de una copia o renombrado, sin trabajar en el hilo del watcher.
         await Task.Delay(TimeSpan.FromMilliseconds(250), ct);
         while (_changes.Reader.TryRead(out _)) { }
-    }
-
-    public void ConfigurationChanged()
-    {
-        Invalidate(_tracks);
-        Invalidate(_remember);
     }
 
     private void Refresh(RootIndex index, string root, bool force, CancellationToken ct)

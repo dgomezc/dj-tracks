@@ -8,10 +8,9 @@ public static class GetMusicFoldersEndpoint
         rest.MapGet("/getMusicFolders.view", Handle);
     }
 
-    private static async Task<IResult> Handle(HttpContext context, GetMusicFoldersHandler handler,
-        CancellationToken ct)
+    private static IResult Handle(HttpContext context, GetMusicFoldersHandler handler)
     {
-        var result = await handler.HandleAsync(ct);
+        var result = handler.Handle();
         return result.IsSuccess
             ? SubsonicResponse.Ok(context, "musicFolders", new { musicFolder = result.Value })
             : SubsonicResponse.FromError(context, result);

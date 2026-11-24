@@ -9,7 +9,7 @@ public static class GetSessionsEndpoint
     public static void MapGetSessions(this RouteGroupBuilder api) =>
         api.MapGet("library/sessions", Handle).WithTags("Library");
 
-    private static async Task<IResult> Handle([AsParameters] GetSessionsRequest request,
+    private static IResult Handle([AsParameters] GetSessionsRequest request,
         GetSessionsHandler handler, CancellationToken ct) =>
-        (await handler.HandleAsync(request, ct)).ToHttpResult();
+        handler.Handle(request, ct).ToHttpResult();
 }

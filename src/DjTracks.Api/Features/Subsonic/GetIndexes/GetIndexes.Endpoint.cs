@@ -8,11 +8,11 @@ public static class GetIndexesEndpoint
         rest.MapGet("/getIndexes.view", Handle);
     }
 
-    private static async Task<IResult> Handle(HttpContext context, GetIndexesHandler handler,
+    private static IResult Handle(HttpContext context, GetIndexesHandler handler,
         CancellationToken ct)
     {
         var folder = context.Request.Query["musicFolderId"].ToString();
-        var result = await handler.HandleAsync(string.IsNullOrEmpty(folder) ? null : folder, ct);
+        var result = handler.Handle(string.IsNullOrEmpty(folder) ? null : folder, ct);
         return result.IsSuccess
             ? SubsonicResponse.Ok(context, "indexes", result.Value)
             : SubsonicResponse.FromError(context, result);

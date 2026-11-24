@@ -72,7 +72,7 @@ public static class SubsonicStreamEndpoint
                 return Results.StatusCode(StatusCodes.Status416RangeNotSatisfiable);
         }
 
-        var result = await handler.HandleAsync(id, ct);
+        var result = handler.Handle(id, ct);
         if (result.IsFailed)
             return SubsonicResponse.FromError(context, result);
         context.Response.Headers.CacheControl = "no-store";
