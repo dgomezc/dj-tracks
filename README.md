@@ -96,6 +96,9 @@ compilar desde la raíz: `dotnet build DjTracks.slnx`.
 
 ## Despliegue con Docker en Ubuntu
 
+Para una guía paso a paso con conexión de clientes, consulte el tutorial
+[Markdown](docs/DESPLIEGUE-DOCKER.md) o [HTML](docs/DESPLIEGUE-DOCKER.html).
+
 Requisitos: Docker Engine y el plugin Docker Compose. Si la música está en
 un NAS, monta y verifica las carpetas en Ubuntu antes de arrancar: Docker no
 configura el montaje ni sus credenciales. Las bibliotecas necesitan permisos de

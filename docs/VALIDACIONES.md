@@ -287,6 +287,10 @@ del MP3 original y playlists manuales/automáticas de solo lectura. El usuario
 autorizó `download`; Tempus también puede guardar audio mediante `stream` y el
 servidor no puede distinguirlo de una reproducción. No se registran estadísticas
 de Tempus ni se permite editar playlists mediante esta API.
+El tutorial de despliegue y conexión está disponible en
+[`DESPLIEGUE-DOCKER.md`](DESPLIEGUE-DOCKER.md) y
+[`DESPLIEGUE-DOCKER.html`](DESPLIEGUE-DOCKER.html). Es una ampliación de
+documentación, no una confirmación de las comprobaciones pendientes.
 
 **Requisitos:** biblioteca real con MP3 en las tres carpetas, Remember con
 `Cortas` y `Largas`, y al menos una playlist manual y otra automática con
