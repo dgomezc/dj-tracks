@@ -7,10 +7,14 @@ Consultar siempre el estado real de GitHub antes de actuar sobre un PR.
 
 ## Estado actual
 
-- **F6.2: implementación pendiente de validación del usuario**:
+- **F6.2: aceptada con incidencias conocidas y merge autorizado**:
   rama `fase/f6-2-subsonic`, desde `develop`; PR
   [#24](https://github.com/dgomezc/dj-tracks/pull/24) hacia `develop`.
-  No se ha comprobado Tempus contra DJ Tracks.
+  El 26/11/2026 el usuario comunica que no ve playlists ni carátulas en
+  Tempus; indica que lo demás funciona bien, da por finalizada la fase y
+  autoriza el merge. Pide las carátulas de Tracks, Sessions y Remember en
+  los listados web y en Subsonic como tarea separada. La incidencia de
+  playlists permanece pendiente, sin atribuirle una causa ni una solución.
 - **Revisión de rutas integrada, pendiente de validación del usuario**:
   rama `dgomezc-configuracion-de-carpetas`, desde `develop` con F2.3 integrada.
   PR [#25](https://github.com/dgomezc/dj-tracks/pull/25) mergeado en
@@ -281,7 +285,7 @@ solo los datos de ficheros de la API se unifican.
 
 ## F6.2: Subsonic (PR #24)
 
-**Pendiente de validación del usuario; no hacer merge.** Se implementan
+**Aceptada por el usuario con incidencias conocidas; merge autorizado.** Se implementan
 carpetas Tracks, Sessions y Remember, reproducción, transcodificación, descarga
 del MP3 original y playlists manuales/automáticas de solo lectura. El usuario
 autorizó `download`; Tempus también puede guardar audio mediante `stream` y el
@@ -290,7 +294,14 @@ de Tempus ni se permite editar playlists mediante esta API.
 El tutorial de despliegue y conexión está disponible en
 [`DESPLIEGUE-DOCKER.md`](DESPLIEGUE-DOCKER.md) y
 [`DESPLIEGUE-DOCKER.html`](DESPLIEGUE-DOCKER.html). Es una ampliación de
-documentación, no una confirmación de las comprobaciones pendientes.
+documentación, no una confirmación de las comprobaciones individuales.
+
+El 26/11/2026 el usuario informa de que no aparecen playlists ni carátulas
+en Tempus, y dice que todo lo demás funciona bien. Autoriza cerrar esta fase
+y mezclar el PR, con las carátulas web/Subsonic en otra tarea. No se declaran
+resueltas las playlists de Tempus ni se atribuyen comprobaciones individuales
+adicionales. Antes había informado de un fallo de autenticación de PostgreSQL;
+no consta confirmación específica sobre cómo se resolvió.
 
 **Requisitos:** biblioteca real con MP3 en las tres carpetas, Remember con
 `Cortas` y `Largas`, y al menos una playlist manual y otra automática con
@@ -315,7 +326,7 @@ Configurar usuario y contraseña Subsonic **exclusivos**, no reutilizados.
   HTTPS es recomendable. Los tokens en URL pueden filtrarse y reutilizarse.
   La autenticación no protege la UI ni los endpoints `/api` existentes.
 
-**Checklist pendiente del usuario:**
+**Checklist de la entrega original (sin confirmación individual):**
 
 - [ ] Conectar Tempus con las credenciales correctas: la conexión se acepta;
   probar una contraseña incorrecta y verificar que se rechaza.
@@ -342,7 +353,9 @@ descarga idéntica, errores de ID/formato/almacenamiento, playlists manuales y
 automáticas con actualización, rechazo de edición y transcodificación
 MP3/Opus/AAC/Ogg comprobada con `ffprobe`. No se usaron datos reales.
 
-**Limitaciones:** Tempus real y despliegue Docker real de F6.2 no probados.
+**Limitaciones:** el usuario ha probado Tempus y Docker y ha informado de
+playlists y carátulas ausentes; no consta el resultado individual de cada
+comprobación anterior. El agente no ha probado Tempus ni Docker real en F6.2.
 Operaciones no implementadas, búsqueda y vistas de artista/álbum devuelven
 error. Las playlists no contienen Sessions. Los IDs cambian si se mueve o
 renombra el fichero. En audio transcodificado no se admite `timeOffset` ni

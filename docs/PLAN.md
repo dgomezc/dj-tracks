@@ -276,7 +276,7 @@ El estado de entrega y las checklists se mantienen en `VALIDACIONES.md`. Una imp
   verificadas. Estas decisiones no implican compatibilidad completa con Tempus
   ni autorización para funciones adicionales.
 
-  **Implementación pendiente de validación:** `ping`, `getMusicFolders`,
+  **Implementación aceptada con incidencias:** `ping`, `getMusicFolders`,
   `getIndexes`, `getMusicDirectory`, `getPlaylists`, `getPlaylist`, `stream`,
   `download` y descubrimiento de extensiones. Respuestas JSON/XML y operaciones
   no admitidas con error explícito. Los identificadores son relativos y estables
@@ -293,8 +293,10 @@ El estado de entrega y las checklists se mantienen en `VALIDACIONES.md`. Una imp
   limitar a LAN/VPN y considerar HTTPS; la autenticación Subsonic no protege la
   interfaz y API actuales. Véase [riesgos y autenticación OpenSubsonic](https://opensubsonic.github.io/docs/api-reference/).
   El análisis fue validado y se autorizó iniciar la implementación el 24/11/2026.
-  La compatibilidad real con Tempus sigue pendiente de comprobación; véase
-  `VALIDACIONES.md` para los pasos, formatos y limitaciones.
+  El 26/11/2026 el usuario acepta la fase y autoriza el merge: indica que no
+  ve playlists ni carátulas en Tempus y que lo demás funciona bien. Las
+  carátulas web y Subsonic se harán en otra tarea; la incidencia de playlists
+  sigue pendiente. Véase `VALIDACIONES.md` para el alcance y las limitaciones.
 
 ## Aclaraciones confirmadas
 

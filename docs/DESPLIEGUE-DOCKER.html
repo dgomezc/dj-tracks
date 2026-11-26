@@ -31,9 +31,10 @@ th { background: #e7f1f8; } li { margin: .4rem 0; }
 Permite abrir DJ Tracks en un navegador y conectar un cliente Subsonic, como
 Tempus, desde la misma red local o VPN.</p>
 <blockquote>
-<p><strong>Estado:</strong> la integración Subsonic de F6.2 está pendiente de validación con
-Tempus y con un despliegue Docker real. La compatibilidad con otros clientes
-también depende de las funciones que soliciten.</p>
+<p><strong>Estado:</strong> el usuario ha probado Tempus y Docker e informa de que las
+playlists y carátulas no aparecen en Tempus; estas incidencias siguen
+pendientes. La compatibilidad con otros clientes depende de las funciones que
+soliciten.</p>
 </blockquote>
 <h2 id="que-se-pone-en-marcha">1. Qué se pone en marcha</h2>
 <pre><code class="language-text">  Navegador                     Tempus u otro cliente Subsonic
@@ -71,8 +72,8 @@ instalados y funcionando; <code>docker compose version</code> debe mostrar una v
 </li>
 <li><p>El código de DJ Tracks en el servidor, en una revisión que incluya F6.2.
 Actualmente la implementación está en la rama del
-<a href="https://github.com/dgomezc/dj-tracks/pull/24">PR #24</a>, pendiente de
-validación. Si todavía no tiene el repositorio, puede obtener esa rama:</p>
+<a href="https://github.com/dgomezc/dj-tracks/pull/24">PR #24</a>, aceptado con
+incidencias conocidas. Si todavía no tiene el repositorio, puede obtener esa rama:</p>
 <pre><code class="language-bash">git clone --branch fase/f6-2-subsonic https://github.com/dgomezc/dj-tracks.git
 cd dj-tracks
 </code></pre>
@@ -242,7 +243,8 @@ permite contraseña <code>p</code> o API key, esta implementación no lo admite.
 contraseña incorrecta debe rechazarse. Después seleccione la navegación por
 carpetas/bibliotecas, abra Tracks, Sessions o Remember y reproduzca un MP3.</p>
 </li>
-<li><p>Consulte las playlists existentes: deben ser de <strong>solo lectura</strong>. Las
+<li><p>Consulte las playlists existentes: deben ser de <strong>solo lectura</strong>, aunque
+el usuario informa de que actualmente no las ve en Tempus. Las
 automáticas se actualizan al consultarlas; las playlists actuales solo
 incluyen Tracks y Remember, no Sessions.</p>
 </li>

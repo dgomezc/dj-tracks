@@ -698,6 +698,7 @@ y YARP reducen la exposición, pero no protegen logs externos.
 transcodificar con FFmpeg a MP3, Opus, Ogg Vorbis o AAC. Una transcodificación
 no admite rangos distintos de `bytes=0-` ni `timeOffset` distinto de cero.
 Los endpoints de modificación y los no implementados responden con error
-Subsonic. Tempus y el despliegue real siguen pendientes de validación.
+Subsonic. El usuario ha probado Tempus y Docker y ha comunicado que no ve
+playlists ni carátulas en Tempus; acepta cerrar la fase con esas incidencias.
 Ver instrucciones concretas en `README.md`; no hay migración automática ni
 formatos nuevos de persistencia.

@@ -4,9 +4,10 @@ Este tutorial describe una instalación en **Ubuntu Server** con Docker Compose.
 Permite abrir DJ Tracks en un navegador y conectar un cliente Subsonic, como
 Tempus, desde la misma red local o VPN.
 
-> **Estado:** la integración Subsonic de F6.2 está pendiente de validación con
-> Tempus y con un despliegue Docker real. La compatibilidad con otros clientes
-> también depende de las funciones que soliciten.
+> **Estado:** el usuario ha probado Tempus y Docker e informa de que las
+> playlists y carátulas no aparecen en Tempus; estas incidencias siguen
+> pendientes. La compatibilidad con otros clientes depende de las funciones que
+> soliciten.
 
 ## 1. Qué se pone en marcha
 
@@ -46,8 +47,8 @@ la API y PostgreSQL permanecen en la red interna de Docker.
   instalados y funcionando; `docker compose version` debe mostrar una versión.
 - El código de DJ Tracks en el servidor, en una revisión que incluya F6.2.
   Actualmente la implementación está en la rama del
-  [PR #24](https://github.com/dgomezc/dj-tracks/pull/24), pendiente de
-  validación. Si todavía no tiene el repositorio, puede obtener esa rama:
+  [PR #24](https://github.com/dgomezc/dj-tracks/pull/24), aceptado con
+  incidencias conocidas. Si todavía no tiene el repositorio, puede obtener esa rama:
 
   ```bash
   git clone --branch fase/f6-2-subsonic https://github.com/dgomezc/dj-tracks.git
@@ -187,7 +188,8 @@ URL base salvo que el cliente indique expresamente lo contrario.
 4. Guarde la conexión y, si el cliente ofrece una prueba, ejecútela. Una
    contraseña incorrecta debe rechazarse. Después seleccione la navegación por
    carpetas/bibliotecas, abra Tracks, Sessions o Remember y reproduzca un MP3.
-5. Consulte las playlists existentes: deben ser de **solo lectura**. Las
+5. Consulte las playlists existentes: deben ser de **solo lectura**, aunque
+   el usuario informa de que actualmente no las ve en Tempus. Las
    automáticas se actualizan al consultarlas; las playlists actuales solo
    incluyen Tracks y Remember, no Sessions.
 

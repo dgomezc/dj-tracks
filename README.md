@@ -157,7 +157,8 @@ La UI/API no están protegidas por esta autenticación. Limita el acceso a
 LAN/VPN y usa HTTPS cuando sea posible: los tokens de URL pueden reutilizarse
 si se interceptan o registran.
 
-La compatibilidad real con Tempus está pendiente de validación. Se ofrecen
+El usuario ha comunicado que las playlists y carátulas no aparecen en Tempus;
+esas incidencias siguen pendientes. Se ofrecen
 carpetas, reproducción y playlists de solo lectura, además de `download` para
 el MP3 original. Tempus también puede guardar audio usando `stream`; el
 servidor no puede distinguirlo de una reproducción. Ver limitaciones y
