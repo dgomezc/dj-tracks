@@ -567,7 +567,7 @@ Compose espera a que PostgreSQL esté disponible antes de iniciar la API.
 El audio es la única petición de streaming ejecutada directamente por el
 navegador; tags, carátulas, onda y tracklist se solicitan desde Blazor Server.
 En Compose, `StreamingProxy:Enabled=true` activa YARP en UI, configurado con
-una ruta GET `/api/streaming/{**path}` hacia la API. `BottomPlayer` presenta
+las rutas GET `/api/streaming/{**path}` y `/rest/{**path}` hacia la API. `BottomPlayer` presenta
 el `PathAndQuery` del audio como URL de mismo origen, conservando las URLs
 internas de la cola y del resto de recursos. YARP transmite el cuerpo y las
 cabeceras Range/Content-Range sin descargar el MP3 entero en memoria.
@@ -673,5 +673,32 @@ de datos guarda M3U, marcas y ondas. La migración es manual y con backup:
 copiar M3U y JSON de marcas a sus subcarpetas, ajustar referencias relativas
 de M3U manuales a su nueva ubicación y, opcionalmente, copiar ondas.
 Las automáticas conservan filtros y reconstruyen referencias al consultarlas.
+
+## 14. Subsonic (F6.2)
+
+`Features/Subsonic` adapta bibliotecas, streaming y playlists mediante endpoints
+y handlers existentes; los identificadores codifican biblioteca y segmentos
+relativos, se validan y se resuelven bajo las raíces configuradas. No contienen
+rutas absolutas; cambiar el nombre o ubicación cambia el ID. `getIndexes` presenta
+las carpetas de primer nivel como artistas para acceder a sus directorios.
+El índice se marca modificado en cada consulta; no se aprovecha `ifModifiedSince`.
+Las playlists usan el store y el índice existentes: se refrescan las automáticas,
+se incluyen fechas del M3U y un error de resolución no devuelve listas parciales.
+
+La autenticación Subsonic verifica `MD5(contraseña + salt)` con comparación
+de tiempo constante. `Subsonic:Username` y `Subsonic:Password` son secretos de
+la API; sin ambos, las operaciones autenticadas fallan cerradas. No se admiten
+contraseñas `p` ni API keys. `getOpenSubsonicExtensions` es público y anuncia
+una lista vacía. No protege la UI ni los endpoints `/api` preexistentes.
+URLs y tokens pueden aparecer en clientes, proxies o logs; limitar LAN/VPN,
+usar credenciales exclusivas y recomendar HTTPS. Los filtros de logs de hosting
+y YARP reducen la exposición, pero no protegen logs externos.
+
+`stream` y `download` entregan el MP3 original con Range; `stream` puede
+transcodificar con FFmpeg a MP3, Opus, Ogg Vorbis o AAC. Una transcodificación
+no admite rangos distintos de `bytes=0-` ni `timeOffset` distinto de cero.
+Los endpoints de modificación y los no implementados responden con error
+Subsonic. El usuario ha probado Tempus y Docker y ha comunicado que no ve
+playlists ni carátulas en Tempus; acepta cerrar la fase con esas incidencias.
 Ver instrucciones concretas en `README.md`; no hay migración automática ni
 formatos nuevos de persistencia.

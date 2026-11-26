@@ -3,6 +3,8 @@ using DjTracks.UI.Shared;
 using BlazorBlueprint.Components;
 
 var builder = WebApplication.CreateBuilder(args);
+builder.Logging.AddFilter("Microsoft.AspNetCore.Hosting.Diagnostics", LogLevel.Warning);
+builder.Logging.AddFilter("Yarp.ReverseProxy", LogLevel.Warning);
 
 // Add services to the container.
 builder.Services.AddRazorComponents()

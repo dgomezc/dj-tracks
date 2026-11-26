@@ -23,6 +23,8 @@ services:
     environment:
       ASPNETCORE_ENVIRONMENT: Production
       ConnectionStrings__Statistics: Host=db;Database=djtracks;Username=djtracks;Password=${POSTGRES_PASSWORD:?Define POSTGRES_PASSWORD en .env}
+      Subsonic__Username: ${SUBSONIC_USERNAME:-}
+      Subsonic__Password: ${SUBSONIC_PASSWORD:-}
       Paths__Tracks: /music/Tracks
       Paths__Sessions: /music/Sessions
       Paths__Remember: /music/Remember
@@ -67,6 +69,9 @@ services:
       ReverseProxy__Routes__streaming__ClusterId: api
       ReverseProxy__Routes__streaming__Match__Path: /api/streaming/{**path}
       ReverseProxy__Routes__streaming__Match__Methods__0: GET
+      ReverseProxy__Routes__subsonic__ClusterId: api
+      ReverseProxy__Routes__subsonic__Match__Path: /rest/{**path}
+      ReverseProxy__Routes__subsonic__Match__Methods__0: GET
       ReverseProxy__Clusters__api__Destinations__api__Address: http://api:8080/
     ports:
       - "${UI_PORT:-5050}:8080"

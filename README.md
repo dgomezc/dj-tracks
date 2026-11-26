@@ -4,8 +4,9 @@ Reproductor autoalojado de música electrónica para explorar y escuchar una
 biblioteca propia desde el navegador. La música y las playlists viven en el
 sistema de archivos; PostgreSQL se utiliza únicamente para las estadísticas.
 
-> **Uso en red local o VPN:** la aplicación no incluye autenticación ni TLS.
-> No expongas sus puertos directamente a Internet.
+> **Uso en red local o VPN:** la UI y la API existentes no incluyen autenticación
+> ni TLS. Subsonic tiene credenciales propias, pero no protege la UI ni el resto
+> de la API. No expongas sus puertos directamente a Internet.
 
 ## Funcionalidades
 
@@ -95,6 +96,9 @@ compilar desde la raíz: `dotnet build DjTracks.slnx`.
 
 ## Despliegue con Docker en Ubuntu
 
+Para una guía paso a paso con conexión de clientes, consulte el tutorial
+[Markdown](docs/DESPLIEGUE-DOCKER.md) o [HTML](docs/DESPLIEGUE-DOCKER.html).
+
 Requisitos: Docker Engine y el plugin Docker Compose. Si la música está en
 un NAS, monta y verifica las carpetas en Ubuntu antes de arrancar: Docker no
 configura el montaje ni sus credenciales. Las bibliotecas necesitan permisos de
@@ -135,6 +139,30 @@ La API ve `/music/Tracks`, `/music/Sessions`, `/music/Remember` y
 `/dj-tracks-data`, no las rutas del host. No lee `.env` ni `settings.json`.
 Después de editar `.env`, ejecuta `docker compose up -d api` para recrearla
 con la nueva configuración; `docker compose restart` no actualiza su entorno.
+
+### Clientes Subsonic
+
+Para habilitar el acceso configura un usuario y contraseña exclusivos:
+en Docker, `SUBSONIC_USERNAME` y `SUBSONIC_PASSWORD` en `.env`; en Visual
+Studio, `Subsonic:Username` y `Subsonic:Password` en los user-secrets de la
+API. Sin ambos se rechazan las peticiones autenticadas. Reinicia o recrea la
+API tras cambiar las credenciales. No compartas ni subas los secretos.
+
+En Compose, conecta Tempus a `http://IP_DEL_SERVIDOR:5050` (o al puerto
+`UI_PORT` configurado), con el usuario y contraseña elegidos y autenticación
+por token. En VS la API escucha por defecto en `localhost:5247`, accesible
+desde el emulador Android en `http://10.0.2.2:5247`; un móvil físico necesita
+una dirección y escucha accesibles desde su red, protegidas por firewall.
+La UI/API no están protegidas por esta autenticación. Limita el acceso a
+LAN/VPN y usa HTTPS cuando sea posible: los tokens de URL pueden reutilizarse
+si se interceptan o registran.
+
+El usuario ha comunicado que las playlists y carátulas no aparecen en Tempus;
+esas incidencias siguen pendientes. Se ofrecen
+carpetas, reproducción y playlists de solo lectura, además de `download` para
+el MP3 original. Tempus también puede guardar audio usando `stream`; el
+servidor no puede distinguirlo de una reproducción. Ver limitaciones y
+checklist en [validaciones](docs/VALIDACIONES.md#f62-subsonic-pr-24).
 
 ### Actualizar una instalación existente
 

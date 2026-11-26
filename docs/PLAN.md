@@ -264,7 +264,39 @@ El estado de entrega y las checklists se mantienen en `VALIDACIONES.md`. Una imp
   estadísticas y claves de protección de datos de Blazor. Desde la revisión
   de rutas, playlists, marcas y ondas comparten el bind mount `dj-tracks-data`.
   Despliegue HTTP solo en red local/VPN, sin añadir autenticación ni TLS.
-- **F6.2 (fase 2 del proyecto) Subsonic**: análisis de exponer API compatible para clientes Android.
+- **F6.2 (fase 2 del proyecto) Subsonic**: análisis de exponer API compatible para
+  clientes Android. Decisiones del 15/11/2026 para una primera implementación:
+  cliente [Tempus](https://github.com/eddyizm/tempus); exploración por carpetas
+  de Tracks, Sessions y Remember, reproducción en línea y playlists manuales y
+  automáticas de solo lectura. Sin estadísticas de reproducciones de Tempus.
+  Decisión posterior del 24/11/2026: incluir el endpoint Subsonic `download`
+  del MP3 original para clientes de otras plataformas. Tempus también puede
+  guardar una descarga transcodificada mediante `stream`; el servidor no puede
+  distinguirla de forma fiable de una reproducción. Acceso solo por LAN/VPN y credenciales Subsonic
+  verificadas. Estas decisiones no implican compatibilidad completa con Tempus
+  ni autorización para funciones adicionales.
+
+  **Implementación aceptada con incidencias:** `ping`, `getMusicFolders`,
+  `getIndexes`, `getMusicDirectory`, `getPlaylists`, `getPlaylist`, `stream`,
+  `download` y descubrimiento de extensiones. Respuestas JSON/XML y operaciones
+  no admitidas con error explícito. Los identificadores son relativos y estables
+  mientras no se muevan o renombren los ficheros. La búsqueda y las vistas por
+  artista/álbum quedan fuera del alcance; hay que observar las peticiones del
+  cliente real. Las playlists automáticas mantienen la resolución viva de F4.4
+  y no incluyen Sessions. En Compose YARP expone GET `/rest` junto al streaming,
+  sin publicar toda la API.
+
+  Tempus implementa el token Subsonic `MD5(contraseña + salt)`; verificarlo
+  requiere que el servidor acceda al secreto, que debe configurarse fuera del
+  repositorio. El token y salt en URL pueden filtrarse en logs y reutilizarse;
+  HTTP no los protege. Usar contraseña exclusiva, proteger secretos y logs,
+  limitar a LAN/VPN y considerar HTTPS; la autenticación Subsonic no protege la
+  interfaz y API actuales. Véase [riesgos y autenticación OpenSubsonic](https://opensubsonic.github.io/docs/api-reference/).
+  El análisis fue validado y se autorizó iniciar la implementación el 24/11/2026.
+  El 26/11/2026 el usuario acepta la fase y autoriza el merge: indica que no
+  ve playlists ni carátulas en Tempus y que lo demás funciona bien. Las
+  carátulas web y Subsonic se harán en otra tarea; la incidencia de playlists
+  sigue pendiente. Véase `VALIDACIONES.md` para el alcance y las limitaciones.
 
 ## Aclaraciones confirmadas
 

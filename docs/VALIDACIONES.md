@@ -7,11 +7,19 @@ Consultar siempre el estado real de GitHub antes de actuar sobre un PR.
 
 ## Estado actual
 
-- **Revisión de rutas implementada, pendiente de validación del usuario**:
+- **F6.2: aceptada con incidencias conocidas y merge autorizado**:
+  rama `fase/f6-2-subsonic`, desde `develop`; PR
+  [#24](https://github.com/dgomezc/dj-tracks/pull/24) hacia `develop`.
+  El 26/11/2026 el usuario comunica que no ve playlists ni carátulas en
+  Tempus; indica que lo demás funciona bien, da por finalizada la fase y
+  autoriza el merge. Pide las carátulas de Tracks, Sessions y Remember en
+  los listados web y en Subsonic como tarea separada. La incidencia de
+  playlists permanece pendiente, sin atribuirle una causa ni una solución.
+- **Revisión de rutas integrada, pendiente de validación del usuario**:
   rama `dgomezc-configuracion-de-carpetas`, desde `develop` con F2.3 integrada.
-  PR [#25](https://github.com/dgomezc/dj-tracks/pull/25) abierto hacia
-  `develop`. No autoriza merge ni avanzar
-  F6.2. Estructura confirmada el 15/11/2026: `dj-tracks-data` contiene
+  PR [#25](https://github.com/dgomezc/dj-tracks/pull/25) mergeado en
+  `develop`; la validación del usuario sigue pendiente.
+  Estructura confirmada el 15/11/2026: `dj-tracks-data` contiene
   `playlists`, `session-marks` y `tracks-waves`; Tracks, Sessions y Remember
   se configuran por separado. Sin formulario de rutas ni JSON de ajustes.
 - F2.3: PR [#23](https://github.com/dgomezc/dj-tracks/pull/23) comprobado
@@ -104,21 +112,25 @@ solo los datos de ficheros de la API se unifican.
 
 ## Historial de entregas y confirmaciones
 
-- **F2.3 en desarrollo, pendiente de validación del usuario**:
+- **F2.3 validada globalmente por el usuario e integrada**:
   rama `fase/f2-3-marcas-tracklist`, desde `develop` con F6.1 integrada.
-  PR [#23](https://github.com/dgomezc/dj-tracks/pull/23) abierto hacia `develop`.
+  PR [#23](https://github.com/dgomezc/dj-tracks/pull/23) mergeado en `develop`
+  (`3201c116fd515d82f8e8ddd15363f8a57098ff0c`).
   Decisiones del 15/11/2026: carpeta independiente configurable y escribible;
   asociar marcas al texto exacto, avisar de duplicados y de marcas sin línea;
-  conservar el único reproductor inferior. No avanzar a F6.2.
+  conservar el único reproductor inferior.
   Revisión solicitada: «A veces los tooltips de las marcas no desaparecen y
   es imposible borrar o editar las marcas» y añadir líneas verticales
-  pulsables en la onda. Pendiente de nueva validación, sin aceptación global.
+  pulsables en la onda. Sin atribuir comprobaciones individuales no confirmadas.
   El usuario prefiere recuperar los botones con icono y tooltip sin el bloqueo.
   Después indica que funcionan bien, pero la captura muestra los iconos muy
   separados y desalineados. Tras corregirlos confirma «ok, ya está perfecto.
   continúa» el 15/11/2026; esta confirmación se refiere a la corrección visual
   y no detalla otras comprobaciones individuales. Autoriza mezclar el PR y
-  continuar el 15/11/2026.
+  continuar el 15/11/2026. Posteriormente confirma «la tarea f2.3 la podemos
+  dar por terminada, mezcla lo que necesites pero no continúes». Esta aceptación
+  global no atribuye comprobaciones individuales adicionales ni implica haber
+  probado Docker para F2.3.
 - **F6.1 validada por el usuario el 15/11/2026 y mergeada**:
   rama `fase/f6-1-docker`, desde `develop` con F5.2 integrada.
   PR [#22](https://github.com/dgomezc/dj-tracks/pull/22) mergeado en `develop`
@@ -271,7 +283,87 @@ solo los datos de ficheros de la API se unifican.
 - Port F1.2 recibido de `dgomezc-fase-f1-2-filtros` (`1354305` código, `c38cddb` documentación). Se integra mediante merge en la rama original: se conservan ambos historiales y se resuelven los conflictos de código con la versión adaptada a Result/FluentValidation. Sin PR duplicado ni reescritura de ramas. Cambios preexistentes y JSON privado conservados; no se borran worktrees.
 - Comprobación de integración en checkout original (27/10/2026): `src` coincide con el port recibido; compilación completa con 0 errores y advertencias. API/UI aisladas con MP3 sintéticos: multiaño/multigrupo/multisubestilo, alias, ausencia de duplicados, resultados vacíos, explorador, errores 400/404, opciones, carga de ajustes y página Tracks correctos. No equivale a validación visual de biblioteca real. Servicios y fixtures temporales retirados después de comprobar.
 
-## F2.3: marcas de tracklist (PR #23; pendiente de validación)
+## F6.2: Subsonic (PR #24)
+
+**Aceptada por el usuario con incidencias conocidas; merge autorizado.** Se implementan
+carpetas Tracks, Sessions y Remember, reproducción, transcodificación, descarga
+del MP3 original y playlists manuales/automáticas de solo lectura. El usuario
+autorizó `download`; Tempus también puede guardar audio mediante `stream` y el
+servidor no puede distinguirlo de una reproducción. No se registran estadísticas
+de Tempus ni se permite editar playlists mediante esta API.
+El tutorial de despliegue y conexión está disponible en
+[`DESPLIEGUE-DOCKER.md`](DESPLIEGUE-DOCKER.md) y
+[`DESPLIEGUE-DOCKER.html`](DESPLIEGUE-DOCKER.html). Es una ampliación de
+documentación, no una confirmación de las comprobaciones individuales.
+
+El 26/11/2026 el usuario informa de que no aparecen playlists ni carátulas
+en Tempus, y dice que todo lo demás funciona bien. Autoriza cerrar esta fase
+y mezclar el PR, con las carátulas web/Subsonic en otra tarea. No se declaran
+resueltas las playlists de Tempus ni se atribuyen comprobaciones individuales
+adicionales. Antes había informado de un fallo de autenticación de PostgreSQL;
+no consta confirmación específica sobre cómo se resolvió.
+
+**Requisitos:** biblioteca real con MP3 en las tres carpetas, Remember con
+`Cortas` y `Largas`, y al menos una playlist manual y otra automática con
+canciones. Usar copias si se altera la biblioteca para comprobar actualización.
+FFmpeg debe estar disponible para la API si se prueba transcodificación.
+Configurar usuario y contraseña Subsonic **exclusivos**, no reutilizados.
+
+- **Visual Studio 2026:** perfil **DJ Tracks (Api + UI)** y .NET 10; configurar
+  las cuatro claves `Paths:*` según `README.md` y, en los user-secrets de la
+  API, `Subsonic:Username` y `Subsonic:Password`. Reiniciar API. UI:
+  `http://localhost:5050`; API: `http://localhost:5247`. Para un emulador
+  Android, indicar en Tempus `http://10.0.2.2:5247`. Un móvil físico requiere
+  configurar una escucha accesible y firewall para la LAN/VPN; los perfiles
+  normales solo escuchan en localhost.
+- **Docker Ubuntu:** seguir la migración y requisitos de rutas de `README.md`,
+  añadir `SUBSONIC_USERNAME` y `SUBSONIC_PASSWORD` a `.env`, ejecutar
+  `docker compose config --quiet` y `docker compose up -d --build`. En Tempus
+  usar `http://IP_DEL_SERVIDOR:5050` o el `UI_PORT` elegido. La API y la BD
+  no se publican directamente.
+- En Tempus introducir esas credenciales y usar autenticación por token,
+  no la opción de contraseña de baja seguridad. Restringir el acceso a LAN/VPN;
+  HTTPS es recomendable. Los tokens en URL pueden filtrarse y reutilizarse.
+  La autenticación no protege la UI ni los endpoints `/api` existentes.
+
+**Checklist de la entrega original (sin confirmación individual):**
+
+- [ ] Conectar Tempus con las credenciales correctas: la conexión se acepta;
+  probar una contraseña incorrecta y verificar que se rechaza.
+- [ ] Explorar por carpetas Tracks (año/estilo), Sessions (año/carpeta) y
+  Remember (Cortas/Largas): aparecen las carpetas y MP3 correspondientes.
+- [ ] Reproducir un MP3 de cada biblioteca: el audio suena; pausa, continuación
+  y desplazamiento funcionan para el audio original.
+- [ ] Abrir una playlist manual y otra automática: muestran sus canciones y
+  permiten reproducirlas; no se pueden modificar desde Subsonic. Añadir una
+  canción que cumpla los filtros en una copia de la biblioteca y volver a
+  abrir la automática: debe reflejarla.
+- [ ] Si se utiliza transcodificación en Tempus, probar una reproducción con
+  el formato/bitrate deseado y comprobar audio y comportamiento al buscar.
+  Para clientes compatibles, descargar con `download` y comparar el MP3 con
+  el original: debe ser idéntico.
+- [ ] Comprobar que la UI web sigue explorando y reproduciendo las tres
+  bibliotecas y que las playlists existentes siguen disponibles.
+
+**Comprobado por el agente:** `dotnet build DjTracks.slnx`, sin errores ni
+advertencias; `docker compose config --quiet` con valores sintéticos. Con
+API/UI aisladas y datos sintéticos: autenticación correcta, incorrecta y no
+configurada; XML/JSON, proxy, tres bibliotecas, Range 206 con bytes exactos,
+descarga idéntica, errores de ID/formato/almacenamiento, playlists manuales y
+automáticas con actualización, rechazo de edición y transcodificación
+MP3/Opus/AAC/Ogg comprobada con `ffprobe`. No se usaron datos reales.
+
+**Limitaciones:** el usuario ha probado Tempus y Docker y ha informado de
+playlists y carátulas ausentes; no consta el resultado individual de cada
+comprobación anterior. El agente no ha probado Tempus ni Docker real en F6.2.
+Operaciones no implementadas, búsqueda y vistas de artista/álbum devuelven
+error. Las playlists no contienen Sessions. Los IDs cambian si se mueve o
+renombra el fichero. En audio transcodificado no se admite `timeOffset` ni
+Range arbitrario (solo `bytes=0-`); el desplazamiento puede no funcionar.
+`getIndexes` no aprovecha `ifModifiedSince`. Los logs de clientes y proxies
+externos pueden registrar credenciales/token; no existe TLS incorporado.
+
+## F2.3: marcas de tracklist (PR #23; validado e integrado)
 
 Las marcas se guardan automáticamente como JSON en una carpeta nueva, separada
 de Sessions. Solo se puede marcar una línea no vacía y única. Al pulsar una
@@ -291,7 +383,7 @@ Configuración, conservar las rutas existentes, introducir la nueva carpeta
 se puede leer sin configurar marcas, pero hay que completar la nueva ruta para
 guardar ajustes o usar las marcas.
 
-**Pendiente del usuario:**
+**Checklist propuesta al usuario en la entrega:**
 
 - [ ] **Revisión de iconos:** pasar el puntero y tabular por Marcar, Sustituir
   y Borrar: se muestra el tooltip de la acción y desaparece al salir. Crear,
