@@ -9,8 +9,9 @@ Consultar siempre el estado real de GitHub antes de actuar sobre un PR.
 
 - **Carátulas web y Subsonic: implementación pendiente de validación**:
   rama `dgomezc-caratulas-web-subsonic`, desde `develop` con el merge
-  `dceec4b2`. PR pendiente de creación. La incidencia de playlists en
-  Tempus se mantiene separada y sin resolver.
+  `dceec4b2`. PR [#26](https://github.com/dgomezc/dj-tracks/pull/26)
+  hacia `develop`. La incidencia de playlists en Tempus se mantiene
+  separada y sin resolver.
 - **F6.2: aceptada con incidencias conocidas y mergeada**:
   rama `fase/f6-2-subsonic`, desde `develop`; PR
   [#24](https://github.com/dgomezc/dj-tracks/pull/24) hacia `develop`.
