@@ -295,8 +295,9 @@ El estado de entrega y las checklists se mantienen en `VALIDACIONES.md`. Una imp
   El análisis fue validado y se autorizó iniciar la implementación el 24/11/2026.
   El 26/11/2026 el usuario acepta la fase y autoriza el merge: indica que no
   ve playlists ni carátulas en Tempus y que lo demás funciona bien. Las
-  carátulas web y Subsonic se harán en otra tarea; la incidencia de playlists
-  sigue pendiente. Véase `VALIDACIONES.md` para el alcance y las limitaciones.
+  carátulas web y Subsonic se abordan en una tarea separada, validada por el
+  usuario con merge autorizado; la incidencia de playlists sigue pendiente.
+  Véase `VALIDACIONES.md` para el alcance y las limitaciones.
 
 ## Aclaraciones confirmadas
 

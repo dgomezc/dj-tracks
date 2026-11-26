@@ -7,7 +7,13 @@ Consultar siempre el estado real de GitHub antes de actuar sobre un PR.
 
 ## Estado actual
 
-- **F6.2: aceptada con incidencias conocidas y merge autorizado**:
+- **Carátulas web y Subsonic: validadas y merge autorizado**:
+  rama `dgomezc-caratulas-web-subsonic`, desde `develop` con el merge
+  `dceec4b2`. PR [#26](https://github.com/dgomezc/dj-tracks/pull/26)
+  hacia `develop`. El 26/11/2026 el usuario confirma «Funciona todo» y
+  autoriza el merge; no detalla los resultados de cada comprobación. La
+  incidencia de playlists en Tempus se mantiene separada y sin resolver.
+- **F6.2: aceptada con incidencias conocidas y mergeada**:
   rama `fase/f6-2-subsonic`, desde `develop`; PR
   [#24](https://github.com/dgomezc/dj-tracks/pull/24) hacia `develop`.
   El 26/11/2026 el usuario comunica que no ve playlists ni carátulas en
@@ -25,6 +31,40 @@ Consultar siempre el estado real de GitHub antes de actuar sobre un PR.
 - F2.3: PR [#23](https://github.com/dgomezc/dj-tracks/pull/23) comprobado
   **mergeado** el 15/11/2026 a las 10:23:16 UTC. Las notas históricas
   inferiores conservan la evidencia y no sustituyen este estado.
+
+## Carátulas en los listados y Subsonic
+
+**Requisitos:** Visual Studio 2026 con perfil **DJ Tracks (Api + UI)**,
+.NET 10, API `http://localhost:5247` y UI `http://localhost:5050`. Configurar
+en user-secrets de la API `Paths:Tracks`, `Paths:Sessions`, `Paths:Remember`
+y `Paths:Data` con rutas absolutas existentes y permisos adecuados, y
+`Subsonic:Username` y `Subsonic:Password` para Tempus. Usar MP3 de cada
+biblioteca con carátula incrustada JPEG, PNG, GIF o WebP y otros sin imagen.
+En Docker, seguir `docs/DESPLIEGUE-DOCKER.md`, reconstruir con
+`docker compose up -d --build` y conectar Tempus a la URL de la UI accesible
+desde el dispositivo, con las credenciales Subsonic configuradas.
+
+**Checklist de la entrega:** el usuario confirma que funciona todo, sin
+especificar el resultado individual de cada comprobación.
+
+- [ ] Abrir Tracks, entrar en un estilo y aplicar filtros: cada canción con
+  imagen muestra su propia miniatura; sin imagen aparece «Sin carátula o no
+  disponible». Comprobar nombres con espacios, scroll y tema claro/oscuro.
+- [ ] Abrir una sesión y las categorías Cortas y Largas de Remember: las
+  miniaturas corresponden a cada MP3; los que no tienen imagen muestran el
+  indicador. Cambiar de carpeta o categoría no conserva imágenes anteriores.
+- [ ] En Tempus, explorar Tracks, Sessions y Remember y comprobar las imágenes
+  de canciones con carátula, así como el comportamiento de las que no tienen.
+  Repetir tras reconstruir Docker y desde el dispositivo real.
+- [ ] Reproducir y añadir a la cola elementos de las tres bibliotecas: audio,
+  onda y carátula de «Ahora suena» siguen correspondiendo al elemento activo.
+
+**Comprobaciones del agente:** compilación de la solución y llamadas aisladas
+con MP3 sintéticos a las tres bibliotecas, miniaturas UI y ambos nombres de
+`getCoverArt`; ausencia de imagen, ID inválido y autenticación incorrecta.
+No consta el detalle de las comprobaciones realizadas por el usuario.
+Subsonic entrega la imagen original y no redimensiona el parámetro `size`.
+La incidencia de playlists en Tempus no forma parte de este cambio.
 
 ## Revisión de rutas: configuración del servidor y datos unificados
 

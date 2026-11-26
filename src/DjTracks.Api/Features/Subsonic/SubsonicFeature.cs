@@ -3,6 +3,7 @@ using DjTracks.Api.Features.Subsonic.GetMusicDirectory;
 using DjTracks.Api.Features.Subsonic.GetMusicFolders;
 using DjTracks.Api.Features.Subsonic.GetPlaylists;
 using DjTracks.Api.Features.Subsonic.Stream;
+using DjTracks.Api.Features.Subsonic.GetCoverArt;
 using DjTracks.Infrastructure.Streaming;
 
 namespace DjTracks.Api.Features.Subsonic;
@@ -15,6 +16,7 @@ public static class SubsonicFeature
             .AddScoped<GetIndexesHandler>()
             .AddScoped<GetPlaylistsHandler>()
             .AddScoped<SubsonicStreamHandler>()
+            .AddScoped<GetCoverArtHandler>()
             .AddSingleton(sp => new SubsonicTranscoder(
                 sp.GetRequiredService<IConfiguration>()["Waveform:BinaryFolder"]));
 
@@ -30,6 +32,7 @@ public static class SubsonicFeature
         rest.MapGetMusicDirectory();
         rest.MapGetPlaylists();
         rest.MapSubsonicStream();
+        rest.MapGetCoverArt();
         rest.MapGet("/{method}", Unsupported);
     }
 

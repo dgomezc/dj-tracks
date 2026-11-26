@@ -34,6 +34,7 @@ app.UseHttpsRedirection();
 
 app.UseAntiforgery();
 
+app.MapArtworkEndpoint();
 if (streamingProxyEnabled)
     app.MapReverseProxy();
 app.MapStaticAssets();
