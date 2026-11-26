@@ -273,6 +273,27 @@ body {
     overflow-wrap: anywhere;
 }
 
+.artwork-thumbnail {
+    display: grid;
+    place-items: center;
+    width: 64px;
+    height: 64px;
+    color: var(--muted-foreground);
+    font-size: 0.7rem;
+    text-align: center;
+}
+
+.artwork-thumbnail > * {
+    grid-area: 1 / 1;
+}
+
+.artwork-thumbnail img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    background: var(--background);
+}
+
 .row-actions {
     display: flex;
     flex-wrap: wrap;

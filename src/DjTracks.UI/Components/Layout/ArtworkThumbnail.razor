@@ -1,0 +1,23 @@
+@using Microsoft.AspNetCore.WebUtilities
+
+<span class="artwork-thumbnail">
+    <span>Sin carátula o no disponible</span>
+    <img src="@Url" alt="@($"Carátula de {FileName}")" loading="lazy"
+         onerror="this.hidden=true" />
+</span>
+
+@code {
+    [Parameter, EditorRequired] public string Library { get; set; } = "";
+    [Parameter, EditorRequired] public string FileName { get; set; } = "";
+    [Parameter] public string? Year { get; set; }
+    [Parameter] public string? Style { get; set; }
+    [Parameter] public string? Session { get; set; }
+    [Parameter] public string? Category { get; set; }
+
+    private string Url => QueryHelpers.AddQueryString($"/artwork/{Library}",
+        new Dictionary<string, string?>
+        {
+            ["year"] = Year, ["style"] = Style, ["session"] = Session,
+            ["category"] = Category, ["fileName"] = FileName
+        });
+}

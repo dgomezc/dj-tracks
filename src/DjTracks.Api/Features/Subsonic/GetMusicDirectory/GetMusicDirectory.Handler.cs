@@ -69,7 +69,7 @@ public sealed record SubsonicDirectory(string Id, string Name, string? Parent, S
 
 public sealed record SubsonicChild(string Id, string Parent, bool IsDir, string Title,
     string? Artist = null, string? Album = null, int? Duration = null,
-    string? ContentType = null, string? Suffix = null, string? Type = null)
+    string? ContentType = null, string? Suffix = null, string? Type = null, string? CoverArt = null)
 {
     public static SubsonicChild Folder(SubsonicId id, SubsonicId parent) =>
         new(id.Encode(), parent.Encode(), true, id.Parts[^1]);
@@ -80,5 +80,5 @@ public sealed record SubsonicChild(string Id, string Parent, bool IsDir, string 
             file.Artists.FirstOrDefault(), file.Album,
             file.DurationSeconds is { } duration && double.IsFinite(duration) && duration >= 0
                 ? (int)Math.Min(int.MaxValue, duration) : null,
-            "audio/mpeg", "mp3", "music");
+            "audio/mpeg", "mp3", "music", id.Encode());
 }

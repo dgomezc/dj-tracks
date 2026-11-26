@@ -35,6 +35,11 @@ else if (_listing is not null)
     <BbDataTable TData="TrackFile" Data="@_listing.Files" ShowToolbar="false" ShowPagination="false"
                  AriaLabel="Archivos de Remember" Class="tracks-table">
         <Columns>
+            <BbDataTableColumn TData="TrackFile" TValue="string" Header="Carátula" Id="artwork">
+                <CellTemplate Context="file">
+                    <ArtworkThumbnail Library="remember" FileName="@file.FileName" Category="@_category" />
+                </CellTemplate>
+            </BbDataTableColumn>
             <BbDataTableColumn TData="TrackFile" TValue="string" Header="Fichero" Property="@(file => file.FileName)">
                 <CellTemplate Context="file">
                     <div class="file-name">@file.FileName</div>

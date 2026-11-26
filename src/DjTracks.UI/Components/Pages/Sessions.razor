@@ -60,6 +60,11 @@ else if (_listing is not null)
         <BbDataTable TData="TrackFile" Data="@_listing.Files" ShowToolbar="false" ShowPagination="false"
                      AriaLabel="Archivos de la sesión" Class="tracks-table">
             <Columns>
+                <BbDataTableColumn TData="TrackFile" TValue="string" Header="Carátula" Id="artwork">
+                    <CellTemplate Context="file">
+                        <ArtworkThumbnail Library="sessions" FileName="@file.FileName" Year="@_year" Session="@_session" />
+                    </CellTemplate>
+                </BbDataTableColumn>
                 <BbDataTableColumn TData="TrackFile" TValue="string" Header="Fichero" Property="@(file => file.FileName)">
                     <CellTemplate Context="file">
                         <div class="file-name">@file.FileName</div>
