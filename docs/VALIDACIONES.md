@@ -7,11 +7,12 @@ Consultar siempre el estado real de GitHub antes de actuar sobre un PR.
 
 ## Estado actual
 
-- **Carátulas web y Subsonic: implementación pendiente de validación**:
+- **Carátulas web y Subsonic: validadas y merge autorizado**:
   rama `dgomezc-caratulas-web-subsonic`, desde `develop` con el merge
   `dceec4b2`. PR [#26](https://github.com/dgomezc/dj-tracks/pull/26)
-  hacia `develop`. La incidencia de playlists en Tempus se mantiene
-  separada y sin resolver.
+  hacia `develop`. El 26/11/2026 el usuario confirma «Funciona todo» y
+  autoriza el merge; no detalla los resultados de cada comprobación. La
+  incidencia de playlists en Tempus se mantiene separada y sin resolver.
 - **F6.2: aceptada con incidencias conocidas y mergeada**:
   rama `fase/f6-2-subsonic`, desde `develop`; PR
   [#24](https://github.com/dgomezc/dj-tracks/pull/24) hacia `develop`.
@@ -43,7 +44,8 @@ En Docker, seguir `docs/DESPLIEGUE-DOCKER.md`, reconstruir con
 `docker compose up -d --build` y conectar Tempus a la URL de la UI accesible
 desde el dispositivo, con las credenciales Subsonic configuradas.
 
-**Pendiente del usuario:**
+**Checklist de la entrega:** el usuario confirma que funciona todo, sin
+especificar el resultado individual de cada comprobación.
 
 - [ ] Abrir Tracks, entrar en un estilo y aplicar filtros: cada canción con
   imagen muestra su propia miniatura; sin imagen aparece «Sin carátula o no
@@ -60,7 +62,7 @@ desde el dispositivo, con las credenciales Subsonic configuradas.
 **Comprobaciones del agente:** compilación de la solución y llamadas aisladas
 con MP3 sintéticos a las tres bibliotecas, miniaturas UI y ambos nombres de
 `getCoverArt`; ausencia de imagen, ID inválido y autenticación incorrecta.
-La visualización en navegador, Tempus y Docker real queda pendiente del usuario.
+No consta el detalle de las comprobaciones realizadas por el usuario.
 Subsonic entrega la imagen original y no redimensiona el parámetro `size`.
 La incidencia de playlists en Tempus no forma parte de este cambio.
 

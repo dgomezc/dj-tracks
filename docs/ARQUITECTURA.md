@@ -705,7 +705,7 @@ Sin imagen o con un ID inexistente responden con error Subsonic. Los listados
 web cargan miniaturas de forma diferida desde la UI, que consulta la API por
 HTTP; no exponen al navegador la dirección interna de la API. El usuario ha
 probado Tempus y Docker y ha comunicado que no ve playlists ni carátulas en
-Tempus; la corrección de carátulas está pendiente de su validación y la
-incidencia de playlists sigue pendiente por separado.
+Tempus; posteriormente confirma que la corrección de carátulas funciona y
+autoriza su merge. La incidencia de playlists sigue pendiente por separado.
 Ver instrucciones concretas en `README.md`; no hay migración automática ni
 formatos nuevos de persistencia.
